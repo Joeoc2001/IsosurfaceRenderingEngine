@@ -61,9 +61,9 @@ public class Chunk : MonoBehaviour
         {
             // Calculate normal function
             Equation distEquation = distanceField.GetEquation();
-            Func<VectorN, float> dx = distEquation.GetDerivative(Variable.X).GetExpression();
-            Func<VectorN, float> dy = distEquation.GetDerivative(Variable.Y).GetExpression();
-            Func<VectorN, float> dz = distEquation.GetDerivative(Variable.Z).GetExpression();
+            Func<VectorN, float> dx = distEquation.GetDerivative(Variable.X).GetSimplifiedCached().GetExpressionCached();
+            Func<VectorN, float> dy = distEquation.GetDerivative(Variable.Y).GetSimplifiedCached().GetExpressionCached();
+            Func<VectorN, float> dz = distEquation.GetDerivative(Variable.Z).GetSimplifiedCached().GetExpressionCached();
 
             // Calculate normals
             Vector3[] chunkNormals = new Vector3[vertices.Length];

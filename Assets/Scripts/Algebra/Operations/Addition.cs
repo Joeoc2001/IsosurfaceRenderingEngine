@@ -133,7 +133,7 @@ public class Addition : CommutativeOperation, IEquatable<Addition>
                 }
                 else
                 {
-                    newTerm = new Multiplication(new Equation[] { eq, coefficients[0] });
+                newTerm = new Multiplication(new Equation[]{ eq, coefficients[0] });
                 }
             }
             else

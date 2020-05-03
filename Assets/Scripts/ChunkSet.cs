@@ -67,5 +67,6 @@ public class ChunkSet : MonoBehaviour
                 }
             }
         }
+        Debug.Log("Delta time: " + Time.deltaTime);
     }
 }

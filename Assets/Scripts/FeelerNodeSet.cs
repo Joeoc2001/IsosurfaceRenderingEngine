@@ -15,8 +15,8 @@ public class FeelerNodeSet : IEnumerable
     {
         Resolution = resolution;
 
-        Equation distEquation = body.GetEquation();
-        Func<VectorN, float> distFunction = distEquation.GetExpression();
+        Equation distEquation = body.GetEquation().GetSimplifiedCached();
+        Func<VectorN, float> distFunction = distEquation.GetExpressionCached();
 
         Nodes = new FeelerNode[resolution, resolution, resolution];
         for (int x = 0; x < resolution; x++)
