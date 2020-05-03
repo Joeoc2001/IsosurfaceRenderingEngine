@@ -1,0 +1,121 @@
+﻿using Rationals;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using UnityEngine;
+
+public class Tokenizer
+{
+    private readonly TextReader reader;
+
+    public Token Token { get; private set; }
+    public Rational Number { get; private set; }
+    public Variable VariableValue { get; private set; }
+    public string FunctionName { get; private set; }
+
+    private char currentChar;
+
+    public Tokenizer(TextReader reader)
+    {
+        this.reader = reader;
+        NextChar();
+        NextToken();
+    }
+
+    void NextChar()
+    {
+        int c = reader.Read();
+        currentChar = c < 0 ? '\0' : char.ToLower((char)c);
+    }
+
+    public void NextToken()
+    {
+        while (char.IsWhiteSpace(currentChar))
+        {
+            NextChar();
+        }
+
+        switch (currentChar)
+        {
+            case '\0':
+                Token = Token.EOF;
+                return;
+
+            case '+':
+                NextChar();
+                Token = Token.Add;
+                return;
+
+            case '-':
+                NextChar();
+                Token = Token.Subtract;
+                return;
+
+            case '*':
+                NextChar();
+                Token = Token.Multiply;
+                return;
+
+            case '/':
+                NextChar();
+                Token = Token.Divide;
+                return;
+
+            case '^':
+                NextChar();
+                Token = Token.Exponent;
+                return;
+
+            case '(':
+                NextChar();
+                Token = Token.OpenBrace;
+                return;
+
+            case ')':
+                NextChar();
+                Token = Token.CloseBrace;
+                return;
+        }
+
+        if (char.IsDigit(currentChar) || currentChar == '.')
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            bool haveDecimalPoint = false;
+            while (char.IsDigit(currentChar) || (!haveDecimalPoint && currentChar == '.'))
+            {
+                stringBuilder.Append(currentChar);
+                haveDecimalPoint = currentChar == '.';
+                NextChar();
+            }
+
+            Number = Rational.ParseDecimal(stringBuilder.ToString(), Constant.TOLERANCE);
+            Token = Token.Decimal;
+            return;
+        }
+
+        if (char.IsLetter(currentChar))
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            while (char.IsLetter(currentChar))
+            {
+                stringBuilder.Append(currentChar);
+                NextChar();
+            }
+
+            string identifier = stringBuilder.ToString();
+            if (Variable.VariableDict.TryGetValue(identifier, out Variable v))
+            {
+                VariableValue = v;
+                Token = Token.Variable;
+                return;
+            }
+
+            Token = Token.Function;
+            FunctionName = identifier;
+            return;
+        }
+
+        throw new InvalidDataException($"Unexpected token '{currentChar + reader.ReadToEnd()}'");
+    }
+}
