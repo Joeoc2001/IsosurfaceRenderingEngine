@@ -58,3 +58,8 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+# Ignore non-essential NuGet data
+/[Aa]ssets/[Nn]u[Gg]et/
+/[Aa]ssets/[Pp]ackages/
+/[Aa]ssets/NuGet.meta
+
