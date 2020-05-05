@@ -546,6 +546,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d49a1640e21d7c438f1a3d53a97ea9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  updateThreshold: 0.16
   size: 10
   distanceField: {fileID: 1521588275}
   quality: 1

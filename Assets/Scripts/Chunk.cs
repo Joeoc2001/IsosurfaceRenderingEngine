@@ -10,6 +10,9 @@ public class Chunk : MonoBehaviour
 {
     Mesh mesh;
 
+    [Range(0f, 5f)]
+    public float updateThreshold;
+
     [Range(0.1f, 100f)]
     public float size;
 
@@ -20,6 +23,10 @@ public class Chunk : MonoBehaviour
 
     public bool approximateNormals;
     public bool showGizmoFeelers;
+
+    public bool IsEmpty { get; private set; } = false;
+
+    private FeelerNodeSet lastNodes = null;
 
     void Start()
     {
@@ -45,6 +52,24 @@ public class Chunk : MonoBehaviour
         }
 
         FeelerNodeSet nodes = GetFeelerNodes();
+
+        if (!(lastNodes is null))
+        {
+            if (lastNodes.Delta(nodes) < updateThreshold)
+            {
+                return;
+            }
+        }
+        lastNodes = nodes;
+
+        // Optimization because no triangles are needed if all nodes are the same
+        IsEmpty = false;
+        if (nodes.AreAllOutside() || nodes.AreAllInside())
+        {
+            IsEmpty = true;
+            mesh.Clear();
+            return;
+        }
 
         CubeMarcher.MarchIntoMesh(mesh, nodes, transform.position);
 

@@ -10,15 +10,22 @@ public class ChunkSet : MonoBehaviour
     private class ChunkPriority : IComparable<ChunkPriority>
     {
         private readonly double lastUpdatedTime;
+        private readonly bool isEmpty;
 
-        public ChunkPriority(double lastUpdatedTime)
+        public ChunkPriority(double lastUpdatedTime, bool isEmpty)
         {
             this.lastUpdatedTime = lastUpdatedTime;
+            this.isEmpty = isEmpty;
+        }
+
+        public double PriorityFunction()
+        {
+            return lastUpdatedTime * (isEmpty? 1 : 0.5);
         }
 
         public int CompareTo(ChunkPriority other)
         {
-            return lastUpdatedTime.CompareTo(other.lastUpdatedTime);
+            return PriorityFunction().CompareTo(other.PriorityFunction());
         }
     }
 
@@ -77,7 +84,7 @@ public class ChunkSet : MonoBehaviour
                         Vector3 offset = new Vector3(index.x, index.y, index.z) * baseChunk.size;
                         Chunk chunk = Instantiate<Chunk>(baseChunk, offset, Quaternion.identity, transform);
 
-                        updatePriority.Enqueue(chunk, new ChunkPriority(0));
+                        updatePriority.Enqueue(chunk, new ChunkPriority(0, false));
 
                         chunks.Add(index, chunk);
                     }
@@ -111,7 +118,7 @@ public class ChunkSet : MonoBehaviour
 
             chunk.GenerateMesh();
 
-            updatePriority.Enqueue(chunk, new ChunkPriority(Time.time));
+            updatePriority.Enqueue(chunk, new ChunkPriority(Time.time, chunk.IsEmpty));
         }
     }
 

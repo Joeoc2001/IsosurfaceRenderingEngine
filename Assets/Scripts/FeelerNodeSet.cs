@@ -10,6 +10,8 @@ public class FeelerNodeSet : IEnumerable
 {
     public readonly int Resolution;
     private readonly FeelerNode[,,] Nodes;
+    private readonly bool areAllOutside = true;
+    private readonly bool areAllInside = true;
 
     public FeelerNodeSet(EquationProvider body, int resolution, Vector3 offset, float delta)
     {
@@ -28,9 +30,50 @@ public class FeelerNodeSet : IEnumerable
                     Vector3 pos = offset + new Vector3(delta * x, delta * y, delta * z);
                     float val = distFunction(new VectorN(pos));
                     Nodes[x, y, z] = new FeelerNode(pos, val);
+
+                    if (val < 0)
+                    {
+                        areAllOutside = false;
+                    } else
+                    {
+                        areAllInside = false;
+                    }
                 }
             }
         }
+    }
+
+    public float Delta(FeelerNodeSet nodes)
+    {
+        if (nodes.Resolution != Resolution)
+        {
+            return float.MaxValue;
+        }
+
+        float delta = 0;
+        for (int x = 0; x < Resolution; x++)
+        {
+            for (int y = 0; y < Resolution; y++)
+            {
+                for (int z = 0; z < Resolution; z++)
+                {
+                    float v = Nodes[x, y, z].Val - nodes.Nodes[x, y, z].Val;
+                    delta += v * v;
+                }
+            }
+        }
+        delta /= Resolution * Resolution * Resolution;
+        return Mathf.Sqrt(delta);
+    }
+
+    public bool AreAllOutside()
+    {
+        return areAllOutside;
+    }
+
+    public bool AreAllInside()
+    {
+        return areAllInside;
     }
 
     public FeelerNode this[int x, int y, int z]
