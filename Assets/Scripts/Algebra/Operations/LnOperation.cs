@@ -13,9 +13,9 @@ public class LnOperation : Equation, IEquatable<LnOperation>
         this.eq = eq;
     }
 
-    public override Func<VectorN, float> GetExpression()
+    public override Func<VariableSet, float> GetExpression()
     {
-        Func<VectorN, float> expression = eq.GetExpression();
+        Func<VariableSet, float> expression = eq.GetExpression();
 
         return v => Mathf.Log(expression(v));
     }
@@ -26,10 +26,6 @@ public class LnOperation : Equation, IEquatable<LnOperation>
         return derivative / eq;
     }
 
-    public override Polynomial GetTaylorApproximation(VectorN origin, int order)
-    {
-        throw new NotImplementedException();
-    }
     public bool Equals(LnOperation other)
     {
         if (other is null)

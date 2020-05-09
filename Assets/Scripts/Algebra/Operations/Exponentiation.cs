@@ -15,16 +15,16 @@ public class Exponentiation : Equation, IEquatable<Exponentiation>
         this.Exponent = exponent;
     }
 
-    public override Func<VectorN, float> GetExpression()
+    public override Func<VariableSet, float> GetExpression()
     {
-        Func<VectorN, float> termExp = Base.GetExpression();
+        Func<VariableSet, float> termExp = Base.GetExpression();
 
         if (Exponent.Equals(Constant.MINUS_ONE))
         {
             return v => 1 / termExp(v);
         }
 
-        Func<VectorN, float> exponentExp = Exponent.GetExpression();
+        Func<VariableSet, float> exponentExp = Exponent.GetExpression();
 
         return v => Mathf.Pow(termExp(v), exponentExp(v));
     }
@@ -66,11 +66,6 @@ public class Exponentiation : Equation, IEquatable<Exponentiation>
         Equation termDeriv = Base.GetDerivative(wrt);
         Equation expDeriv = Exponent.GetDerivative(wrt);
         return Pow(Base, Exponent - 1) * ((Exponent * termDeriv) + (Base * expDeriv * new LnOperation(Base)));
-    }
-
-    public override Polynomial GetTaylorApproximation(VectorN origin, int order)
-    {
-        throw new NotImplementedException();
     }
 
     public bool Equals(Exponentiation other)

@@ -4,43 +4,11 @@ using System.Collections.Generic;
 
 public abstract class Equation
 {
-    private Func<VectorN, float> cachedExpression = null;
-    public Func<VectorN, float> GetExpressionCached()
-    {
-        if (cachedExpression is null)
-        {
-            cachedExpression = GetExpression();
-        }
-        return cachedExpression;
-    }
-
-    private readonly Dictionary<Variable, Equation> cachedDerivatives = new Dictionary<Variable, Equation>();
-    public Equation GetDerivativeCached(Variable wrt)
-    {
-        if (!cachedDerivatives.ContainsKey(wrt))
-        {
-            cachedDerivatives.Add(wrt, GetDerivative(wrt));
-        }
-        return cachedDerivatives[wrt];
-    }
-
-    private Equation cachedSimplified = null;
-    public Equation GetSimplifiedCached()
-    {
-        if (cachedSimplified is null)
-        {
-            cachedSimplified = GetSimplified();
-        }
-        return cachedSimplified;
-    }
-
-    public abstract Func<VectorN, float> GetExpression();
+    public abstract Func<VariableSet, float> GetExpression();
 
     public abstract Equation GetDerivative(Variable wrt);
 
     public abstract Equation GetSimplified();
-
-    public abstract Polynomial GetTaylorApproximation(VectorN origin, int order);
 
     public static Addition operator +(Equation left, Equation right)
     {

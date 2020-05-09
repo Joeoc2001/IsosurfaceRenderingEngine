@@ -26,9 +26,16 @@ public class CubeMarcher
         }
     }
 
-    private static readonly ObjectPool<MarchingDatas> pool = new ObjectPool<MarchingDatas>(() => new MarchingDatas());
+    public static readonly CubeMarcher Instance = new CubeMarcher();
 
-    public static void MarchIntoMesh(Mesh mesh, FeelerNodeSet nodes, Vector3 offset)
+    private readonly ObjectPool<MarchingDatas> pool;
+
+    private CubeMarcher()
+    {
+        pool = new ObjectPool<MarchingDatas>(() => new MarchingDatas());
+    }
+
+    public void MarchIntoMesh(Mesh mesh, FeelerNodeSet nodes, Vector3 offset)
     {
         mesh.Clear();
 

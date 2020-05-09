@@ -16,8 +16,6 @@ public class Chunk : MonoBehaviour
     [Range(0.1f, 100f)]
     public float size;
 
-    public EquationProvider distanceField;
-
     [Range(1, 10)]
     public int quality;
 
@@ -35,29 +33,30 @@ public class Chunk : MonoBehaviour
         GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
-    FeelerNodeSet GetFeelerNodes()
+    FeelerNodeSet GetFeelerNodes(Func<VariableSet, float> dist)
     {
         // Per side
         int numNodes = (1 << quality) + 1;
         float delta = size / (1 << quality);
 
-        return new FeelerNodeSet(distanceField, numNodes, transform.position, delta);
+        return new FeelerNodeSet(dist, numNodes, transform.position, delta);
     }
 
-    public void GenerateMesh()
+    // Returns true if the mesh changed
+    public bool GenerateMesh(Func<VariableSet, float> dist, Func<VariableSet, Vector3> norm)
     {
-        if (mesh is null || distanceField is null)
+        if (mesh is null)
         {
-            return;
+            return false;
         }
 
-        FeelerNodeSet nodes = GetFeelerNodes();
+        FeelerNodeSet nodes = GetFeelerNodes(dist);
 
         if (!(lastNodes is null))
         {
             if (lastNodes.Delta(nodes) < updateThreshold)
             {
-                return;
+                return false;
             }
         }
         lastNodes = nodes;
@@ -68,10 +67,10 @@ public class Chunk : MonoBehaviour
         {
             IsEmpty = true;
             mesh.Clear();
-            return;
+            return true;
         }
 
-        CubeMarcher.MarchIntoMesh(mesh, nodes, transform.position);
+        CubeMarcher.Instance.MarchIntoMesh(mesh, nodes, transform.position);
 
         // Extract for speed
         Vector3[] vertices = mesh.vertices;
@@ -84,23 +83,19 @@ public class Chunk : MonoBehaviour
         }
         else
         {
-            // Calculate normal function
-            Equation distEquation = distanceField.GetEquation();
-            Func<VectorN, float> dx = distEquation.GetDerivative(Variable.X).GetSimplifiedCached().GetExpressionCached();
-            Func<VectorN, float> dy = distEquation.GetDerivative(Variable.Y).GetSimplifiedCached().GetExpressionCached();
-            Func<VectorN, float> dz = distEquation.GetDerivative(Variable.Z).GetSimplifiedCached().GetExpressionCached();
-
             // Calculate normals
             Vector3[] chunkNormals = new Vector3[vertices.Length];
+            VariableSet variableSet = new VariableSet();
             for (int iChunkVertex = 0; iChunkVertex < vertices.Length; iChunkVertex++)
             {
-                VectorN pos = new VectorN(transform.position + vertices[iChunkVertex]);
-                Vector3 n = new Vector3(dx(pos), dy(pos), dz(pos)).normalized;
+                variableSet.Set(transform.position + vertices[iChunkVertex]);
+                Vector3 n = norm(variableSet).normalized;
 
                 chunkNormals[iChunkVertex] = n;
             }
             mesh.normals = chunkNormals;
         }
+        return true;
     }
 
     private static Vector3[] ApproximateNormals(Vector3[] vertices, int[] triangles)
@@ -135,27 +130,24 @@ public class Chunk : MonoBehaviour
         return chunkNormals;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     private void OnDrawGizmos()
     {
         if (showGizmoFeelers)
         {
-            foreach (FeelerNode n in GetFeelerNodes())
+            if (!(lastNodes is null))
             {
-                if (n.Val < 0)
+                foreach (FeelerNode n in lastNodes)
                 {
-                    Gizmos.color = Color.red;
+                    if (n.Val < 0)
+                    {
+                        Gizmos.color = Color.red;
+                    }
+                    else
+                    {
+                        Gizmos.color = Color.green;
+                    }
+                    Gizmos.DrawSphere(n.Pos, .05f);
                 }
-                else
-                {
-                    Gizmos.color = Color.green;
-                }
-                Gizmos.DrawSphere(n.Pos, .05f);
             }
         }
     }

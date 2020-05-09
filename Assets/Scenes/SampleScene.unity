@@ -414,10 +414,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseChunk: {fileID: 921602430}
-  updatesPerTick: 10
-  viewDistance: 1
+  updatesPerTick: 40
+  viewDistance: 10
   normalApproxDistance: 10.2
-  qualityDropoff: 0
+  qualityDropoff: 0.5
   baseIndex:
     x: 0
     y: 0
@@ -549,7 +549,7 @@ MonoBehaviour:
   updateThreshold: 0.16
   size: 10
   distanceField: {fileID: 1521588275}
-  quality: 1
+  quality: 3
   approximateNormals: 0
   showGizmoFeelers: 0
 --- !u!23 &921602431

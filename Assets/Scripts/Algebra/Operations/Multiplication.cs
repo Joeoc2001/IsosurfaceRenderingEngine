@@ -45,11 +45,6 @@ public class Multiplication : CommutativeOperation, IEquatable<Multiplication>
         return new Addition(terms);
     }
 
-    public override Polynomial GetTaylorApproximation(VectorN origin, int order)
-    {
-        throw new NotImplementedException();
-    }
-
     public bool Equals(Multiplication obj)
     {
         if (obj is null)

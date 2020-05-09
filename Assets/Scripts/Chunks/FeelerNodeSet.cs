@@ -13,14 +13,12 @@ public class FeelerNodeSet : IEnumerable
     private readonly bool areAllOutside = true;
     private readonly bool areAllInside = true;
 
-    public FeelerNodeSet(EquationProvider body, int resolution, Vector3 offset, float delta)
+    public FeelerNodeSet(Func<VariableSet, float> distFunction, int resolution, Vector3 offset, float delta)
     {
         Resolution = resolution;
 
-        Equation distEquation = body.GetEquation().GetSimplifiedCached();
-        Func<VectorN, float> distFunction = distEquation.GetExpressionCached();
-
         Nodes = new FeelerNode[resolution, resolution, resolution];
+        VariableSet variableSet = new VariableSet();
         for (int x = 0; x < resolution; x++)
         {
             for (int y = 0; y < resolution; y++)
@@ -28,7 +26,8 @@ public class FeelerNodeSet : IEnumerable
                 for (int z = 0; z < resolution; z++)
                 {
                     Vector3 pos = offset + new Vector3(delta * x, delta * y, delta * z);
-                    float val = distFunction(new VectorN(pos));
+                    variableSet.Set(pos);
+                    float val = distFunction(variableSet);
                     Nodes[x, y, z] = new FeelerNode(pos, val);
 
                     if (val < 0)

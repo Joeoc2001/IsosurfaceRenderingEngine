@@ -107,9 +107,14 @@ namespace Tests
             List<string> keys = new List<string>(Variable.VariableDict.Keys);
 
             float[] values = new float[keys.Count];
+            VariableSet variableSet = new VariableSet();
             for (int i = 0; i < keys.Count; i++)
             {
                 values[i] = keys.Count * i;
+
+                string key = keys[i];
+                Variable v = Variable.VariableDict[key];
+                variableSet[v] = values[i];
             }
 
             for (int i = 0; i < keys.Count; i++)
@@ -119,7 +124,7 @@ namespace Tests
                 Variable v = Variable.VariableDict[key];
 
                 // ACT
-                float value = v.GetExpression()(new VectorN(values));
+                float value = v.GetExpression()(variableSet);
 
                 // ASSERT
                 Assert.AreEqual(values[i], value);

@@ -90,7 +90,7 @@ namespace Tests
             Equation equation = new Constant(54321) + new Constant(7);
 
             // ACT
-            float value = equation.GetExpression()(new VectorN(0));
+            float value = equation.GetExpression()(new VariableSet());
 
             // ASSERT
             Assert.AreEqual(54321 + 7, value);

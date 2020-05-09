@@ -17,7 +17,7 @@ public class Constant : Equation, IEquatable<Constant>
         this.value = value;
     }
 
-    public override Func<VectorN, float> GetExpression()
+    public override Func<VariableSet, float> GetExpression()
     {
         float approximation = (float)value;
         return v => approximation;
@@ -26,11 +26,6 @@ public class Constant : Equation, IEquatable<Constant>
     public override Equation GetDerivative(Variable wrt)
     {
         return Constant.ZERO;
-    }
-
-    public override Polynomial GetTaylorApproximation(VectorN origin, int order)
-    {
-        throw new NotImplementedException();
     }
 
     public bool Equals(Constant obj)

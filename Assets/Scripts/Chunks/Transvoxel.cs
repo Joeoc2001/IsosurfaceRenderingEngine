@@ -30,6 +30,10 @@
 //
 //================================================================================
 
+using System.Dynamic;
+using System.Linq;
+using UnityEngine.UI;
+
 class Transvoxel {
 	// The CellData structure holds information about the triangulation
 	// used for a single equivalence class in the modified Marching Cubes algorithm,
@@ -68,6 +72,27 @@ class Transvoxel {
 		0x03, 0x04, 0x04, 0x03, 0x04, 0x03, 0x0D, 0x01, 0x04, 0x0D, 0x03, 0x01, 0x03, 0x01, 0x01, 0x00
 	};
 
+	public const int MAX_REGULAR_TRIANGLES = 5;
+
+	public static byte[] RegularCellCollatedData()
+	{
+		byte[] vs = new byte[(MAX_REGULAR_TRIANGLES * 3 + 1) * RegularCellData.Length];
+		for (int i = 0; i < RegularCellData.Length; i++)
+		{
+			byte[] cell = RegularCellData[i].VertexIndex;
+
+			int baseIndex = (MAX_REGULAR_TRIANGLES * 3 + 1) * i;
+
+			vs[baseIndex] = (byte)cell.Length;
+
+			for (int j = 0; j < cell.Length; j++)
+			{
+				vs[baseIndex + j] = cell[j];
+			}
+		}
+
+		return vs;
+	}
 
 	// The regularCellData table holds the triangulation data for all 16 distinct classes to
 	// which a case can be mapped by the regularCellClass table.
@@ -90,6 +115,28 @@ class Transvoxel {
 		new CellData(new byte[]{0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6}),
 		new CellData(new byte[]{0, 4, 5, 0, 3, 4, 0, 1, 3, 1, 2, 3, 6, 7, 8})
 	};
+
+	public const int MAX_REGULAR_VERTICES = 12;
+
+	public static ushort[] RegularVertexCollatedData()
+	{
+		ushort[] vs = new ushort[(MAX_REGULAR_VERTICES + 1) * RegularVertexData.Length];
+		for (int i = 0; i < RegularVertexData.Length; i++)
+		{
+			ushort[] cell = RegularVertexData[i];
+
+			int baseIndex = (MAX_REGULAR_VERTICES + 1) * i;
+
+			vs[baseIndex] = (ushort)cell.Length;
+
+			for (int j = 0; j < cell.Length; j++)
+			{
+				vs[baseIndex + j] = cell[j];
+			}
+		}
+
+		return vs;
+	}
 
 	// The regularVertexData table gives the vertex locations for every one of the 256 possible
 	// cases in the modified Marching Cubes algorithm. Each 16-bit value also provides information

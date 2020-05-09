@@ -22,11 +22,6 @@ public class Addition : CommutativeOperation, IEquatable<Addition>
         return new Addition(derivatives);
     }
 
-    public override Polynomial GetTaylorApproximation(VectorN origin, int order)
-    {
-        throw new NotImplementedException();
-    }
-
     public bool Equals(Addition obj)
     {
         if (obj is null)

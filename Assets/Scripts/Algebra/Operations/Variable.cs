@@ -9,23 +9,23 @@ public class Variable : Equation, IEquatable<Variable>
 
     public static readonly Dictionary<string, Variable> VariableDict = new Dictionary<string, Variable>() 
     {
-        { X.name, X },
-        { Y.name, Y },
-        { Z.name, Z }
+        { X.Name, X },
+        { Y.Name, Y },
+        { Z.Name, Z }
     };
 
-    private readonly int index;
-    private readonly string name;
+    public readonly int Index;
+    public readonly string Name;
 
     private Variable(int index, string name)
     {
-        this.index = index;
-        this.name = name;
+        this.Index = index;
+        this.Name = name;
     }
 
-    public override Func<VectorN, float> GetExpression()
+    public override Func<VariableSet, float> GetExpression()
     {
-        return v => v[index];
+        return v => v[this];
     }
 
     public override Equation GetDerivative(Variable wrt)
@@ -37,19 +37,14 @@ public class Variable : Equation, IEquatable<Variable>
         return Constant.ZERO;
     }
 
-    public override Polynomial GetTaylorApproximation(VectorN origin, int order)
-    {
-        throw new NotImplementedException();
-    }
-
     public bool Equals(Variable obj)
     {
-        if (obj == null)
+        if (obj is null)
         {
             return false;
         }
 
-        return this.index.Equals(obj.index);
+        return this.Index.Equals(obj.Index);
     }
 
     public override bool Equals(object obj)
@@ -59,12 +54,12 @@ public class Variable : Equation, IEquatable<Variable>
 
     public override int GetHashCode()
     {
-        return index.GetHashCode();
+        return Index;
     }
 
     public override string ToString()
     {
-        return name;
+        return Name;
     }
 
     public override Equation GetSimplified()
