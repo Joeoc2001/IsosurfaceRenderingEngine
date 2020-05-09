@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Jobs;
 using UnityEngine;
 
 /**
@@ -9,35 +10,32 @@ using UnityEngine;
 public class FeelerNodeSet : IEnumerable
 {
     public readonly int Resolution;
-    private readonly FeelerNode[,,] Nodes;
-    private readonly bool areAllOutside = true;
-    private readonly bool areAllInside = true;
+    private readonly FeelerNode[] Nodes;
+    public readonly bool IsUniform;
 
-    public FeelerNodeSet(Func<VariableSet, float> distFunction, int resolution, Vector3 offset, float delta)
+    public FeelerNodeSet(int resolution, FeelerNode[] nodes)
     {
         Resolution = resolution;
+        Nodes = nodes;
 
-        Nodes = new FeelerNode[resolution, resolution, resolution];
-        VariableSet variableSet = new VariableSet();
-        for (int x = 0; x < resolution; x++)
+        IsUniform = true;
+        bool allInside = true;
+        bool allOutside = true;
+        foreach (FeelerNode node in nodes)
         {
-            for (int y = 0; y < resolution; y++)
+            if (node.Val > 0)
             {
-                for (int z = 0; z < resolution; z++)
-                {
-                    Vector3 pos = offset + new Vector3(delta * x, delta * y, delta * z);
-                    variableSet.Set(pos);
-                    float val = distFunction(variableSet);
-                    Nodes[x, y, z] = new FeelerNode(pos, val);
+                allInside = false;
+            }
+            else
+            {
+                allOutside = false;
+            }
 
-                    if (val < 0)
-                    {
-                        areAllOutside = false;
-                    } else
-                    {
-                        areAllInside = false;
-                    }
-                }
+            if (!allInside && !allOutside)
+            {
+                IsUniform = false;
+                break;
             }
         }
     }
@@ -56,7 +54,7 @@ public class FeelerNodeSet : IEnumerable
             {
                 for (int z = 0; z < Resolution; z++)
                 {
-                    float v = Nodes[x, y, z].Val - nodes.Nodes[x, y, z].Val;
+                    float v = this[x, y, z].Val - nodes[x, y, z].Val;
                     delta += v * v;
                 }
             }
@@ -65,21 +63,11 @@ public class FeelerNodeSet : IEnumerable
         return Mathf.Sqrt(delta);
     }
 
-    public bool AreAllOutside()
-    {
-        return areAllOutside;
-    }
-
-    public bool AreAllInside()
-    {
-        return areAllInside;
-    }
-
     public FeelerNode this[int x, int y, int z]
     {
         get
         {
-            return Nodes[x, y, z];
+            return Nodes[(x * Resolution + y) * Resolution + z];
         }
     }
 

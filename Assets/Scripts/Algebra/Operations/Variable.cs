@@ -3,9 +3,13 @@ using System.Collections.Generic;
 
 public class Variable : Equation, IEquatable<Variable>
 {
-    public static readonly Variable X = new Variable(0, "x");
-    public static readonly Variable Y = new Variable(1, "y");
-    public static readonly Variable Z = new Variable(2, "z");
+    public enum Variables
+    {
+        X, Y, Z
+    }
+    public static readonly Variable X = new Variable((int)Variables.X, "x");
+    public static readonly Variable Y = new Variable((int)Variables.Y, "y");
+    public static readonly Variable Z = new Variable((int)Variables.Z, "z");
 
     public static readonly Dictionary<string, Variable> VariableDict = new Dictionary<string, Variable>() 
     {
@@ -23,7 +27,7 @@ public class Variable : Equation, IEquatable<Variable>
         this.Name = name;
     }
 
-    public override Func<VariableSet, float> GetExpression()
+    public override ExpressionDelegate GetExpression()
     {
         return v => v[this];
     }

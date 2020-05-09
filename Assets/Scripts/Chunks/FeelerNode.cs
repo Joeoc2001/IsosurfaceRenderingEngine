@@ -1,19 +1,27 @@
 ﻿using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 public struct FeelerNode
 {
-    public readonly Vector3 Pos;
+    public readonly float3 Pos;
     public readonly float Val;
 
-    // Precached values
     public readonly int SignBit;
 
-    public FeelerNode(Vector3 pos, float val)
+    public FeelerNode(float3 pos, float val)
     {
         Pos = pos;
         Val = val;
 
-        SignBit = (-Math.Sign(Val) + 1) / 2;
+
+        if (float.IsNaN(Val))
+        {
+            SignBit = 1;
+        }
+        else
+        {
+            SignBit = (-Math.Sign(Val) + 1) / 2;
+        }
     }
 }

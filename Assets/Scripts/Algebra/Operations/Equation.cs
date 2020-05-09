@@ -4,7 +4,9 @@ using System.Collections.Generic;
 
 public abstract class Equation
 {
-    public abstract Func<VariableSet, float> GetExpression();
+    public delegate float ExpressionDelegate(VariableSet set);
+
+    public abstract ExpressionDelegate GetExpression();
 
     public abstract Equation GetDerivative(Variable wrt);
 

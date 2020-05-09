@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using Unity.Jobs;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -30,40 +31,19 @@ public class Chunk : MonoBehaviour
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
-        GetComponent<MeshCollider>().sharedMesh = mesh;
-    }
-
-    FeelerNodeSet GetFeelerNodes(Func<VariableSet, float> dist)
-    {
-        // Per side
-        int numNodes = (1 << quality) + 1;
-        float delta = size / (1 << quality);
-
-        return new FeelerNodeSet(dist, numNodes, transform.position, delta);
     }
 
     // Returns true if the mesh changed
-    public bool GenerateMesh(Func<VariableSet, float> dist, Func<VariableSet, Vector3> norm)
+    public bool GenerateMesh(FeelerNodeSet nodes, Func<VariableSet, Vector3> norm)
     {
         if (mesh is null)
         {
             return false;
         }
 
-        FeelerNodeSet nodes = GetFeelerNodes(dist);
-
-        if (!(lastNodes is null))
-        {
-            if (lastNodes.Delta(nodes) < updateThreshold)
-            {
-                return false;
-            }
-        }
-        lastNodes = nodes;
-
         // Optimization because no triangles are needed if all nodes are the same
         IsEmpty = false;
-        if (nodes.AreAllOutside() || nodes.AreAllInside())
+        if (nodes.IsUniform)
         {
             IsEmpty = true;
             mesh.Clear();

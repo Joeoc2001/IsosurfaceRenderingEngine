@@ -13,9 +13,9 @@ public class LnOperation : Equation, IEquatable<LnOperation>
         this.eq = eq;
     }
 
-    public override Func<VariableSet, float> GetExpression()
+    public override ExpressionDelegate GetExpression()
     {
-        Func<VariableSet, float> expression = eq.GetExpression();
+        ExpressionDelegate expression = eq.GetExpression();
 
         return v => Mathf.Log(expression(v));
     }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Universe : MonoBehaviour
 {
-    public static readonly double DELTA_RATIO = 0.9;
+    public static readonly double DELTA_RATIO = 1;
 
     public static Universe Instance { get; private set; }
 
@@ -14,7 +14,8 @@ public class Universe : MonoBehaviour
 
     public double TimeDeltaAim { get => 1 / FPSAim; }
 
-    public double TimeDeltaAverage = .1;
+    public double TimeDeltaAverage = .017;
+    public double FPSAverage = 60;
 
     void Awake()
     {
@@ -23,7 +24,10 @@ public class Universe : MonoBehaviour
 
     void Update()
     {
-        TimeDeltaAverage *= DELTA_RATIO;
-        TimeDeltaAverage += Time.deltaTime * (1 - DELTA_RATIO);
+        double ratioScaled = DELTA_RATIO * Time.deltaTime;
+        TimeDeltaAverage *= (1 - ratioScaled);
+        TimeDeltaAverage += Time.deltaTime * ratioScaled;
+
+        FPSAverage = 1 / TimeDeltaAverage;
     }
 }

@@ -386,7 +386,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainPlayer: {fileID: 0}
   FPSAim: 0
-  TimeDeltaAverage: 0.1
+  TimeDeltaAverage: 0.017
+  FPSAverage: 60
 --- !u!4 &430997005
 Transform:
   m_ObjectHideFlags: 0
@@ -414,14 +415,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseChunk: {fileID: 921602430}
-  updatesPerTick: 40
+  distanceField: {fileID: 1521588275}
+  lastUpdates: 0
+  updatesPerChunkSecond: 1
+  maxUpdates: 50
   viewDistance: 10
-  normalApproxDistance: 10.2
-  qualityDropoff: 0.5
-  baseIndex:
-    x: 0
-    y: 0
-    z: 0
+  normalApproxDistance: 50
+  qualityDropoff: 0.2
+  baseIndex: {x: 0, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -524,7 +525,6 @@ GameObject:
   m_Component:
   - component: {fileID: 921602434}
   - component: {fileID: 921602433}
-  - component: {fileID: 921602432}
   - component: {fileID: 921602431}
   - component: {fileID: 921602430}
   m_Layer: 0
@@ -548,7 +548,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateThreshold: 0.16
   size: 10
-  distanceField: {fileID: 1521588275}
   quality: 3
   approximateNormals: 0
   showGizmoFeelers: 0
@@ -591,20 +590,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!64 &921602432
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 921602429}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
 --- !u!33 &921602433
 MeshFilter:
   m_ObjectHideFlags: 0

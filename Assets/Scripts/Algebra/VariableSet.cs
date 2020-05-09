@@ -1,22 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
-public class VariableSet : IEquatable<VariableSet>
+public struct VariableSet : IEquatable<VariableSet>
 {
-    private readonly float[] values;
+    private float[] values;
 
-    public VariableSet()
+    public VariableSet(float3 vector)
     {
-        values = new float[Variable.VariableDict.Count];
+        values = null;
+        Set(vector);
     }
 
-    public void Set(Vector3 vector)
+    public void Set(float3 vector)
     {
-        this[Variable.X] = vector.x;
-        this[Variable.Y] = vector.y;
-        this[Variable.Z] = vector.z;
+        if (values is null)
+        {
+            values = new float[Variable.VariableDict.Count];
+        }
+
+        values[(int)Variable.Variables.X] = vector.x;
+        values[(int)Variable.Variables.Y] = vector.y;
+        values[(int)Variable.Variables.Z] = vector.z;
     }
 
     public float this[Variable v]
@@ -40,7 +47,12 @@ public class VariableSet : IEquatable<VariableSet>
 
     public override bool Equals(object obj)
     {
-        return this.Equals(obj as VariableSet);
+        if (obj is null || !(obj is VariableSet))
+        {
+            return false;
+        }
+
+        return this.Equals((VariableSet)obj);
     }
 
     public override int GetHashCode()
@@ -53,11 +65,6 @@ public class VariableSet : IEquatable<VariableSet>
         if (ReferenceEquals(left, right))
         {
             return true;
-        }
-
-        if (left is null || right is null)
-        {
-            return false;
         }
 
         return left.Equals(right);

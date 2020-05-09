@@ -17,7 +17,7 @@ public class Constant : Equation, IEquatable<Constant>
         this.value = value;
     }
 
-    public override Func<VariableSet, float> GetExpression()
+    public override ExpressionDelegate GetExpression()
     {
         float approximation = (float)value;
         return v => approximation;

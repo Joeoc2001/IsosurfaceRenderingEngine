@@ -2,6 +2,11 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -33,10 +38,15 @@ public class ChunkSet : MonoBehaviour
 
     public EquationProvider distanceField;
 
-    [Range(1, 100)]
-    public int updatesPerTick = 10;
+    public int lastUpdates = 0;
 
-    [Range(1, 10)]
+    [Range(0, 2)]
+    public double updatesPerChunkSecond = 0.1;
+
+    [Range(0, 100)]
+    public int maxUpdates = 10;
+
+    [Range(1, 50)]
     public int viewDistance;
 
     [Range(0, 50)]
@@ -129,23 +139,53 @@ public class ChunkSet : MonoBehaviour
         generatedViewDistance = viewDistance;
     }
 
+    private readonly Dictionary<Chunk, (JobHandle handle, FeelerNodeSetJob job)> chunkFeelerNodeJobs
+        = new Dictionary<Chunk, (JobHandle handle, FeelerNodeSetJob job)>();
+
     public void TickChunks()
     {
         // Calculate functions
         Equation distEq = distanceField.GetEquation().GetSimplified();
-        Func<VariableSet, float> distFunc = distEq.GetExpression();
-        Func<VariableSet, float> dxFunc = distEq.GetDerivative(Variable.X).GetSimplified().GetExpression();
-        Func<VariableSet, float> dyFunc = distEq.GetDerivative(Variable.Y).GetSimplified().GetExpression();
-        Func<VariableSet, float> dzFunc = distEq.GetDerivative(Variable.Z).GetSimplified().GetExpression();
+        Equation.ExpressionDelegate distFunc = distEq.GetExpression();
+        Equation.ExpressionDelegate dxFunc = distEq.GetDerivative(Variable.X).GetSimplified().GetExpression();
+        Equation.ExpressionDelegate dyFunc = distEq.GetDerivative(Variable.Y).GetSimplified().GetExpression();
+        Equation.ExpressionDelegate dzFunc = distEq.GetDerivative(Variable.Z).GetSimplified().GetExpression();
         Func<VariableSet, Vector3> normFunc = v => new Vector3(dxFunc(v), dyFunc(v), dzFunc(v));
 
+        // Find complete all feeler node tasks
+        List<Chunk> jobChunks = chunkFeelerNodeJobs.Keys.ToList();
+        foreach (Chunk chunk in jobChunks)
+        {
+            (JobHandle handle, FeelerNodeSetJob job) = chunkFeelerNodeJobs[chunk];
+            handle.Complete();
+
+            // Extract completed datas
+            FeelerNode[] feelerNodes = job.Target.ToArray();
+            int resolution = job.Resolution;
+            FeelerNodeSet feelerNodeSet = new FeelerNodeSet(resolution, feelerNodes);
+
+            // Update chunk
+            chunk.GenerateMesh(feelerNodeSet, normFunc);
+
+            // Remove the chunk from the jobs dict and add it back to the queue
+            chunkFeelerNodeJobs.Remove(chunk);
+
+            // Clean up
+            job.Target.Dispose();
+
+            updatePriority.Enqueue(chunk, new ChunkPriority(Time.time, chunk.IsEmpty));
+        }
+
         // Loop through some and update
-        for (int i = 0; i < Math.Min(updatesPerTick, updatePriority.Count); i++)
+        int updates = (int)(updatesPerChunkSecond * Time.deltaTime * updatePriority.Count);
+        updates = Math.Min(updates, updatePriority.Count);
+        updates = Math.Min(updates, maxUpdates);
+        for (int i = 0; i < updates; i++)
         {
             Chunk chunk = updatePriority.Dequeue();
 
+            // Check to see if the chunk should be deleted
             Vector3Int index = chunks[chunk];
-
             float dist = (index - baseIndex).magnitude;
             if (dist > viewDistance + 1)
             {
@@ -155,13 +195,27 @@ public class ChunkSet : MonoBehaviour
                 continue;
             }
 
+            // Update fields
             chunk.approximateNormals = baseChunk.approximateNormals || ShouldApproximateNormals(dist);
             chunk.quality = GetQuality(dist);
 
-            chunk.GenerateMesh(distFunc, normFunc);
+            // Create new feeler node update job
+            int resolution = (1 << chunk.quality) + 1;
+            FeelerNodeSetJob feelerNodeSetJob = new FeelerNodeSetJob()
+            {
+                // Get a pointer to the distance function
+                Function = new FunctionPointer<Equation.ExpressionDelegate>(Marshal.GetFunctionPointerForDelegate(distFunc)),
 
-            updatePriority.Enqueue(chunk, new ChunkPriority(Time.time, chunk.IsEmpty));
+                Resolution = resolution,
+                Delta = chunk.size / (1 << chunk.quality),
+                Origin = chunk.transform.position,
+
+                Target = new NativeArray<FeelerNode>(resolution * resolution * resolution, Allocator.TempJob)
+            };
+            JobHandle handle = feelerNodeSetJob.Schedule();
+            chunkFeelerNodeJobs.Add(chunk, (handle, feelerNodeSetJob));
         }
+        lastUpdates = updates;
     }
 
     // Update is called once per frame
@@ -169,5 +223,18 @@ public class ChunkSet : MonoBehaviour
     {
         GenerateChunks();
         TickChunks();
+    }
+
+    void OnDestroy()
+    {
+        // Clean up any leftover tasks
+        foreach (Chunk chunk in chunkFeelerNodeJobs.Keys)
+        {
+            (JobHandle handle, FeelerNodeSetJob job) = chunkFeelerNodeJobs[chunk];
+            handle.Complete();
+
+            // Clean up
+            job.Target.Dispose();
+        }
     }
 }

@@ -15,16 +15,16 @@ public class Exponentiation : Equation, IEquatable<Exponentiation>
         this.Exponent = exponent;
     }
 
-    public override Func<VariableSet, float> GetExpression()
+    public override ExpressionDelegate GetExpression()
     {
-        Func<VariableSet, float> termExp = Base.GetExpression();
+        ExpressionDelegate termExp = Base.GetExpression();
 
         if (Exponent.Equals(Constant.MINUS_ONE))
         {
             return v => 1 / termExp(v);
         }
 
-        Func<VariableSet, float> exponentExp = Exponent.GetExpression();
+        ExpressionDelegate exponentExp = Exponent.GetExpression();
 
         return v => Mathf.Pow(termExp(v), exponentExp(v));
     }

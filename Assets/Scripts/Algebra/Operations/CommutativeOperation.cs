@@ -20,9 +20,9 @@ public abstract class CommutativeOperation : Equation
     public abstract string EmptyName();
     public abstract string OperationName();
 
-    public override sealed Func<VariableSet, float> GetExpression()
+    public override sealed ExpressionDelegate GetExpression()
     {
-        List<Func<VariableSet, float>> expressions = new List<Func<VariableSet, float>>(eqs.Count());
+        List<ExpressionDelegate> expressions = new List<ExpressionDelegate>(eqs.Count());
         foreach (Equation e in eqs)
         {
             expressions.Add(e.GetExpression());
@@ -31,7 +31,7 @@ public abstract class CommutativeOperation : Equation
         return v =>
         {
             float value = IdentityValue();
-            foreach (Func<VariableSet, float> f in expressions)
+            foreach (ExpressionDelegate f in expressions)
             {
                 value = Operation(value, f(v));
             }
