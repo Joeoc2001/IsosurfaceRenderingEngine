@@ -73,7 +73,7 @@ namespace Tests
         {
             // ARANGE
             string equation = "x - 50";
-            Equation expected = Variable.X - 50;
+            Equation expected = Variable.X + (-50);
 
             // ACT
             Equation result = Parser.Parse(equation);

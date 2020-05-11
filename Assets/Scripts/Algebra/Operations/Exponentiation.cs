@@ -34,38 +34,20 @@ public class Exponentiation : Equation, IEquatable<Exponentiation>
         // Check for common cases
         if (Exponent is Constant)
         {
-            if (Base is Constant)
-            {
-                // Both term and exponent are constant means this is constant
-                return Constant.ZERO;
-            }
-            if (Exponent.Equals(Constant.ONE))
-            {
-                return Base.GetDerivative(wrt);
-            }
-            if (Exponent.Equals(Constant.ZERO))
-            {
-                return Constant.ZERO;
-            }
-
             Equation baseDerivative = Base.GetDerivative(wrt);
-            return Exponent * baseDerivative * Pow(Base, Exponent - 1);
+            return Exponent * baseDerivative * Pow(Base, ((Constant)Exponent).GetValue() - 1);
         }
 
-        // Check for common term cases
-        if (Base.Equals(Constant.ONE))
+        if (Base is Constant)
         {
-            return Constant.ZERO;
-        }
-        if (Base.Equals(Constant.ZERO))
-        {
-            return Constant.ZERO;
+            Equation exponentDerivative = Exponent.GetDerivative(wrt);
+            return Ln(Base) * exponentDerivative * Pow(Base, Exponent);
         }
 
         // Big derivative (u^v)'=(u^(v-1))(vu' + uv'ln(u))
         Equation termDeriv = Base.GetDerivative(wrt);
         Equation expDeriv = Exponent.GetDerivative(wrt);
-        return Pow(Base, Exponent - 1) * ((Exponent * termDeriv) + (Base * expDeriv * new LnOperation(Base)));
+        return Pow(Base, Exponent - 1) * ((Exponent * termDeriv) + (Base * expDeriv * Ln(Base)));
     }
 
     public bool Equals(Exponentiation other)
@@ -117,6 +99,11 @@ public class Exponentiation : Equation, IEquatable<Exponentiation>
     {
         Equation newTerm = Base.GetSimplified();
         Equation newExponent = Exponent.GetSimplified();
+
+        if (newExponent.Equals(Constant.ZERO))
+        {
+            return 1;
+        }
 
         if (newExponent.Equals(Constant.ONE))
         {

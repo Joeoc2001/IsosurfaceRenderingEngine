@@ -12,50 +12,57 @@ public abstract class Equation
 
     public abstract Equation GetSimplified();
 
+    public static implicit operator Equation(int r) => new Constant(r);
+    public static implicit operator Equation(long r) => new Constant(r);
+    public static implicit operator Equation(float r) => new Constant(Rational.Approximate(r));
+    public static implicit operator Equation(double r) => new Constant(Rational.Approximate(r));
+    public static implicit operator Equation(decimal r) => new Constant(Rational.Approximate(r, Constant.TOLERANCE));
+    public static implicit operator Equation(Rational r) => new Constant(r);
+
     public static Addition operator +(Equation left, Equation right)
     {
         return new Addition(new Equation[] { left, right });
     }
 
-    public static Addition operator +(Equation left, Rational right)
-    {
-        return left + new Constant(right);
-    }
+    //public static Addition operator +(Equation left, Rational right)
+    //{
+    //    return left + new Constant(right);
+    //}
 
-    public static Addition operator +(Rational left, Equation right)
-    {
-        return new Constant(left) + right;
-    }
+    //public static Addition operator +(Rational left, Equation right)
+    //{
+    //    return new Constant(left) + right;
+    //}
 
     public static Addition operator -(Equation left, Equation right)
     {
         return new Addition(new Equation[] { left, Constant.MINUS_ONE * right });
     }
 
-    public static Addition operator -(Equation left, Rational right)
-    {
-        return left + new Constant(-right);
-    }
+    //public static Addition operator -(Equation left, Rational right)
+    //{
+    //    return left + new Constant(-right);
+    //}
 
-    public static Addition operator -(Rational left, Equation right)
-    {
-        return new Constant(-left) + right;
-    }
+    //public static Addition operator -(Rational left, Equation right)
+    //{
+    //    return new Constant(-left) + right;
+    //}
 
     public static Multiplication operator *(Equation left, Equation right)
     {
         return new Multiplication(new Equation[] { left, right });
     }
 
-    public static Multiplication operator *(Equation left, Rational right)
-    {
-        return left * new Constant(right);
-    }
+    //public static Multiplication operator *(Equation left, Rational right)
+    //{
+    //    return left * new Constant(right);
+    //}
 
-    public static Multiplication operator *(Rational left, Equation right)
-    {
-        return new Constant(left) * right;
-    }
+    //public static Multiplication operator *(Rational left, Equation right)
+    //{
+    //    return new Constant(left) * right;
+    //}
 
     public static Multiplication operator /(Equation left, Equation right)
     {
@@ -63,30 +70,40 @@ public abstract class Equation
         return new Multiplication(new Equation[] { left, new Exponentiation(right, Constant.MINUS_ONE) });
     }
 
-    public static Multiplication operator /(Equation left, Rational right)
-    {
-        return left / new Constant(right);
-    }
+    //public static Multiplication operator /(Equation left, Rational right)
+    //{
+    //    return left / new Constant(right);
+    //}
 
-    public static Multiplication operator /(Rational left, Equation right)
-    {
-        return new Constant(left) / right;
-    }
+    //public static Multiplication operator /(Rational left, Equation right)
+    //{
+    //    return new Constant(left) / right;
+    //}
 
     public static Exponentiation Pow(Equation left, Equation right)
     {
         return new Exponentiation(left, right);
     }
 
-    public static Exponentiation Pow(Equation left, Rational right)
+    //public static Exponentiation Pow(Equation left, Rational right)
+    //{
+    //    return Pow(left, new Constant(right));
+    //}
+
+    //public static Exponentiation Pow(Rational left, Equation right)
+    //{
+    //    return Pow(new Constant(left), right);
+    //}
+
+    public static LnOperation Ln(Equation left)
     {
-        return Pow(left, new Constant(right));
+        return new LnOperation(left);
     }
 
-    public static Exponentiation Pow(Rational left, Equation right)
-    {
-        return Pow(new Constant(left), right);
-    }
+    //public static LnOperation Ln(Rational left)
+    //{
+    //    return Ln(new Constant(left));
+    //}
 
     public override abstract int GetHashCode();
 

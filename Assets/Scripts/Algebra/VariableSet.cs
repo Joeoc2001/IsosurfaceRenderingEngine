@@ -4,26 +4,15 @@ using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 
-public struct VariableSet : IEquatable<VariableSet>
+public unsafe struct VariableSet : IEquatable<VariableSet>
 {
-    private float[] values;
+    private fixed float values[Variable.VariablesCount];
 
     public VariableSet(float3 vector)
     {
-        values = null;
-        Set(vector);
-    }
-
-    public void Set(float3 vector)
-    {
-        if (values is null)
-        {
-            values = new float[Variable.VariableDict.Count];
-        }
-
-        values[(int)Variable.Variables.X] = vector.x;
-        values[(int)Variable.Variables.Y] = vector.y;
-        values[(int)Variable.Variables.Z] = vector.z;
+        values[0] = vector.x;
+        values[1] = vector.y;
+        values[2] = vector.z;
     }
 
     public float this[Variable v]
@@ -32,16 +21,15 @@ public struct VariableSet : IEquatable<VariableSet>
         set => values[v.Index] = value;
     }
 
-    public bool Equals(VariableSet other)
+    public bool Equals(VariableSet o)
     {
-        for (int i = 0; i < values.Length; i++)
+        for (int i = 0; i < Variable.VariablesCount; i++)
         {
-            if (!Mathf.Approximately(values[i], other.values[i]))
+            if (!Mathf.Approximately(values[i],o.values[i]))
             {
                 return false;
             }
         }
-
         return true;
     }
 

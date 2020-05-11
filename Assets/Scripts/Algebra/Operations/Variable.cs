@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 public class Variable : Equation, IEquatable<Variable>
 {
+    public const int VariablesCount = 3;
     public enum Variables
     {
         X, Y, Z

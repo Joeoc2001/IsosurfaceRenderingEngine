@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+[RequireComponent(typeof(MeshFilter))]
 public class Chunk : MonoBehaviour
 {
     Mesh mesh;
@@ -65,10 +66,9 @@ public class Chunk : MonoBehaviour
         {
             // Calculate normals
             Vector3[] chunkNormals = new Vector3[vertices.Length];
-            VariableSet variableSet = new VariableSet();
             for (int iChunkVertex = 0; iChunkVertex < vertices.Length; iChunkVertex++)
             {
-                variableSet.Set(transform.position + vertices[iChunkVertex]);
+                VariableSet variableSet = new VariableSet(transform.position + vertices[iChunkVertex]);
                 Vector3 n = norm(variableSet).normalized;
 
                 chunkNormals[iChunkVertex] = n;
