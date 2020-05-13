@@ -74,7 +74,7 @@ namespace Tests
         {
             // ARANGE
             Equation value = Variable.X + Variable.Y;
-            Equation expected = Constant.ONE + Constant.ZERO;
+            Equation expected = Constant.From(1) + Constant.From(0);
 
             // ACT
             Equation derivative = value.GetDerivative(Variable.X);
@@ -87,7 +87,7 @@ namespace Tests
         public void Addition_EvaluatesCorrectly()
         {
             // ARANGE
-            Equation equation = new Constant(54321) + new Constant(7);
+            Equation equation = Constant.From(54321) + Constant.From(7);
 
             // ACT
             float value = equation.GetExpression()(new VariableSet());
@@ -100,56 +100,52 @@ namespace Tests
         public void Addition_Simplify_CollectsConstants()
         {
             // ARANGE
-            Equation equation = new Constant(54321) + Variable.Z + new Constant(54321);
-            Equation expected = new Constant(54321 + 54321) + Variable.Z;
 
             // ACT
-            Equation simplified = equation.GetSimplified();
+            Equation equation = Constant.From(54321) + Variable.Z + Constant.From(54321);
+            Equation expected = Constant.From(54321 + 54321) + Variable.Z;
 
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
 
         [Test]
         public void Addition_Simplify_CollectsCoefficients()
         {
             // ARANGE
-            Equation equation = (new Constant(54321) * Variable.Z) + (new Constant(54321) * Variable.Z) + Variable.Z;
-            Equation expected = new Constant(54321 + 54321 + 1) * Variable.Z;
 
             // ACT
-            Equation simplified = equation.GetSimplified();
+            Equation equation = (Constant.From(54321) * Variable.Z) + (Constant.From(54321) * Variable.Z) + Variable.Z;
+            Equation expected = Constant.From(54321 + 54321 + 1) * Variable.Z;
 
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
 
         [Test]
         public void Addition_Simplify_RemovesZeros()
         {
             // ARANGE
-            Equation equation = Constant.ZERO + Constant.ONE + Constant.MINUS_ONE + Variable.Z;
-            Equation expected = Variable.Z;
 
             // ACT
-            Equation simplified = equation.GetSimplified();
+            Equation equation = Constant.From(0) + Constant.From(1) + Constant.From(-1) + Variable.Z;
+            Equation expected = Variable.Z;
 
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
 
         [Test]
         public void Addition_Simplify_CollatesAdditions()
         {
             // ARANGE
-            Equation equation = new Addition(new Equation[] { new Addition(new Equation[] { Variable.X, Variable.Y } ), Variable.Z });
-            Equation expected = new Addition(new Equation[] { Variable.X, Variable.Y, Variable.Z });
 
             // ACT
-            Equation simplified = equation.GetSimplified();
+            Equation equation = Equation.Add(new List<Equation>() { Equation.Add(new List<Equation>() { Variable.X, Variable.Y }), Variable.Z });
+            Equation expected = Equation.Add(new List<Equation>() { Variable.X, Variable.Y, Variable.Z });
 
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
     }
 }

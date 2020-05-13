@@ -4,15 +4,25 @@ using UnityEngine;
 
 public class Constant : Equation, IEquatable<Constant>
 {
-    public static readonly decimal TOLERANCE = 0.00000000001M;
+    public static readonly Constant ZERO = 0;
+    public static readonly Constant ONE = 1;
+    public static readonly Constant MINUS_ONE = -1;
 
-    public static readonly Constant ZERO = new Constant(0);
-    public static readonly Constant ONE = new Constant(1);
-    public static readonly Constant MINUS_ONE = new Constant(-1);
+    public static implicit operator Constant(int r) => Constant.From(r);
+    public static implicit operator Constant(long r) => Constant.From(r);
+    public static implicit operator Constant(float r) => Rational.Approximate(r);
+    public static implicit operator Constant(double r) => Rational.Approximate(r);
+    public static implicit operator Constant(decimal r) => Rational.Approximate(r);
+    public static implicit operator Constant(Rational r) => Constant.From(r);
 
     private readonly Rational value;
 
-    public Constant(Rational value)
+    public static Constant From(Rational value)
+    {
+        return new Constant(value.CanonicalForm);
+    }
+
+    private Constant(Rational value)
     {
         this.value = value;
     }
@@ -25,7 +35,7 @@ public class Constant : Equation, IEquatable<Constant>
 
     public override Equation GetDerivative(Variable wrt)
     {
-        return Constant.ZERO;
+        return 0;
     }
 
     public bool Equals(Constant obj)
@@ -46,24 +56,6 @@ public class Constant : Equation, IEquatable<Constant>
     public override int GetHashCode()
     {
         return value.GetHashCode();
-    }
-
-    public override string ToString()
-    {
-        if (value.Denominator < 1000)
-        {
-            return $"{value}";
-        }
-        return $"[{(float)value:0.00}...]";
-    }
-
-    public override Equation GetSimplified()
-    {
-        if (!value.IsCanonical)
-        {
-            return new Constant(value.CanonicalForm);
-        }
-        return this;
     }
 
     public static bool operator ==(Constant left, Constant right)
@@ -89,5 +81,20 @@ public class Constant : Equation, IEquatable<Constant>
     public Rational GetValue()
     {
         return value;
+    }
+
+    public override string ToString()
+    {
+        return $"[CONSTANT]({value})";
+    }
+
+    public override string ToParsableString()
+    {
+        return $"{value}";
+    }
+
+    public override string ToRunnableString()
+    {
+        return $"Constant.From((Rational)({value.Numerator})/({value.Denominator}))";
     }
 }

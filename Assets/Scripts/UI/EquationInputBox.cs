@@ -16,8 +16,7 @@ public class EquationInputBox : EquationProvider
 
     private void UpdateEquation(string s)
     {
-        Equation equation = Parser.Parse(s);
-        SetEquation(equation.GetSimplified());
+        SetEquation(Parser.Parse(s));
     }
 
     // Start is called before the first frame update

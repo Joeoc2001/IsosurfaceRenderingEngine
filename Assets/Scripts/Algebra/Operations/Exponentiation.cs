@@ -4,10 +4,40 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Exponentiation : Equation, IEquatable<Exponentiation>
+class Exponentiation : Equation, IEquatable<Exponentiation>
 {
     public readonly Equation Base;
     public readonly Equation Exponent;
+
+    new public static Equation Pow(Equation term, Equation exponent)
+    {
+        if (exponent.Equals(Constant.ZERO))
+        {
+            return 1;
+        }
+
+        if (exponent.Equals(Constant.ONE))
+        {
+            return term;
+        }
+
+        if (term is Constant termConstant && exponent is Constant exponentConstant)
+        {
+            Rational numerator = exponentConstant.GetValue().Numerator;
+            Rational denominator = exponentConstant.GetValue().Denominator;
+            if (numerator > -10 && numerator < 10) // Bounds for sanity sake
+            {
+                Rational value = Rational.Pow(termConstant.GetValue(), (int)numerator);
+                if (value >= 0)
+                {
+                    value = Rational.RationalRoot(value, (int)denominator);
+                    return value;
+                }
+            }
+        }
+
+        return new Exponentiation(term, exponent);
+    }
 
     public Exponentiation(Equation term, Equation exponent)
     {
@@ -19,7 +49,7 @@ public class Exponentiation : Equation, IEquatable<Exponentiation>
     {
         ExpressionDelegate termExp = Base.GetExpression();
 
-        if (Exponent.Equals(Constant.MINUS_ONE))
+        if (Exponent.Equals(-1))
         {
             return v => 1 / termExp(v);
         }
@@ -41,13 +71,14 @@ public class Exponentiation : Equation, IEquatable<Exponentiation>
         if (Base is Constant)
         {
             Equation exponentDerivative = Exponent.GetDerivative(wrt);
-            return Ln(Base) * exponentDerivative * Pow(Base, Exponent);
+            return Ln(Base) * exponentDerivative * this;
         }
 
-        // Big derivative (u^v)'=(u^(v-1))(vu' + uv'ln(u))
-        Equation termDeriv = Base.GetDerivative(wrt);
+        // Big derivative (u^v)'=(u^v)(vu'/u + v'ln(u))
+        // Alternatively  (u^v)'=(u^(v-1))(vu' + uv'ln(u)) but I find the first form simplifies faster
+        Equation baseDeriv = Base.GetDerivative(wrt);
         Equation expDeriv = Exponent.GetDerivative(wrt);
-        return Pow(Base, Exponent - 1) * ((Exponent * termDeriv) + (Base * expDeriv * Ln(Base)));
+        return this * ((Exponent * baseDeriv / Base) + (expDeriv * Ln(Base)));
     }
 
     public bool Equals(Exponentiation other)
@@ -92,42 +123,16 @@ public class Exponentiation : Equation, IEquatable<Exponentiation>
 
     public override string ToString()
     {
-        return $"({Base} ^ {Exponent})";
+        return $"[EXPONENTIATION]({Base}, {Exponent})";
     }
 
-    public override Equation GetSimplified()
+    public override string ToParsableString()
     {
-        Equation newTerm = Base.GetSimplified();
-        Equation newExponent = Exponent.GetSimplified();
+        return $"({Base.ToParsableString()} ^ {Exponent.ToParsableString()})";
+    }
 
-        if (newExponent.Equals(Constant.ZERO))
-        {
-            return 1;
-        }
-
-        if (newExponent.Equals(Constant.ONE))
-        {
-            return newTerm;
-        }
-
-        if (newTerm is Constant termConstant && newExponent is Constant exponentConstant)
-        {
-            Rational numerator = exponentConstant.GetValue().Numerator;
-            Rational denominator = exponentConstant.GetValue().Denominator;
-            if (numerator < int.MaxValue && numerator > int.MinValue
-                && denominator < int.MaxValue && numerator > int.MinValue)
-            {
-                Rational value = Rational.Pow(termConstant.GetValue(), (int)numerator);
-                value = Rational.RationalRoot(value, (int)denominator);
-                return new Constant(value).GetSimplified();
-            }
-        }
-
-        if (newTerm.Equals(Base) && newExponent.Equals(Exponent))
-        {
-            return this;
-        }
-
-        return new Exponentiation(newTerm, newExponent).GetSimplified();
+    public override string ToRunnableString()
+    {
+        return $"Equation.Pow({Base.ToRunnableString()}, {Exponent.ToRunnableString()})";
     }
 }

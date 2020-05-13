@@ -4,110 +4,69 @@ using System.Collections.Generic;
 
 public abstract class Equation
 {
+    public static implicit operator Equation(int r) => (Constant)r;
+    public static implicit operator Equation(long r) => (Constant)r;
+    public static implicit operator Equation(float r) => (Constant)r;
+    public static implicit operator Equation(double r) => (Constant)r;
+    public static implicit operator Equation(decimal r) => (Constant)r;
+    public static implicit operator Equation(Rational r) => (Constant)r;
+
     public delegate float ExpressionDelegate(VariableSet set);
 
     public abstract ExpressionDelegate GetExpression();
 
     public abstract Equation GetDerivative(Variable wrt);
 
-    public abstract Equation GetSimplified();
+    [Obsolete("GetSimplified is deprecated, it is no longer necissary and should do nothing.")]
+    public Equation GetSimplified() { return this; }
 
-    public static implicit operator Equation(int r) => new Constant(r);
-    public static implicit operator Equation(long r) => new Constant(r);
-    public static implicit operator Equation(float r) => new Constant(Rational.Approximate(r));
-    public static implicit operator Equation(double r) => new Constant(Rational.Approximate(r));
-    public static implicit operator Equation(decimal r) => new Constant(Rational.Approximate(r, Constant.TOLERANCE));
-    public static implicit operator Equation(Rational r) => new Constant(r);
-
-    public static Addition operator +(Equation left, Equation right)
+    public static Equation operator +(Equation left, Equation right)
     {
-        return new Addition(new Equation[] { left, right });
+        return Add(new List<Equation>() { left, right });
     }
 
-    //public static Addition operator +(Equation left, Rational right)
-    //{
-    //    return left + new Constant(right);
-    //}
-
-    //public static Addition operator +(Rational left, Equation right)
-    //{
-    //    return new Constant(left) + right;
-    //}
-
-    public static Addition operator -(Equation left, Equation right)
+    public static Equation operator -(Equation left, Equation right)
     {
-        return new Addition(new Equation[] { left, Constant.MINUS_ONE * right });
+        return Add(new List<Equation>() { left, -1 * right });
     }
 
-    //public static Addition operator -(Equation left, Rational right)
-    //{
-    //    return left + new Constant(-right);
-    //}
-
-    //public static Addition operator -(Rational left, Equation right)
-    //{
-    //    return new Constant(-left) + right;
-    //}
-
-    public static Multiplication operator *(Equation left, Equation right)
+    public static Equation Add(List<Equation> eqs)
     {
-        return new Multiplication(new Equation[] { left, right });
+        return Addition.Add(eqs);
     }
 
-    //public static Multiplication operator *(Equation left, Rational right)
-    //{
-    //    return left * new Constant(right);
-    //}
+    public static Equation operator *(Equation left, Equation right)
+    {
+        return Multiply(new List<Equation>() { left, right });
+    }
 
-    //public static Multiplication operator *(Rational left, Equation right)
-    //{
-    //    return new Constant(left) * right;
-    //}
-
-    public static Multiplication operator /(Equation left, Equation right)
+    public static Equation operator /(Equation left, Equation right)
     {
         // a/b = a * (b^-1)
-        return new Multiplication(new Equation[] { left, new Exponentiation(right, Constant.MINUS_ONE) });
+        return Multiply(new List<Equation>() { left, Pow(right, -1) });
     }
 
-    //public static Multiplication operator /(Equation left, Rational right)
-    //{
-    //    return left / new Constant(right);
-    //}
-
-    //public static Multiplication operator /(Rational left, Equation right)
-    //{
-    //    return new Constant(left) / right;
-    //}
-
-    public static Exponentiation Pow(Equation left, Equation right)
+    public static Equation Multiply(List<Equation> eqs)
     {
-        return new Exponentiation(left, right);
+        return Multiplication.Multiply(eqs);
     }
 
-    //public static Exponentiation Pow(Equation left, Rational right)
-    //{
-    //    return Pow(left, new Constant(right));
-    //}
-
-    //public static Exponentiation Pow(Rational left, Equation right)
-    //{
-    //    return Pow(new Constant(left), right);
-    //}
-
-    public static LnOperation Ln(Equation left)
+    public static Equation Pow(Equation left, Equation right)
     {
-        return new LnOperation(left);
+        return Exponentiation.Pow(left, right);
     }
 
-    //public static LnOperation Ln(Rational left)
-    //{
-    //    return Ln(new Constant(left));
-    //}
+    public static Equation Ln(Equation left)
+    {
+        return LnOperation.Ln(left);
+    }
 
     public override abstract int GetHashCode();
 
     public override abstract bool Equals(object obj);
+
+    public abstract string ToParsableString();
+    public abstract string ToRunnableString();
 
     public static bool operator ==(Equation left, Equation right)
     {

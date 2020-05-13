@@ -1,24 +1,45 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.Mathematics;
 using UnityEngine;
 
 public unsafe struct VariableSet : IEquatable<VariableSet>
 {
     private fixed float values[Variable.VariablesCount];
 
-    public VariableSet(float3 vector)
+    public static implicit operator VariableSet(float vector) => new VariableSet(vector);
+    public static implicit operator VariableSet(Vector2 vector) => new VariableSet(vector);
+    public static implicit operator VariableSet(Vector3 vector) => new VariableSet(vector);
+    public static implicit operator VariableSet(float[] vector) => new VariableSet(vector);
+
+    public VariableSet(float vector)
     {
-        values[0] = vector.x;
-        values[1] = vector.y;
-        values[2] = vector.z;
+        values[(int)Variable.Variables.X] = vector;
+    }
+
+    public VariableSet(Vector2 vector)
+    {
+        values[(int)Variable.Variables.X] = vector.x;
+        values[(int)Variable.Variables.Y] = vector.y;
+    }
+
+    public VariableSet(Vector3 vector)
+    {
+        values[(int)Variable.Variables.X] = vector.x;
+        values[(int)Variable.Variables.Y] = vector.y;
+        values[(int)Variable.Variables.Z] = vector.z;
+    }
+
+    public VariableSet(float[] vector)
+    {
+        int i = Math.Min(Variable.VariablesCount, vector.Length);
+        for(int j = 0; j < i; j++)
+        {
+            values[j] = vector[j];
+        }
     }
 
     public float this[Variable v]
     {
         get => values[v.Index];
-        set => values[v.Index] = value;
     }
 
     public bool Equals(VariableSet o)

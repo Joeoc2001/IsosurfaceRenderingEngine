@@ -54,12 +54,7 @@ public class Parser
             }
             else
             {
-                if (terms.Count == 1)
-                {
-                    return terms[0];
-                }
-
-                return new Addition(terms);
+                return Addition.Add(terms);
             }
 
             // Skip the operator
@@ -71,7 +66,7 @@ public class Parser
             {
                 if (rhs is Constant constant)
                 {
-                    rhs = new Constant(-constant.GetValue());
+                    rhs = Constant.From(-constant.GetValue());
                 }
                 else
                 {
@@ -104,12 +99,7 @@ public class Parser
             }
             else
             {
-                if (terms.Count == 1)
-                {
-                    return terms[0];
-                }
-
-                return new Multiplication(terms);
+                return Multiplication.Multiply(terms);
             }
 
             // Skip the operator
@@ -142,7 +132,7 @@ public class Parser
 
             // Parse the next term in the expression
             Equation rhs = ParseLeaf();
-            lhs = new Exponentiation(lhs, rhs);
+            lhs = Equation.Pow(lhs, rhs);
         }
     }
 
@@ -157,7 +147,7 @@ public class Parser
 
         if (tokenizer.Token == Token.Decimal)
         {
-            Equation node = new Constant(tokenizer.Number);
+            Equation node = Constant.From(tokenizer.Number);
             tokenizer.NextToken();
             return node;
         }
@@ -195,7 +185,7 @@ public class Parser
             {
                 case "log":
                 case "ln":
-                    return new LnOperation(node);
+                    return Equation.Ln(node);
                 default:
                     throw new SyntaxException($"Unknown function name: {tokenizer.FunctionName}");
             }

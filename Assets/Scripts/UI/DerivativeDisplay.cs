@@ -17,11 +17,11 @@ public class DerivativeDisplay : MonoBehaviour
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.Append("df/dx = ");
-        stringBuilder.Append(e.GetDerivative(Variable.X).GetSimplified().ToString());
+        stringBuilder.Append(e.GetDerivative(Variable.X).ToString());
         stringBuilder.Append("\ndf/dy = ");
-        stringBuilder.Append(e.GetDerivative(Variable.Y).GetSimplified().ToString());
+        stringBuilder.Append(e.GetDerivative(Variable.Y).ToString());
         stringBuilder.Append("\ndf/dz = ");
-        stringBuilder.Append(e.GetDerivative(Variable.Z).GetSimplified().ToString());
+        stringBuilder.Append(e.GetDerivative(Variable.Z).ToString());
 
         text.text = stringBuilder.ToString();
     }

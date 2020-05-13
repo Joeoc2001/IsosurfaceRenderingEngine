@@ -73,7 +73,7 @@ namespace Tests
                 Equation derivative = v1.GetDerivative(v1);
 
                 // ASSERT
-                Assert.AreEqual(Constant.ONE, derivative);
+                Assert.AreEqual(Constant.From(1), derivative);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Tests
                     Equation derivative = v1.GetDerivative(v2);
 
                     // ASSERT
-                    Assert.AreEqual(Constant.ZERO, derivative);
+                    Assert.AreEqual(Constant.From(0), derivative);
                 }
             }
         }
@@ -107,14 +107,9 @@ namespace Tests
             List<string> keys = new List<string>(Variable.VariableDict.Keys);
 
             float[] values = new float[keys.Count];
-            VariableSet variableSet = new VariableSet();
             for (int i = 0; i < keys.Count; i++)
             {
                 values[i] = keys.Count * i;
-
-                string key = keys[i];
-                Variable v = Variable.VariableDict[key];
-                variableSet[v] = values[i];
             }
 
             for (int i = 0; i < keys.Count; i++)
@@ -124,25 +119,11 @@ namespace Tests
                 Variable v = Variable.VariableDict[key];
 
                 // ACT
-                float value = v.GetExpression()(variableSet);
+                float value = v.GetExpression()(values);
 
                 // ASSERT
                 Assert.AreEqual(values[i], value);
             }
-        }
-
-        [Test]
-        public void Variable_DoesntSimplify()
-        {
-            // ARANGE
-            Variable v1 = Variable.Y;
-
-            // ACT
-            Equation simplified = v1.GetSimplified();
-
-            // ASSERT
-            Assert.IsTrue(simplified is Variable);
-            Assert.AreEqual(v1, simplified);
         }
     }
 }

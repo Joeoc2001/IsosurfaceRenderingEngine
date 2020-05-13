@@ -74,7 +74,7 @@ namespace Tests
         {
             // ARANGE
             Equation value = Variable.X * Variable.Y;
-            Equation expected = Constant.ONE * Variable.Y + Variable.X * Constant.ZERO;
+            Equation expected = 1 * Variable.Y + Variable.X * 0;
 
             // ACT
             Equation derivative = value.GetDerivative(Variable.X);
@@ -87,7 +87,7 @@ namespace Tests
         public void Multiplication_EvaluatesCorrectly()
         {
             // ARANGE
-            Equation equation = new Constant(54321) * new Constant(7);
+            Equation equation = Constant.From(54321) * Constant.From(7);
 
             // ACT
             float value = equation.GetExpression()(new VariableSet());
@@ -100,70 +100,65 @@ namespace Tests
         public void Multiplication_Simplify_CollectsConstants()
         {
             // ARANGE
-            Equation equation = new Constant(54321) * Variable.Z * new Constant(54321);
-            Equation expected = new Constant(((Rational)54321) * 54321) * Variable.Z;
 
             // ACT
-            Equation simplified = equation.GetSimplified();
+            Equation equation = Constant.From(54321) * Variable.Z * Constant.From(54321);
+            Equation expected = Constant.From(((Rational)54321) * 54321) * Variable.Z;
 
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
 
         [Test]
         public void Multiplication_Simplify_CollectsPowers()
         {
             // ARANGE
+
+            // ACT
             Equation equation = Equation.Pow(Variable.Z, 2) * Equation.Pow(Variable.Z, Variable.Y) * Variable.Z;
             Equation expected = Equation.Pow(Variable.Z, 3 + Variable.Y);
 
-            // ACT
-            Equation simplified = equation.GetSimplified();
-
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
 
         [Test]
         public void Multiplication_Simplify_RemovesOnes()
         {
             // ARANGE
-            Equation equation = Constant.ONE * 2 * Variable.Z * (Rational)0.5M;
-            Equation expected = Variable.Z;
 
             // ACT
-            Equation simplified = equation.GetSimplified();
+            Equation equation = 1 * 2 * Variable.Z * (Rational)0.5M;
+            Equation expected = Variable.Z;
 
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
 
         [Test]
         public void Multiplication_Simplify_CollatesMultiplication()
         {
             // ARANGE
-            Equation equation = new Multiplication(new Equation[] { new Multiplication(new Equation[] { Variable.X, Variable.Y } ), Variable.Z });
-            Equation expected = new Multiplication(new Equation[] { Variable.X, Variable.Y, Variable.Z });
 
             // ACT
-            Equation simplified = equation.GetSimplified();
+            Equation equation = Equation.Multiply(new List<Equation>() { Equation.Multiply(new List<Equation>() { Variable.X, Variable.Y }), Variable.Z });
+            Equation expected = Equation.Multiply(new List<Equation>() { Variable.X, Variable.Y, Variable.Z });
 
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
 
         [Test]
         public void Multiplication_Simplify_GoesToConstantZero()
         {
             // ARANGE
-            Equation equation = Constant.ZERO * 2 * Variable.Z * (Rational)0.5M;
-            Equation expected = Constant.ZERO;
 
             // ACT
-            Equation simplified = equation.GetSimplified();
+            Equation equation = 0 * 2 * Variable.Z * (Rational)0.5M;
+            Equation expected = 0;
 
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
     }
 }

@@ -6,9 +6,83 @@ using System.Linq;
 using System.Linq.Expressions;
 using UnityEngine;
 
-public class Multiplication : CommutativeOperation, IEquatable<Multiplication>
+class Multiplication : CommutativeOperation, IEquatable<Multiplication>
 {
-    public Multiplication(IEnumerable<Equation> eqs)
+    public static Equation Multiply<T>(List<T> eqs) where T : Equation
+    {
+        // Collate multiplications into one big multiplication
+        List<Equation> collatedEqs = new List<Equation>();
+        foreach (Equation eq in eqs)
+        {
+            if (eq is Multiplication multeq)
+            {
+                collatedEqs.AddRange(multeq.eqs);
+                continue;
+            }
+
+            collatedEqs.Add(eq);
+        }
+
+        List<Equation> newEqs = SimplifyArguments(collatedEqs, 1, (x, y) => x * y);
+
+        if (newEqs.Count == 0)
+        {
+            return 1;
+        }
+        if (newEqs.Count == 1)
+        {
+            return newEqs[0];
+        }
+
+        foreach (Equation eq in newEqs)
+        {
+            if (eq.Equals(Constant.ZERO))
+            {
+                return 0;
+            }
+        }
+
+        // Collate exponents
+        Dictionary<Equation, List<Equation>> exponents = new Dictionary<Equation, List<Equation>>();
+        foreach (Equation eq in newEqs)
+        {
+            Equation baseEq;
+            Equation exponentEq;
+            if (eq is Exponentiation expeq)
+            {
+                baseEq = expeq.Base;
+                exponentEq = expeq.Exponent;
+            }
+            else
+            {
+                baseEq = eq;
+                exponentEq = 1;
+            }
+
+            if (!exponents.ContainsKey(baseEq))
+            {
+                exponents.Add(baseEq, new List<Equation>());
+            }
+            exponents[baseEq].Add(exponentEq);
+        }
+        // Put back into exponent form
+        newEqs.Clear();
+        foreach (Equation eq in exponents.Keys)
+        {
+            List<Equation> powers = exponents[eq];
+
+            newEqs.Add(Pow(eq, Add(powers)));
+        }
+
+        if (newEqs.Count == 1)
+        {
+            return newEqs[0];
+        }
+
+        return new Multiplication(newEqs);
+    }
+
+    private Multiplication(IEnumerable<Equation> eqs)
         : base(eqs)
     {
 
@@ -40,9 +114,9 @@ public class Multiplication : CommutativeOperation, IEquatable<Multiplication>
 
                 term.Add(eqs[iCoefficient]);
             }
-            terms.Add(new Multiplication(term));
+            terms.Add(Multiply(term));
         }
-        return new Addition(terms);
+        return Addition.Add(terms);
     }
 
     public bool Equals(Multiplication obj)
@@ -71,12 +145,7 @@ public class Multiplication : CommutativeOperation, IEquatable<Multiplication>
         return 1;
     }
 
-    public override float Operation(float a, float b)
-    {
-        return a * b;
-    }
-
-    public override Rational Operation(Rational a, Rational b)
+    public override float Perform(float a, float b)
     {
         return a * b;
     }
@@ -86,104 +155,13 @@ public class Multiplication : CommutativeOperation, IEquatable<Multiplication>
         return "[EMPTY PRODUCT]";
     }
 
-    public override string OperationName()
+    public override string OperationSymbol()
     {
         return "*";
     }
 
-    public override Equation GetSimplified()
-    {
-        List<Equation> newEqs = SimplifyArguments();
-
-        if (newEqs.Count == 0)
-        {
-            return Constant.ONE;
-        }
-
-        if (newEqs.Count == 1)
-        {
-            return newEqs[0];
-        }
-
-        foreach (Equation eq in newEqs)
-        {
-            if (eq.Equals(Constant.ZERO))
-            {
-                return Constant.ZERO;
-            }
-        }
-
-        // Collate multiplications into one big multiplication
-        List<Equation> collatedEqs = new List<Equation>();
-        foreach (Equation eq in newEqs)
-        {
-            if (eq is Multiplication multeq)
-            {
-                collatedEqs.AddRange(multeq.eqs);
-                continue;
-            }
-
-            collatedEqs.Add(eq);
-        }
-
-        // Collate exponents
-        Dictionary<Equation, List<Equation>> exponents = new Dictionary<Equation, List<Equation>>();
-        foreach (Equation eq in collatedEqs)
-        {
-            Equation baseEq;
-            Equation exponentEq;
-            if (eq is Exponentiation expeq)
-            {
-                baseEq = expeq.Base;
-                exponentEq = expeq.Exponent;
-            }
-            else
-            {
-                baseEq = eq;
-                exponentEq = Constant.ONE;
-            }
-
-            if (!exponents.ContainsKey(baseEq))
-            {
-                exponents.Add(baseEq, new List<Equation>());
-            }
-            exponents[baseEq].Add(exponentEq);
-        }
-        // Put back into exponent form
-        collatedEqs.Clear();
-        foreach (Equation eq in exponents.Keys)
-        {
-            List<Equation> powers = exponents[eq];
-
-            Equation newTerm;
-            if (powers.Count == 1)
-            {
-                if (powers[0] is Constant c && c.GetValue().Equals(1))
-                {
-                    newTerm = eq;
-                }
-                else
-                {
-                    newTerm = new Exponentiation(eq, powers[0]);
-                }
-            }
-            else
-            {
-                newTerm = new Exponentiation(eq, new Addition(powers));
-            }
-            collatedEqs.Add(newTerm);
-        }
-
-        if (OperandsEquals(collatedEqs))
-        {
-            return this;
-        }
-
-        return new Multiplication(collatedEqs).GetSimplified();
-    }
-
     // Finds the first constant in the multiplication, or returns 1 if there are none
-    public Constant GetConstantCoefficient()
+    public Equation GetConstantCoefficient()
     {
         foreach (Equation eq in eqs)
         {
@@ -192,7 +170,7 @@ public class Multiplication : CommutativeOperation, IEquatable<Multiplication>
                 return c;
             }
         }
-        return Constant.ONE;
+        return 1;
     }
 
     // Gets a multiplication term of all of the terms minus the first constant, or this if there are no constants
@@ -212,6 +190,11 @@ public class Multiplication : CommutativeOperation, IEquatable<Multiplication>
             }
         }
         return this;
+    }
+
+    public override string OperationName()
+    {
+        return "MULTIPLICATION";
     }
 
     public static bool operator ==(Multiplication left, Multiplication right)

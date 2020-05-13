@@ -145,11 +145,11 @@ public class ChunkSet : MonoBehaviour
     public void TickChunks()
     {
         // Calculate functions
-        Equation distEq = distanceField.GetEquation().GetSimplified();
+        Equation distEq = distanceField.GetEquation();
         Equation.ExpressionDelegate distFunc = distEq.GetExpression();
-        Equation.ExpressionDelegate dxFunc = distEq.GetDerivative(Variable.X).GetSimplified().GetExpression();
-        Equation.ExpressionDelegate dyFunc = distEq.GetDerivative(Variable.Y).GetSimplified().GetExpression();
-        Equation.ExpressionDelegate dzFunc = distEq.GetDerivative(Variable.Z).GetSimplified().GetExpression();
+        Equation.ExpressionDelegate dxFunc = distEq.GetDerivative(Variable.X).GetExpression();
+        Equation.ExpressionDelegate dyFunc = distEq.GetDerivative(Variable.Y).GetExpression();
+        Equation.ExpressionDelegate dzFunc = distEq.GetDerivative(Variable.Z).GetExpression();
         Func<VariableSet, Vector3> normFunc = v => new Vector3(dxFunc(v), dyFunc(v), dzFunc(v));
 
         // Find complete all feeler node tasks

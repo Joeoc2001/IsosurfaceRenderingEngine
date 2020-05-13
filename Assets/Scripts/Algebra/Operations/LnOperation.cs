@@ -4,9 +4,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LnOperation : Equation, IEquatable<LnOperation>
+class LnOperation : Equation, IEquatable<LnOperation>
 {
     private readonly Equation eq;
+
+    new public static Equation Ln(Equation eq)
+    {
+        if (eq is Constant constant)
+        {
+            double log = Rational.Log(constant.GetValue());
+            if (!double.IsNaN(log) && !double.IsInfinity(log))
+            {
+                return log;
+            }
+        }
+
+        return new LnOperation(eq);
+    }
 
     public LnOperation(Equation eq)
     {
@@ -68,23 +82,16 @@ public class LnOperation : Equation, IEquatable<LnOperation>
 
     public override string ToString()
     {
-        return $"ln({eq})";
+        return $"[LN]({eq})";
     }
 
-    public override Equation GetSimplified()
+    public override string ToParsableString()
     {
-        Equation newEq = eq.GetSimplified();
+        return $"ln {eq.ToParsableString()}";
+    }
 
-        if (newEq is Constant newEqConstant)
-        {
-            return new Constant((Rational)Rational.Log(newEqConstant.GetValue()));
-        }
-
-        if (newEq.Equals(eq))
-        {
-            return this;
-        }
-
-        return new LnOperation(newEq).GetSimplified();
+    public override string ToRunnableString()
+    {
+        return $"Equation.Ln({eq.ToRunnableString()})";
     }
 }

@@ -33,8 +33,8 @@ namespace Tests
         public void Exponentiation_EqualReturnFalse_WhenDifferent()
         {
             // ARANGE
-            Equation v1 = Equation.Pow(Variable.X, 1);
-            Equation v2 = Equation.Pow(1, Variable.X);
+            Equation v1 = Equation.Pow(Variable.X, 6);
+            Equation v2 = Equation.Pow(6, Variable.X);
 
             // ACT
 
@@ -57,7 +57,7 @@ namespace Tests
             Equation expected = 1;
 
             // ACT
-            Equation derivative = value.GetDerivative(Variable.X).GetSimplified();
+            Equation derivative = value.GetDerivative(Variable.X);
 
             // ASSERT
             Assert.AreEqual(expected, derivative);
@@ -71,7 +71,7 @@ namespace Tests
             Equation expected = 5 * Equation.Pow(Variable.X, 4);
 
             // ACT
-            Equation derivative = value.GetDerivative(Variable.X).GetSimplified();
+            Equation derivative = value.GetDerivative(Variable.X);
 
             // ASSERT
             Assert.AreEqual(expected, derivative);
@@ -85,7 +85,7 @@ namespace Tests
             Equation expected = Rational.Log(5) * Equation.Pow(5, Variable.X);
 
             // ACT
-            Equation derivative = value.GetDerivative(Variable.X).GetSimplified();
+            Equation derivative = value.GetDerivative(Variable.X);
 
             // ASSERT
             Assert.AreEqual(expected, derivative);
@@ -99,7 +99,7 @@ namespace Tests
             Equation expected = (1 + Equation.Ln(Variable.X)) * Equation.Pow(Variable.X, Variable.X);
 
             // ACT
-            Equation derivative = value.GetDerivative(Variable.X).GetSimplified();
+            Equation derivative = value.GetDerivative(Variable.X);
 
             // ASSERT
             Assert.AreEqual(expected, derivative);
@@ -109,7 +109,7 @@ namespace Tests
         public void Exponentiation_EvaluatesCorrectly()
         {
             // ARANGE
-            Equation equation = Equation.Pow(2, new Constant(7));
+            Equation equation = Equation.Pow(2, Constant.From(7));
 
             // ACT
             float value = equation.GetExpression()(new VariableSet());
@@ -122,42 +122,39 @@ namespace Tests
         public void Exponentiation_Simplify_CollapsesConstants()
         {
             // ARANGE
-            Equation equation = Equation.Pow(5, new Constant(2));
-            Equation expected = new Constant(25);
 
             // ACT
-            Equation simplified = equation.GetSimplified();
+            Equation equation = Equation.Pow(5, Constant.From(2));
+            Equation expected = Constant.From(25);
 
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
 
         [Test]
         public void Exponentiation_Simplify_RemovesPowersOf1()
         {
             // ARANGE
+
+            // ACT
             Equation equation = Equation.Pow(Variable.Z, 1);
             Equation expected = Variable.Z;
 
-            // ACT
-            Equation simplified = equation.GetSimplified();
-
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
 
         [Test]
         public void Exponentiation_Simplify_RemovesPowersOf0()
         {
             // ARANGE
+
+            // ACT
             Equation equation = Equation.Pow(Variable.Y, 0);
             Equation expected = 1;
 
-            // ACT
-            Equation simplified = equation.GetSimplified();
-
             // ASSERT
-            Assert.AreEqual(expected, simplified);
+            Assert.AreEqual(expected, equation);
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 public abstract class EquationProvider : MonoBehaviour
 {
-    private Equation equation = Constant.ZERO;
+    private Equation equation = 0;
 
     private OnEquationChange onEquationChange = new OnEquationChange();
 

@@ -78,18 +78,31 @@ public class Tokenizer
                 return;
         }
 
-        if (char.IsDigit(currentChar) || currentChar == '.')
+        if (char.IsDigit(currentChar))
         {
             StringBuilder stringBuilder = new StringBuilder();
+
             bool haveDecimalPoint = false;
-            while (char.IsDigit(currentChar) || (!haveDecimalPoint && currentChar == '.'))
+            bool haveDenominator = false;
+
+            while (char.IsDigit(currentChar)
+                || (!haveDecimalPoint && !haveDenominator && currentChar == '.')
+                || (!haveDecimalPoint && !haveDenominator && currentChar == '/'))
             {
                 stringBuilder.Append(currentChar);
-                haveDecimalPoint = currentChar == '.';
+                haveDecimalPoint = haveDecimalPoint || currentChar == '.';
+                haveDenominator = haveDenominator ||currentChar == '/';
                 NextChar();
             }
 
-            Number = Rational.ParseDecimal(stringBuilder.ToString(), Constant.TOLERANCE);
+            if (!haveDenominator)
+            {
+                Number = Rational.ParseDecimal(stringBuilder.ToString());
+            }
+            else
+            {
+                Number = Rational.Parse(stringBuilder.ToString());
+            }
             Token = Token.Decimal;
             return;
         }

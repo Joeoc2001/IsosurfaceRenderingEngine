@@ -129,7 +129,7 @@ namespace Rationals
                 sequence.Add(coefficient);
                 currentNumber = FromContinuedFraction(sequence);
                 var currentDifference = Math.Abs((double)currentNumber - input);
-                Debug.WriteLine($"{currentNumber} {currentDifference}");
+
                 if (currentDifference <= tolerance)
                 {
                     break;

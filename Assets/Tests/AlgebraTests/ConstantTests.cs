@@ -13,8 +13,8 @@ namespace Tests
         public void Constant_Zero_IsSelfEqual()
         {
             // ARANGE
-            Constant zero1 = Constant.ZERO;
-            Constant zero2 = Constant.ZERO;
+            Constant zero1 = 0;
+            Constant zero2 = 0;
 
             // ACT
 
@@ -33,8 +33,8 @@ namespace Tests
         public void Constant_ZeroAndOne_AreNotEqual()
         {
             // ARANGE
-            Constant zero = Constant.ZERO;
-            Constant one = Constant.ONE;
+            Constant zero = 0;
+            Constant one = 1;
 
             // ACT
 
@@ -50,39 +50,23 @@ namespace Tests
         }
 
         [Test]
-        public void Constant_Constants_HaveCorrectValues()
-        {
-            // ARANGE
-            Constant zeroConst = Constant.ZERO;
-            Constant oneConst = Constant.ONE;
-            Constant zero = new Constant(0);
-            Constant one = new Constant(1);
-
-            // ACT
-
-            // ASSERT
-            Assert.IsTrue(zeroConst == zero);
-            Assert.IsTrue(oneConst == one);
-        }
-
-        [Test]
         public void Constant_Derivative_IsZero()
         {
             // ARANGE
-            Constant value = new Constant(54321);
+            Constant value = Constant.From(54321);
 
             // ACT
             Equation derivative = value.GetDerivative(Variable.X);
 
             // ASSERT
-            Assert.AreEqual(Constant.ZERO, derivative);
+            Assert.AreEqual(Constant.From(0), derivative);
         }
 
         [Test]
         public void Constant_EvaluatesCorrectly()
         {
             // ARANGE
-            Constant equation = new Constant(54321);
+            Constant equation = Constant.From(54321);
 
             // ACT
             float value = equation.GetExpression()(new VariableSet());
@@ -92,18 +76,15 @@ namespace Tests
         }
 
         [Test]
-        public void Constant_DoesntSimplify()
+        public void Constant_ParsesCorrectly()
         {
             // ARANGE
-            Constant equation = new Constant(54321);
 
             // ACT
-            Equation simplified = equation.GetSimplified();
+            Constant equation = Constant.From(54321);
 
             // ASSERT
-            Assert.AreEqual(equation, simplified);
-            Assert.IsTrue(simplified is Constant);
-            Assert.AreEqual((Rational)54321, ((Constant)simplified).GetValue());
+            Assert.AreEqual((Rational)54321, equation.GetValue());
         }
     }
 }

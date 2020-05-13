@@ -37,9 +37,9 @@ public class Variable : Equation, IEquatable<Variable>
     {
         if (wrt == this)
         {
-            return Constant.ONE;
+            return 1;
         }
-        return Constant.ZERO;
+        return 0;
     }
 
     public bool Equals(Variable obj)
@@ -64,12 +64,17 @@ public class Variable : Equation, IEquatable<Variable>
 
     public override string ToString()
     {
+        return $"[VARIABLE]{Name.ToUpper()}";
+    }
+
+    public override string ToParsableString()
+    {
         return Name;
     }
 
-    public override Equation GetSimplified()
+    public override string ToRunnableString()
     {
-        return this;
+        return $"Variable.{Name.ToUpper()}";
     }
 
     public static bool operator ==(Variable left, Variable right)
