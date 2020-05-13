@@ -11,7 +11,7 @@ public class ParsedEquationDisplay : MonoBehaviour
 
     void Awake()
     {
-        provider.AddListener(x => text.text = (" = " + x.ToString()));
+        provider.AddListener(x => text.text = (" = " + x.ToParsableString()));
     }
 
     private void Start()

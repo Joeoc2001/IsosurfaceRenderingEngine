@@ -1,8 +1,7 @@
 {
-    "name": "Game",
+    "name": "Algebra",
     "references": [
-        "GUID:d8b63aba1907145bea998dd612889d6b",
-        "GUID:2665a8d13d1b3f18800f46e256720795"
+        "GUID:6c5f232548c9e4847a29a25d9a1bcef3"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
