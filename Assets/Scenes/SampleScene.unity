@@ -418,7 +418,7 @@ MonoBehaviour:
   distanceField: {fileID: 1521588275}
   lastUpdates: 0
   updatesPerChunkSecond: 1
-  maxUpdates: 50
+  maxUpdatesPerSecond: 5000
   viewDistance: 10
   normalApproxDistance: 50
   qualityDropoff: 0.2

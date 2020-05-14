@@ -12,27 +12,32 @@ using UnityEngine.Assertions;
 
 public class ChunkSet : MonoBehaviour
 {
-    private class ChunkPriority : IComparable<ChunkPriority>
+    private class ChunkContainer : Priority_Queue.FastPriorityQueueNode
     {
-        private readonly double lastUpdatedTime;
-        private readonly bool isEmpty;
+        private float lastUpdatedTime;
+        public readonly Chunk Chunk;
 
-        public ChunkPriority(double lastUpdatedTime, bool isEmpty)
+        public ChunkContainer(Chunk chunk)
         {
-            this.lastUpdatedTime = lastUpdatedTime;
-            this.isEmpty = isEmpty;
+            lastUpdatedTime = 0;
+            Chunk = chunk;
+            SetPriority();
         }
 
-        public double PriorityFunction()
+        public void SetLastUpdatedTime()
         {
-            return lastUpdatedTime;
+            lastUpdatedTime = Time.time;
+            SetPriority();
         }
 
-        public int CompareTo(ChunkPriority other)
+        private void SetPriority()
         {
-            return PriorityFunction().CompareTo(other.PriorityFunction());
+            float priority = lastUpdatedTime;
+            Priority = priority;
         }
     }
+
+    public const int MAX_RADIUS = 50;
 
     public Chunk baseChunk;
 
@@ -43,10 +48,10 @@ public class ChunkSet : MonoBehaviour
     [Range(0, 2)]
     public double updatesPerChunkSecond = 0.1;
 
-    [Range(0, 100)]
-    public int maxUpdates = 10;
+    [Range(0, 10000)]
+    public int maxUpdatesPerSecond = 5000;
 
-    [Range(1, 50)]
+    [Range(1, MAX_RADIUS)]
     public int viewDistance;
 
     [Range(0, 50)]
@@ -59,13 +64,14 @@ public class ChunkSet : MonoBehaviour
 
     private TwoWayDict<Vector3Int, Chunk> chunks;
 
-    private Priority_Queue.SimplePriorityQueue<Chunk, ChunkPriority> updatePriority;
+    private Priority_Queue.FastPriorityQueue<ChunkContainer> updatePriority;
 
     // Start is called before the first frame update
     void Start()
     {
         chunks = new TwoWayDict<Vector3Int, Chunk>();
-        updatePriority = new Priority_Queue.SimplePriorityQueue<Chunk, ChunkPriority>();
+        int maxChunks = MAX_RADIUS * MAX_RADIUS * MAX_RADIUS * 8;
+        updatePriority = new Priority_Queue.FastPriorityQueue<ChunkContainer>(maxChunks);
     }
 
     bool ShouldApproximateNormals(double dist)
@@ -128,7 +134,8 @@ public class ChunkSet : MonoBehaviour
                 Vector3 offset = new Vector3(index.x, index.y, index.z) * baseChunk.size;
                 Chunk chunk = Instantiate<Chunk>(baseChunk, offset, Quaternion.identity, transform);
 
-                updatePriority.Enqueue(chunk, new ChunkPriority(0, false));
+                ChunkContainer container = new ChunkContainer(chunk);
+                updatePriority.Enqueue(container, container.Priority);
 
                 chunks.Add(index, chunk);
             }
@@ -139,8 +146,8 @@ public class ChunkSet : MonoBehaviour
         generatedViewDistance = viewDistance;
     }
 
-    private readonly Dictionary<Chunk, (JobHandle handle, FeelerNodeSetJob job)> chunkFeelerNodeJobs
-        = new Dictionary<Chunk, (JobHandle handle, FeelerNodeSetJob job)>();
+    private readonly Dictionary<ChunkContainer, (JobHandle handle, FeelerNodeSetJob job)> chunkFeelerNodeJobs
+        = new Dictionary<ChunkContainer, (JobHandle handle, FeelerNodeSetJob job)>();
 
     public void TickChunks()
     {
@@ -153,10 +160,9 @@ public class ChunkSet : MonoBehaviour
         Func<VariableSet, Vector3> normFunc = v => new Vector3(dxFunc(v), dyFunc(v), dzFunc(v));
 
         // Find complete all feeler node tasks
-        List<Chunk> jobChunks = chunkFeelerNodeJobs.Keys.ToList();
-        foreach (Chunk chunk in jobChunks)
+        foreach (ChunkContainer chunkContainer in chunkFeelerNodeJobs.Keys)
         {
-            (JobHandle handle, FeelerNodeSetJob job) = chunkFeelerNodeJobs[chunk];
+            (JobHandle handle, FeelerNodeSetJob job) = chunkFeelerNodeJobs[chunkContainer];
             handle.Complete();
 
             // Extract completed datas
@@ -165,24 +171,25 @@ public class ChunkSet : MonoBehaviour
             FeelerNodeSet feelerNodeSet = new FeelerNodeSet(resolution, feelerNodes);
 
             // Update chunk
-            chunk.GenerateMesh(feelerNodeSet, normFunc);
-
-            // Remove the chunk from the jobs dict and add it back to the queue
-            chunkFeelerNodeJobs.Remove(chunk);
+            chunkContainer.Chunk.GenerateMesh(feelerNodeSet, normFunc);
 
             // Clean up
             job.Target.Dispose();
 
-            updatePriority.Enqueue(chunk, new ChunkPriority(Time.time, chunk.IsEmpty));
+            chunkContainer.SetLastUpdatedTime();
+            updatePriority.Enqueue(chunkContainer, chunkContainer.Priority);
         }
+
+        chunkFeelerNodeJobs.Clear();
 
         // Loop through some and update
         int updates = (int)(updatesPerChunkSecond * Time.deltaTime * updatePriority.Count);
         updates = Math.Min(updates, updatePriority.Count);
-        updates = Math.Min(updates, maxUpdates);
+        updates = Math.Min(updates, (int)(maxUpdatesPerSecond * Time.deltaTime));
         for (int i = 0; i < updates; i++)
         {
-            Chunk chunk = updatePriority.Dequeue();
+            ChunkContainer chunkContainer = updatePriority.Dequeue();
+            Chunk chunk = chunkContainer.Chunk;
 
             // Check to see if the chunk should be deleted
             Vector3Int index = chunks[chunk];
@@ -213,7 +220,7 @@ public class ChunkSet : MonoBehaviour
                 Target = new NativeArray<FeelerNode>(resolution * resolution * resolution, Allocator.TempJob)
             };
             JobHandle handle = feelerNodeSetJob.Schedule();
-            chunkFeelerNodeJobs.Add(chunk, (handle, feelerNodeSetJob));
+            chunkFeelerNodeJobs.Add(chunkContainer, (handle, feelerNodeSetJob));
         }
         lastUpdates = updates;
     }
@@ -228,9 +235,9 @@ public class ChunkSet : MonoBehaviour
     void OnDestroy()
     {
         // Clean up any leftover tasks
-        foreach (Chunk chunk in chunkFeelerNodeJobs.Keys)
+        foreach (ChunkContainer chunkContainer in chunkFeelerNodeJobs.Keys)
         {
-            (JobHandle handle, FeelerNodeSetJob job) = chunkFeelerNodeJobs[chunk];
+            (JobHandle handle, FeelerNodeSetJob job) = chunkFeelerNodeJobs[chunkContainer];
             handle.Complete();
 
             // Clean up

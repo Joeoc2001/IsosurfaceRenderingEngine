@@ -64,20 +64,13 @@ abstract class CommutativeOperation : Equation
 
     protected static List<Equation> SimplifyArguments<T>(List<T> eqs, Rational identity, Operation operation) where T : Equation
     {
-        List<Equation> newEqs = new List<Equation>();
-
-        Constant identityConstant = Constant.From(identity);
+        List<Equation> newEqs = new List<Equation>(eqs.Count);
 
         Rational collectedConstants = identity;
 
         // Loop & simplify
         foreach (Equation eq in eqs)
         {
-            if (eq.Equals(identityConstant))
-            {
-                continue;
-            }
-
             if (eq is Constant constEq)
             {
                 collectedConstants = operation(collectedConstants, constEq.GetValue());
