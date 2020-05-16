@@ -1,6 +1,7 @@
 ﻿using Rationals;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public abstract class Equation
 {
@@ -12,13 +13,42 @@ public abstract class Equation
     public static implicit operator Equation(Rational r) => (Constant)r;
 
     public delegate float ExpressionDelegate(VariableSet set);
+    public delegate Vector2 Vector2ExpressionDelegate(VariableSet set);
+    public delegate Vector3 Vector3ExpressionDelegate(VariableSet set);
+    public delegate Vector4 Vector4ExpressionDelegate(VariableSet set);
 
     public abstract ExpressionDelegate GetExpression();
 
     public abstract Equation GetDerivative(Variable wrt);
 
-    [Obsolete("GetSimplified is deprecated, it is no longer necissary and should do nothing.")]
-    public Equation GetSimplified() { return this; }
+    public ExpressionDelegate GetDerivitiveExpression(Variable wrt)
+    {
+        return GetDerivative(wrt).GetExpression();
+    }
+
+    public Vector2ExpressionDelegate GetDerivitiveExpressionWrtXY()
+    {
+        ExpressionDelegate dxFunc = GetDerivative(Variable.X).GetExpression();
+        ExpressionDelegate dyFunc = GetDerivative(Variable.Y).GetExpression();
+        return (VariableSet v) => new Vector2(dxFunc(v), dyFunc(v));
+    }
+
+    public Vector3ExpressionDelegate GetDerivitiveExpressionWrtXYZ()
+    {
+        ExpressionDelegate dxFunc = GetDerivative(Variable.X).GetExpression();
+        ExpressionDelegate dyFunc = GetDerivative(Variable.Y).GetExpression();
+        ExpressionDelegate dzFunc = GetDerivative(Variable.Z).GetExpression();
+        return (VariableSet v) => new Vector3(dxFunc(v), dyFunc(v), dzFunc(v));
+    }
+
+    public Vector4ExpressionDelegate GetDerivitiveExpressionWrtXYZW()
+    {
+        ExpressionDelegate dxFunc = GetDerivative(Variable.X).GetExpression();
+        ExpressionDelegate dyFunc = GetDerivative(Variable.Y).GetExpression();
+        ExpressionDelegate dzFunc = GetDerivative(Variable.Z).GetExpression();
+        ExpressionDelegate dwFunc = GetDerivative(Variable.W).GetExpression();
+        return (VariableSet v) => new Vector4(dxFunc(v), dyFunc(v), dzFunc(v), dwFunc(v));
+    }
 
     public static Equation operator +(Equation left, Equation right)
     {

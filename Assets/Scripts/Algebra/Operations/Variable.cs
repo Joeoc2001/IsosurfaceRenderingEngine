@@ -3,20 +3,22 @@ using System.Collections.Generic;
 
 public class Variable : Equation, IEquatable<Variable>
 {
-    public const int VariablesCount = 3;
+    public const int VariablesCount = 4;
     public enum Variables
     {
-        X, Y, Z
+        X, Y, Z, W
     }
     public static readonly Variable X = new Variable((int)Variables.X, "x");
     public static readonly Variable Y = new Variable((int)Variables.Y, "y");
     public static readonly Variable Z = new Variable((int)Variables.Z, "z");
+    public static readonly Variable W = new Variable((int)Variables.W, "w");
 
     public static readonly Dictionary<string, Variable> VariableDict = new Dictionary<string, Variable>() 
     {
         { X.Name, X },
         { Y.Name, Y },
-        { Z.Name, Z }
+        { Z.Name, Z },
+        { W.Name, W }
     };
 
     public readonly int Index;

@@ -35,7 +35,7 @@ public class Chunk : MonoBehaviour
     }
 
     // Returns true if the mesh changed
-    public bool GenerateMesh(FeelerNodeSet nodes, Func<VariableSet, Vector3> norm)
+    public bool GenerateMesh(FeelerNodeSet nodes, Equation.Vector3ExpressionDelegate norm)
     {
         if (mesh is null)
         {

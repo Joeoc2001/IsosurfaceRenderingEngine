@@ -39,8 +39,6 @@ public class ChunkSet : MonoBehaviour
         }
     }
 
-    public const int MAX_RADIUS = 50;
-
     public Chunk baseChunk;
 
     public EquationProvider distanceField;
@@ -54,7 +52,7 @@ public class ChunkSet : MonoBehaviour
     [Range(0, 10000)]
     public int maxUpdatesPerSecond = 5000;
 
-    [Range(1, MAX_RADIUS)]
+    [Range(1, 50)]
     public int viewDistance;
 
     [Range(0, 50)]
@@ -73,8 +71,13 @@ public class ChunkSet : MonoBehaviour
     void Start()
     {
         chunks = new TwoWayDict<Vector3Int, Chunk>();
-        int maxChunks = MAX_RADIUS * MAX_RADIUS * MAX_RADIUS * 8;
-        updatePriority = new Priority_Queue.FastPriorityQueue<ChunkContainer>(maxChunks);
+        updatePriority = new Priority_Queue.FastPriorityQueue<ChunkContainer>(GetMaxChunks());
+    }
+
+    private int GetMaxChunks()
+    {
+        int side = (2 * viewDistance) + 1;
+        return side * side * side;
     }
 
     bool ShouldApproximateNormals(double dist)
@@ -130,6 +133,12 @@ public class ChunkSet : MonoBehaviour
     {
         IEnumerable<Vector3Int> newChunkIndexes = GetNewChunkIndexes(generatedBaseIndex, generatedViewDistance, baseIndex, viewDistance);
 
+        // Check if priority queue needs resizing
+        if (viewDistance > generatedViewDistance || viewDistance < generatedViewDistance / 1.2)
+        {
+            updatePriority.Resize(GetMaxChunks());
+        }
+
         foreach (Vector3Int index in newChunkIndexes)
         {
             if (!chunks.ContainsKey(index))
@@ -152,79 +161,93 @@ public class ChunkSet : MonoBehaviour
     private readonly Dictionary<ChunkContainer, (JobHandle handle, FeelerNodeSetJob job)> chunkFeelerNodeJobs
         = new Dictionary<ChunkContainer, (JobHandle handle, FeelerNodeSetJob job)>();
 
-    public void TickChunks()
+    private List<(ChunkContainer, FeelerNodeSet)> FinishFeelerNodeJobs()
     {
-        // Calculate functions
-        Equation distEq = distanceField.GetEquation();
-        Equation.ExpressionDelegate distFunc = distEq.GetExpression();
-        Equation.ExpressionDelegate dxFunc = distEq.GetDerivative(Variable.X).GetExpression();
-        Equation.ExpressionDelegate dyFunc = distEq.GetDerivative(Variable.Y).GetExpression();
-        Equation.ExpressionDelegate dzFunc = distEq.GetDerivative(Variable.Z).GetExpression();
-        Func<VariableSet, Vector3> normFunc = v => new Vector3(dxFunc(v), dyFunc(v), dzFunc(v));
+        List<(ChunkContainer, FeelerNodeSet)> data
+            = new List<(ChunkContainer, FeelerNodeSet)>(chunkFeelerNodeJobs.Count);
 
-        // Find complete all feeler node tasks
         foreach (ChunkContainer chunkContainer in chunkFeelerNodeJobs.Keys)
         {
             (JobHandle handle, FeelerNodeSetJob job) = chunkFeelerNodeJobs[chunkContainer];
             handle.Complete();
 
             // Extract completed datas
-            FeelerNode[] feelerNodes = job.Target.ToArray();
+            FeelerNode[] feelerNodes = new FeelerNode[job.Target.Length];
+            job.Target.CopyTo(feelerNodes);
             int resolution = job.Resolution;
             FeelerNodeSet feelerNodeSet = new FeelerNodeSet(resolution, feelerNodes);
-
-            // Update chunk
-            chunkContainer.Chunk.GenerateMesh(feelerNodeSet, normFunc);
 
             // Clean up
             job.Target.Dispose();
 
-            chunkContainer.SetLastUpdatedTime();
-            updatePriority.Enqueue(chunkContainer, chunkContainer.Priority);
+            // Add chunk to be modified
+            data.Add((chunkContainer, feelerNodeSet));
+
         }
 
         chunkFeelerNodeJobs.Clear();
 
-        // Loop through some and update
+        return data;
+    }
+
+    private bool ShouldChunkBeKilled(Chunk chunk)
+    {
+        Vector3Int index = chunks[chunk];
+        float dist = (index - baseIndex).magnitude;
+        return dist > viewDistance + 1;
+    }
+
+    private FeelerNodeSetJob CreateFeelerNodeJob(ChunkContainer chunkContainer, Equation.ExpressionDelegate distFunc)
+    {
+        Chunk chunk = chunkContainer.Chunk;
+        int resolution = (1 << chunk.quality) + 1;
+        return new FeelerNodeSetJob()
+        {
+            // Get a pointer to the distance function
+            Function = new FunctionPointer<Equation.ExpressionDelegate>(Marshal.GetFunctionPointerForDelegate(distFunc)),
+
+            Resolution = resolution,
+            Delta = chunk.size / (1 << chunk.quality),
+            Origin = chunk.transform.position,
+
+            Target = new NativeArray<FeelerNode>(resolution * resolution * resolution, Allocator.TempJob)
+        };
+    }
+
+    private void RandomTickChunk(ChunkContainer chunkContainer, Equation.ExpressionDelegate distFunc)
+    {
+        Chunk chunk = chunkContainer.Chunk;
+        Vector3Int index = chunks[chunk];
+        float dist = (index - baseIndex).magnitude;
+
+        // Check to see if the chunk should be deleted
+        if (ShouldChunkBeKilled(chunk))
+        {
+            chunks.Remove(index);
+            Destroy(chunk.gameObject);
+            return;
+        }
+
+        // Update fields
+        chunk.approximateNormals = baseChunk.approximateNormals || ShouldApproximateNormals(dist);
+        chunk.quality = GetQuality(dist);
+
+        // Create new feeler node update job
+        FeelerNodeSetJob feelerNodeSetJob = CreateFeelerNodeJob(chunkContainer, distFunc);
+        JobHandle handle = feelerNodeSetJob.Schedule();
+        chunkFeelerNodeJobs.Add(chunkContainer, (handle, feelerNodeSetJob));
+    }
+
+    private int GetNumberOfChunksToTick()
+    {
         int updates = (int)(updatesPerChunkSecond * Time.deltaTime * updatePriority.Count);
         updates = Math.Min(updates, updatePriority.Count);
         updates = Math.Min(updates, (int)(maxUpdatesPerSecond * Time.deltaTime));
-        for (int i = 0; i < updates; i++)
-        {
-            ChunkContainer chunkContainer = updatePriority.Dequeue();
-            Chunk chunk = chunkContainer.Chunk;
+        return updates;
+    }
 
-            // Check to see if the chunk should be deleted
-            Vector3Int index = chunks[chunk];
-            float dist = (index - baseIndex).magnitude;
-            if (dist > viewDistance + 1)
-            {
-                chunks.Remove(index);
-
-                Destroy(chunk.gameObject);
-                continue;
-            }
-
-            // Update fields
-            chunk.approximateNormals = baseChunk.approximateNormals || ShouldApproximateNormals(dist);
-            chunk.quality = GetQuality(dist);
-
-            // Create new feeler node update job
-            int resolution = (1 << chunk.quality) + 1;
-            FeelerNodeSetJob feelerNodeSetJob = new FeelerNodeSetJob()
-            {
-                // Get a pointer to the distance function
-                Function = new FunctionPointer<Equation.ExpressionDelegate>(Marshal.GetFunctionPointerForDelegate(distFunc)),
-
-                Resolution = resolution,
-                Delta = chunk.size / (1 << chunk.quality),
-                Origin = chunk.transform.position,
-
-                Target = new NativeArray<FeelerNode>(resolution * resolution * resolution, Allocator.TempJob)
-            };
-            JobHandle handle = feelerNodeSetJob.Schedule();
-            chunkFeelerNodeJobs.Add(chunkContainer, (handle, feelerNodeSetJob));
-        }
+    private void UpdateMetrics(int updates)
+    {
         lastUpdates = updates;
 
         double ratioScaled = DELTA_RATIO * Time.deltaTime;
@@ -232,23 +255,44 @@ public class ChunkSet : MonoBehaviour
         updatesPerSecond += (updates / Time.deltaTime) * ratioScaled;
     }
 
+    public void TickChunks()
+    {
+        // Calculate functions
+        Equation distEq = distanceField.GetEquation();
+        Equation.ExpressionDelegate distFunc = distEq.GetExpression();
+        Equation.Vector3ExpressionDelegate normFunc = distEq.GetDerivitiveExpressionWrtXYZ();
+
+        // Complete all feeler node tasks
+        List<(ChunkContainer, FeelerNodeSet)> chunkNodes = FinishFeelerNodeJobs();
+        foreach ((ChunkContainer chunkContainer, FeelerNodeSet nodes) in chunkNodes)
+        {
+            // Update chunk's mesh
+            chunkContainer.Chunk.GenerateMesh(nodes, normFunc);
+            chunkContainer.SetLastUpdatedTime();
+            updatePriority.Enqueue(chunkContainer, chunkContainer.Priority);
+        }
+
+        int updates = GetNumberOfChunksToTick();
+        // Loop through some and update
+        for (int i = 0; i < updates; i++)
+        {
+            ChunkContainer chunkContainer = updatePriority.Dequeue();
+            RandomTickChunk(chunkContainer, distFunc);
+        }
+
+        UpdateMetrics(updates);
+    }
+
     // Update is called once per frame
     void Update()
     {
-        GenerateChunks();
-        TickChunks();
+        GenerateChunks(); // Checks which chunks should exist given the position etc of this set
+        TickChunks(); // Updates a collection of the chunks
     }
 
     void OnDestroy()
     {
         // Clean up any leftover tasks
-        foreach (ChunkContainer chunkContainer in chunkFeelerNodeJobs.Keys)
-        {
-            (JobHandle handle, FeelerNodeSetJob job) = chunkFeelerNodeJobs[chunkContainer];
-            handle.Complete();
-
-            // Clean up
-            job.Target.Dispose();
-        }
+        FinishFeelerNodeJobs();
     }
 }
