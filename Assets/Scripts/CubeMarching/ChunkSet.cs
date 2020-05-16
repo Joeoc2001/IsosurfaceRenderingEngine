@@ -12,6 +12,8 @@ using UnityEngine.Assertions;
 
 public class ChunkSet : MonoBehaviour
 {
+    public static readonly double DELTA_RATIO = 1;
+
     private class ChunkContainer : Priority_Queue.FastPriorityQueueNode
     {
         private float lastUpdatedTime;
@@ -44,6 +46,7 @@ public class ChunkSet : MonoBehaviour
     public EquationProvider distanceField;
 
     public int lastUpdates = 0;
+    public double updatesPerSecond = 0;
 
     [Range(0, 2)]
     public double updatesPerChunkSecond = 0.1;
@@ -223,6 +226,10 @@ public class ChunkSet : MonoBehaviour
             chunkFeelerNodeJobs.Add(chunkContainer, (handle, feelerNodeSetJob));
         }
         lastUpdates = updates;
+
+        double ratioScaled = DELTA_RATIO * Time.deltaTime;
+        updatesPerSecond *= (1 - ratioScaled);
+        updatesPerSecond += (updates / Time.deltaTime) * ratioScaled;
     }
 
     // Update is called once per frame
