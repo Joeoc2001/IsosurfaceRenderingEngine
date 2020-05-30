@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -177,20 +178,82 @@ public class Parser
 
         if (tokenizer.Token == Token.Function)
         {
+            string functionName = tokenizer.FunctionName;
+
             tokenizer.NextToken();
 
-            Equation node = ParseLeaf();
-
-            switch(tokenizer.FunctionName)
+            List<Equation> nodes;
+            if (tokenizer.Token == Token.OpenBrace)
             {
-                case "log":
-                case "ln":
-                    return Equation.Ln(node);
-                default:
-                    throw new SyntaxException($"Unknown function name: {tokenizer.FunctionName}");
+                tokenizer.NextToken();
+                nodes = new List<Equation>()
+                {
+                    ParseAddSubtract()
+                };
+
+                while (tokenizer.Token == Token.Comma)
+                {
+                    tokenizer.NextToken();
+                    nodes.Add(ParseAddSubtract());
+                }
+
+                if (tokenizer.Token != Token.CloseBrace)
+                {
+                    throw new SyntaxException("Missing close parenthesis");
+                }
+
+                tokenizer.NextToken();
             }
+            else
+            {
+                nodes = new List<Equation>()
+                {
+                    ParseLeaf()
+                };
+            }
+
+            return MakeFunction(nodes, functionName);
         }
 
         throw new SyntaxException($"Unexpected leaf token: {tokenizer.Token}");
+    }
+
+    Equation MakeFunction(IList<Equation> nodes, string functionName)
+    {
+        int requiredParameters;
+        Func<IList<Equation>, Equation> constructor;
+        switch (functionName)
+        {
+            case "log":
+            case "ln":
+                requiredParameters = 1;
+                constructor = ns => Equation.Ln(ns[0]);
+                break;
+            case "sign":
+                requiredParameters = 1;
+                constructor = ns => Equation.Sign(ns[0]);
+                break;
+            case "abs":
+                requiredParameters = 1;
+                constructor = ns => Equation.Abs(ns[0]);
+                break;
+            case "min":
+                requiredParameters = 2;
+                constructor = ns => Equation.Min(ns[0], ns[1]);
+                break;
+            case "max":
+                requiredParameters = 2;
+                constructor = ns => Equation.Max(ns[0], ns[1]);
+                break;
+            default:
+                throw new SyntaxException($"Unknown function name: {tokenizer.FunctionName}");
+        }
+
+        if (nodes.Count != requiredParameters)
+        {
+            throw new SyntaxException($"Incorrect number of parameters for {tokenizer.FunctionName}: {nodes.Count}");
+        }
+
+        return constructor(nodes);
     }
 }

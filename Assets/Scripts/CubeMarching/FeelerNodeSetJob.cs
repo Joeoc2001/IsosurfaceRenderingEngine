@@ -34,6 +34,12 @@ public struct FeelerNodeSetJob : IJob
                     VariableSet variableSet = new VariableSet(position);
                     float value = expression(variableSet);
 
+                    // Guard for invalid values
+                    if (float.IsNaN(value))
+                    {
+                        value = 0;
+                    }
+
                     // Place in target array
                     int index = (x * Resolution + y) * Resolution + z;
                     Target[index] = new FeelerNode(position, value);

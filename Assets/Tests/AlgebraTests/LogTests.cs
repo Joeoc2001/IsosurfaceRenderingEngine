@@ -10,26 +10,12 @@ namespace Tests
     public class LogTests
     {
         [Test]
-        public void Log_Simplifies_WhenConstantParameter()
+        public void Log_DoesntSimplify_WhenConstantParameter()
         {
             // ARANGE
 
             // ACT
             Equation e = Equation.Ln(10);
-
-            // ASSERT
-            Assert.IsTrue(e is Constant);
-            Constant c = (Constant)e;
-            Assert.IsTrue(Mathf.Approximately((float)c.GetValue(), Mathf.Log(10)));
-        }
-
-        [Test]
-        public void Log_DoesntSimplify_WhenNaNResult()
-        {
-            // ARANGE
-
-            // ACT
-            Equation e = Equation.Ln(-1);
 
             // ASSERT
             Assert.IsFalse(e is Constant);

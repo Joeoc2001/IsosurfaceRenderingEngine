@@ -9,6 +9,32 @@ namespace Tests
 {
     public class VariableSetTests
     {
+        public class CountingVariableSet : IVariableSet
+        {
+            private readonly Dictionary<Variable, int> accesses = new Dictionary<Variable, int>();
+            private int totalCount = 0;
+
+            public int GetCount(Variable v)
+            {
+                return accesses[v];
+            }
+
+            public int GetTotalCount()
+            {
+                return totalCount;
+            }
+
+            public float this[Variable v]
+            {
+                get
+                {
+                    accesses[v] += 1;
+                    totalCount += 1;
+                    return 0;
+                }
+            }
+        }
+
         [Test]
         public void VariableSet_EmptyConstructor_SetsAllTo0()
         {

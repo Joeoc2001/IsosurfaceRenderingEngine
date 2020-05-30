@@ -14,5 +14,6 @@ public enum Token
     Variable,
     OpenBrace,
     CloseBrace,
-    Function
+    Function,
+    Comma
 }

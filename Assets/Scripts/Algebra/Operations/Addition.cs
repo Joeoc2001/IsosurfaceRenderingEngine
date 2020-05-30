@@ -108,7 +108,7 @@ class Addition : CommutativeOperation, IEquatable<Addition>
 
     public override int GetHashCode()
     {
-        return base.GetHashCode();
+        return base.GetHashCode() ^ -1375070008;
     }
 
     public override int IdentityValue()

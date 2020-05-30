@@ -61,7 +61,7 @@ public class Variable : Equation, IEquatable<Variable>
 
     public override int GetHashCode()
     {
-        return Index;
+        return Index * 1513357220;
     }
 
     public override string ToString()

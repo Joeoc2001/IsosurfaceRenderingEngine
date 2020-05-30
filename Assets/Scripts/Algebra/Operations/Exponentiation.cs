@@ -98,7 +98,7 @@ class Exponentiation : Equation, IEquatable<Exponentiation>
 
     public override int GetHashCode()
     {
-        return 31 * Base.GetHashCode() + Exponent.GetHashCode();
+        return (31 * Base.GetHashCode() + Exponent.GetHashCode()) ^ 642859777;
     }
 
     public static bool operator ==(Exponentiation left, Exponentiation right)

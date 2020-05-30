@@ -12,10 +12,10 @@ public abstract class Equation
     public static implicit operator Equation(decimal r) => (Constant)r;
     public static implicit operator Equation(Rational r) => (Constant)r;
 
-    public delegate float ExpressionDelegate(VariableSet set);
-    public delegate Vector2 Vector2ExpressionDelegate(VariableSet set);
-    public delegate Vector3 Vector3ExpressionDelegate(VariableSet set);
-    public delegate Vector4 Vector4ExpressionDelegate(VariableSet set);
+    public delegate float ExpressionDelegate(IVariableSet set);
+    public delegate Vector2 Vector2ExpressionDelegate(IVariableSet set);
+    public delegate Vector3 Vector3ExpressionDelegate(IVariableSet set);
+    public delegate Vector4 Vector4ExpressionDelegate(IVariableSet set);
 
     public abstract ExpressionDelegate GetExpression();
 
@@ -30,7 +30,7 @@ public abstract class Equation
     {
         ExpressionDelegate dxFunc = GetDerivative(Variable.X).GetExpression();
         ExpressionDelegate dyFunc = GetDerivative(Variable.Y).GetExpression();
-        return (VariableSet v) => new Vector2(dxFunc(v), dyFunc(v));
+        return (IVariableSet v) => new Vector2(dxFunc(v), dyFunc(v));
     }
 
     public Vector3ExpressionDelegate GetDerivitiveExpressionWrtXYZ()
@@ -38,7 +38,7 @@ public abstract class Equation
         ExpressionDelegate dxFunc = GetDerivative(Variable.X).GetExpression();
         ExpressionDelegate dyFunc = GetDerivative(Variable.Y).GetExpression();
         ExpressionDelegate dzFunc = GetDerivative(Variable.Z).GetExpression();
-        return (VariableSet v) => new Vector3(dxFunc(v), dyFunc(v), dzFunc(v));
+        return (IVariableSet v) => new Vector3(dxFunc(v), dyFunc(v), dzFunc(v));
     }
 
     public Vector4ExpressionDelegate GetDerivitiveExpressionWrtXYZW()
@@ -47,7 +47,7 @@ public abstract class Equation
         ExpressionDelegate dyFunc = GetDerivative(Variable.Y).GetExpression();
         ExpressionDelegate dzFunc = GetDerivative(Variable.Z).GetExpression();
         ExpressionDelegate dwFunc = GetDerivative(Variable.W).GetExpression();
-        return (VariableSet v) => new Vector4(dxFunc(v), dyFunc(v), dzFunc(v), dwFunc(v));
+        return (IVariableSet v) => new Vector4(dxFunc(v), dyFunc(v), dzFunc(v), dwFunc(v));
     }
 
     public static Equation operator +(Equation left, Equation right)
@@ -86,9 +86,29 @@ public abstract class Equation
         return Exponentiation.Pow(left, right);
     }
 
-    public static Equation Ln(Equation left)
+    public static Equation Ln(Equation eq)
     {
-        return LnOperation.Ln(left);
+        return LnOperation.Ln(eq);
+    }
+
+    public static Equation Sign(Equation eq)
+    {
+        return SignOperation.Sign(eq);
+    }
+
+    public static Equation Abs(Equation eq)
+    {
+        return eq * Sign(eq);
+    }
+
+    public static Equation Min(Equation a, Equation b)
+    {
+        return 0.5 * (a + b - Abs(a - b));
+    }
+
+    public static Equation Max(Equation a, Equation b)
+    {
+        return 0.5 * (a + b + Abs(a - b));
     }
 
     public override abstract int GetHashCode();

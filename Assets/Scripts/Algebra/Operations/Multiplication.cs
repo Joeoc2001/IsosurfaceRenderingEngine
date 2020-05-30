@@ -137,7 +137,7 @@ class Multiplication : CommutativeOperation, IEquatable<Multiplication>
 
     public override int GetHashCode()
     {
-        return base.GetHashCode();
+        return base.GetHashCode() ^ -914308772;
     }
 
     public override int IdentityValue()

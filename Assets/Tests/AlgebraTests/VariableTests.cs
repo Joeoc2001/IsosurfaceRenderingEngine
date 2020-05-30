@@ -119,7 +119,7 @@ namespace Tests
                 Variable v = Variable.VariableDict[key];
 
                 // ACT
-                float value = v.GetExpression()(values);
+                float value = v.GetExpression()(new VariableSet(values));
 
                 // ASSERT
                 Assert.AreEqual(values[i], value);

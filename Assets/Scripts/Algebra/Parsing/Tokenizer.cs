@@ -76,6 +76,11 @@ public class Tokenizer
                 NextChar();
                 Token = Token.CloseBrace;
                 return;
+
+            case ',':
+                NextChar();
+                Token = Token.Comma;
+                return;
         }
 
         if (char.IsDigit(currentChar))

@@ -31,10 +31,32 @@ namespace Tests
             if (Random.value < 0.7) // Return a simple function node
             {
                 float functionValue = Random.value;
-                if (functionValue < 0.3)
+                if (functionValue < 0.1)
                 {
                     // Return a log function
                     return Equation.Ln(GenerateRandomEquation(baseProb, maxDepth - 1));
+                }
+                else if (functionValue < 0.2)
+                {
+                    // Return a sign function
+                    return Equation.Sign(GenerateRandomEquation(baseProb, maxDepth - 1));
+                }
+                else if (functionValue < 0.3)
+                {
+                    // Return a min function
+                    return Equation.Min(GenerateRandomEquation(baseProb, maxDepth - 3),
+                        GenerateRandomEquation(baseProb, maxDepth - 3));
+                }
+                else if (functionValue < 0.4)
+                {
+                    // Return a max function
+                    return Equation.Max(GenerateRandomEquation(baseProb, maxDepth - 3),
+                        GenerateRandomEquation(baseProb, maxDepth - 3));
+                }
+                else if (functionValue < 0.5)
+                {
+                    // Return an Abs function
+                    return Equation.Abs(GenerateRandomEquation(baseProb, maxDepth - 2));
                 }
                 else
                 {

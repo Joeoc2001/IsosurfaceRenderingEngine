@@ -82,7 +82,7 @@ namespace Tests
         {
             // ARANGE
             Equation value = Equation.Pow(5, Variable.X);
-            Equation expected = Rational.Log(5) * Equation.Pow(5, Variable.X);
+            Equation expected = Equation.Ln(5) * Equation.Pow(5, Variable.X);
 
             // ACT
             Equation derivative = value.GetDerivative(Variable.X);

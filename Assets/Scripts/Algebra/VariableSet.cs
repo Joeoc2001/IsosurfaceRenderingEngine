@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public unsafe struct VariableSet : IEquatable<VariableSet>
+public unsafe struct VariableSet : IVariableSet, IEquatable<VariableSet>
 {
     private fixed float values[Variable.VariablesCount];
 
@@ -31,7 +31,7 @@ public unsafe struct VariableSet : IEquatable<VariableSet>
     public VariableSet(float[] vector)
     {
         int i = Math.Min(Variable.VariablesCount, vector.Length);
-        for(int j = 0; j < i; j++)
+        for (int j = 0; j < i; j++)
         {
             values[j] = vector[j];
         }
@@ -46,7 +46,7 @@ public unsafe struct VariableSet : IEquatable<VariableSet>
     {
         for (int i = 0; i < Variable.VariablesCount; i++)
         {
-            if (!Mathf.Approximately(values[i],o.values[i]))
+            if (!Mathf.Approximately(values[i], o.values[i]))
             {
                 return false;
             }

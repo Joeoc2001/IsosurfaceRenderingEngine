@@ -10,15 +10,6 @@ class LnOperation : Equation, IEquatable<LnOperation>
 
     new public static Equation Ln(Equation eq)
     {
-        if (eq is Constant constant)
-        {
-            double log = Rational.Log(constant.GetValue());
-            if (!double.IsNaN(log) && !double.IsInfinity(log))
-            {
-                return log;
-            }
-        }
-
         return new LnOperation(eq);
     }
 
@@ -29,6 +20,11 @@ class LnOperation : Equation, IEquatable<LnOperation>
 
     public override ExpressionDelegate GetExpression()
     {
+        if (eq is Constant constant)
+        {
+            return v => (float)Rational.Log(constant.GetValue());
+        }
+
         ExpressionDelegate expression = eq.GetExpression();
 
         return v => Mathf.Log(expression(v));
@@ -57,7 +53,7 @@ class LnOperation : Equation, IEquatable<LnOperation>
 
     public override int GetHashCode()
     {
-        return eq.GetHashCode();
+        return eq.GetHashCode() ^ -1043105826;
     }
 
     public static bool operator ==(LnOperation left, LnOperation right)
