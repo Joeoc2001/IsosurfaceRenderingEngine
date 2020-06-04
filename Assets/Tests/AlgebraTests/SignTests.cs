@@ -16,7 +16,7 @@ namespace Tests
             Constant c = Constant.ONE;
 
             // ACT
-            Equation e = Equation.Sign(10);
+            Equation e = Equation.SignOf(10);
 
             // ASSERT
             Assert.IsTrue(e is Constant);
@@ -30,7 +30,7 @@ namespace Tests
             Constant c = Constant.ZERO;
 
             // ACT
-            Equation e = Equation.Sign(0);
+            Equation e = Equation.SignOf(0);
 
             // ASSERT
             Assert.IsTrue(e is Constant);
@@ -43,7 +43,7 @@ namespace Tests
             // ARANGE
 
             // ACT
-            float e = Equation.Sign(Variable.X).GetExpression()(new VariableSet(0));
+            float e = Equation.SignOf(Variable.X).GetExpression()(new VariableSet(0));
 
             // ASSERT
             Assert.AreEqual(0, e);
@@ -55,7 +55,7 @@ namespace Tests
             // ARANGE
 
             // ACT
-            float e = Equation.Sign(Variable.X).GetExpression()(new VariableSet(145));
+            float e = Equation.SignOf(Variable.X).GetExpression()(new VariableSet(145));
 
             // ASSERT
             Assert.AreEqual(1, e);
@@ -67,7 +67,7 @@ namespace Tests
             // ARANGE
 
             // ACT
-            float e = Equation.Sign(Variable.X).GetExpression()(new VariableSet(-14335));
+            float e = Equation.SignOf(Variable.X).GetExpression()(new VariableSet(-14335));
 
             // ASSERT
             Assert.AreEqual(-1, e);

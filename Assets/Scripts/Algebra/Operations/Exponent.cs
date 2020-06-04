@@ -4,24 +4,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class Exponentiation : Equation, IEquatable<Exponentiation>
+class Exponent : Equation, IEquatable<Exponent>
 {
     public readonly Equation Base;
-    public readonly Equation Exponent;
+    public readonly Equation Power;
 
-    new public static Equation Pow(Equation term, Equation exponent)
+    new public static Equation Pow(Equation term, Equation power)
     {
-        if (exponent.Equals(Constant.ZERO))
+        if (power.Equals(Constant.ZERO))
         {
             return 1;
         }
 
-        if (exponent.Equals(Constant.ONE))
+        if (power.Equals(Constant.ONE))
         {
             return term;
         }
 
-        if (term is Constant termConstant && exponent is Constant exponentConstant)
+        if (term is Constant termConstant && power is Constant exponentConstant)
         {
             Rational numerator = exponentConstant.GetValue().Numerator;
             Rational denominator = exponentConstant.GetValue().Denominator;
@@ -36,25 +36,25 @@ class Exponentiation : Equation, IEquatable<Exponentiation>
             }
         }
 
-        return new Exponentiation(term, exponent);
+        return new Exponent(term, power);
     }
 
-    public Exponentiation(Equation term, Equation exponent)
+    public Exponent(Equation term, Equation power)
     {
         this.Base = term;
-        this.Exponent = exponent;
+        this.Power = power;
     }
 
     public override ExpressionDelegate GetExpression()
     {
         ExpressionDelegate termExp = Base.GetExpression();
 
-        if (Exponent.Equals(-1))
+        if (Power.Equals(-1))
         {
             return v => 1 / termExp(v);
         }
 
-        ExpressionDelegate exponentExp = Exponent.GetExpression();
+        ExpressionDelegate exponentExp = Power.GetExpression();
 
         return v => Mathf.Pow(termExp(v), exponentExp(v));
     }
@@ -62,46 +62,46 @@ class Exponentiation : Equation, IEquatable<Exponentiation>
     public override Equation GetDerivative(Variable wrt)
     {
         // Check for common cases
-        if (Exponent is Constant)
+        if (Power is Constant powerConst)
         {
             Equation baseDerivative = Base.GetDerivative(wrt);
-            return Exponent * baseDerivative * Pow(Base, ((Constant)Exponent).GetValue() - 1);
+            return Power * baseDerivative * Pow(Base, powerConst.GetValue() - 1);
         }
 
         if (Base is Constant)
         {
-            Equation exponentDerivative = Exponent.GetDerivative(wrt);
-            return Ln(Base) * exponentDerivative * this;
+            Equation exponentDerivative = Power.GetDerivative(wrt);
+            return LnOf(Base) * exponentDerivative * this;
         }
 
         // Big derivative (u^v)'=(u^v)(vu'/u + v'ln(u))
         // Alternatively  (u^v)'=(u^(v-1))(vu' + uv'ln(u)) but I find the first form simplifies faster
         Equation baseDeriv = Base.GetDerivative(wrt);
-        Equation expDeriv = Exponent.GetDerivative(wrt);
-        return this * ((Exponent * baseDeriv / Base) + (expDeriv * Ln(Base)));
+        Equation expDeriv = Power.GetDerivative(wrt);
+        return this * ((Power * baseDeriv / Base) + (expDeriv * LnOf(Base)));
     }
 
-    public bool Equals(Exponentiation other)
+    public bool Equals(Exponent other)
     {
         if (other is null)
         {
             return false;
         }
 
-        return Base.Equals(other.Base) && Exponent.Equals(other.Exponent);
+        return Base.Equals(other.Base) && Power.Equals(other.Power);
     }
 
     public override bool Equals(object obj)
     {
-        return this.Equals(obj as Exponentiation);
+        return this.Equals(obj as Exponent);
     }
 
     public override int GetHashCode()
     {
-        return (31 * Base.GetHashCode() + Exponent.GetHashCode()) ^ 642859777;
+        return (31 * Base.GetHashCode() + Power.GetHashCode()) ^ 642859777;
     }
 
-    public static bool operator ==(Exponentiation left, Exponentiation right)
+    public static bool operator ==(Exponent left, Exponent right)
     {
         if (ReferenceEquals(left, right))
         {
@@ -116,23 +116,23 @@ class Exponentiation : Equation, IEquatable<Exponentiation>
         return left.Equals(right);
     }
 
-    public static bool operator !=(Exponentiation left, Exponentiation right)
+    public static bool operator !=(Exponent left, Exponent right)
     {
         return !(left == right);
     }
 
     public override string ToString()
     {
-        return $"[EXPONENTIATION]({Base}, {Exponent})";
+        return $"[EXPONENTIATION]({Base}, {Power})";
     }
 
     public override string ToParsableString()
     {
-        return $"({Base.ToParsableString()} ^ {Exponent.ToParsableString()})";
+        return $"({Base.ToParsableString()} ^ {Power.ToParsableString()})";
     }
 
     public override string ToRunnableString()
     {
-        return $"Equation.Pow({Base.ToRunnableString()}, {Exponent.ToRunnableString()})";
+        return $"Equation.Pow({Base.ToRunnableString()}, {Power.ToRunnableString()})";
     }
 }

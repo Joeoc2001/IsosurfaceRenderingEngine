@@ -82,7 +82,7 @@ namespace Tests
         {
             // ARANGE
             Equation value = Equation.Pow(5, Variable.X);
-            Equation expected = Equation.Ln(5) * Equation.Pow(5, Variable.X);
+            Equation expected = Equation.LnOf(5) * Equation.Pow(5, Variable.X);
 
             // ACT
             Equation derivative = value.GetDerivative(Variable.X);
@@ -96,7 +96,7 @@ namespace Tests
         {
             // ARANGE
             Equation value = Equation.Pow(Variable.X, Variable.X);
-            Equation expected = (1 + Equation.Ln(Variable.X)) * Equation.Pow(Variable.X, Variable.X);
+            Equation expected = (1 + Equation.LnOf(Variable.X)) * Equation.Pow(Variable.X, Variable.X);
 
             // ACT
             Equation derivative = value.GetDerivative(Variable.X);

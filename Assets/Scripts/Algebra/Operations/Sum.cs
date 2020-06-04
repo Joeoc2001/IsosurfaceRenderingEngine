@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-class Addition : CommutativeOperation, IEquatable<Addition>
+class Sum : CommutativeOperation, IEquatable<Sum>
 {
     public static Equation Add<T>(List<T> eqs) where T : Equation
     {
@@ -12,7 +12,7 @@ class Addition : CommutativeOperation, IEquatable<Addition>
         List<Equation> collatedEqs = new List<Equation>();
         foreach (Equation eq in eqs)
         {
-            if (eq is Addition addeq)
+            if (eq is Sum addeq)
             {
                 collatedEqs.AddRange(addeq.eqs);
             }
@@ -40,7 +40,7 @@ class Addition : CommutativeOperation, IEquatable<Addition>
         {
             Equation baseEq;
             Equation coefficientEq;
-            if (eq is Multiplication multeq)
+            if (eq is Product multeq)
             {
                 baseEq = multeq.GetVariable();
                 coefficientEq = multeq.GetConstantCoefficient();
@@ -71,10 +71,10 @@ class Addition : CommutativeOperation, IEquatable<Addition>
             return newEqs[0];
         }
 
-        return new Addition(newEqs);
+        return new Sum(newEqs);
     }
 
-    private Addition(IEnumerable<Equation> eqs)
+    private Sum(IEnumerable<Equation> eqs)
         : base(eqs)
     {
 
@@ -90,7 +90,7 @@ class Addition : CommutativeOperation, IEquatable<Addition>
         return Add(derivatives);
     }
 
-    public bool Equals(Addition obj)
+    public bool Equals(Sum obj)
     {
         if (obj is null)
         {
@@ -103,7 +103,7 @@ class Addition : CommutativeOperation, IEquatable<Addition>
 
     public override bool Equals(object obj)
     {
-        return this.Equals(obj as Addition);
+        return this.Equals(obj as Sum);
     }
 
     public override int GetHashCode()
@@ -136,7 +136,7 @@ class Addition : CommutativeOperation, IEquatable<Addition>
         return "ADDITION";
     }
 
-    public static bool operator==(Addition left, Addition right)
+    public static bool operator==(Sum left, Sum right)
     {
         if (ReferenceEquals(left, right))
         {
@@ -151,7 +151,7 @@ class Addition : CommutativeOperation, IEquatable<Addition>
         return left.Equals(right);
     }
 
-    public static bool operator !=(Addition left, Addition right)
+    public static bool operator !=(Sum left, Sum right)
     {
         return !(left == right);
     }

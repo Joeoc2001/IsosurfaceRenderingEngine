@@ -34,12 +34,12 @@ namespace Tests
                 if (functionValue < 0.1)
                 {
                     // Return a log function
-                    return Equation.Ln(GenerateRandomEquation(baseProb, maxDepth - 1));
+                    return Equation.LnOf(GenerateRandomEquation(baseProb, maxDepth - 1));
                 }
                 else if (functionValue < 0.2)
                 {
                     // Return a sign function
-                    return Equation.Sign(GenerateRandomEquation(baseProb, maxDepth - 1));
+                    return Equation.SignOf(GenerateRandomEquation(baseProb, maxDepth - 1));
                 }
                 else if (functionValue < 0.3)
                 {

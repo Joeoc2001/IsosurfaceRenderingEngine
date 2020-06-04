@@ -62,7 +62,7 @@ public abstract class Equation
 
     public static Equation Add(List<Equation> eqs)
     {
-        return Addition.Add(eqs);
+        return Sum.Add(eqs);
     }
 
     public static Equation operator *(Equation left, Equation right)
@@ -78,27 +78,27 @@ public abstract class Equation
 
     public static Equation Multiply(List<Equation> eqs)
     {
-        return Multiplication.Multiply(eqs);
+        return Product.Multiply(eqs);
     }
 
     public static Equation Pow(Equation left, Equation right)
     {
-        return Exponentiation.Pow(left, right);
+        return Exponent.Pow(left, right);
     }
 
-    public static Equation Ln(Equation eq)
+    public static Equation LnOf(Equation eq)
     {
-        return LnOperation.Ln(eq);
+        return Ln.LnOf(eq);
     }
 
-    public static Equation Sign(Equation eq)
+    public static Equation SignOf(Equation eq)
     {
-        return SignOperation.Sign(eq);
+        return Sign.SignOf(eq);
     }
 
     public static Equation Abs(Equation eq)
     {
-        return eq * Sign(eq);
+        return eq * SignOf(eq);
     }
 
     public static Equation Min(Equation a, Equation b)

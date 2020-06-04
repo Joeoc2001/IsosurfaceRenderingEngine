@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-class SignOperation : Equation, IEquatable<SignOperation>
+class Sign : Equation, IEquatable<Sign>
 {
     private readonly Equation eq;
 
-    new public static Equation Sign(Equation eq)
+    new public static Equation SignOf(Equation eq)
     {
-        if (eq is SignOperation)
+        if (eq is Sign)
         {
             return eq;
         }
@@ -31,10 +31,10 @@ class SignOperation : Equation, IEquatable<SignOperation>
             }
         }
 
-        return new SignOperation(eq);
+        return new Sign(eq);
     }
 
-    private SignOperation(Equation eq)
+    private Sign(Equation eq)
     {
         this.eq = eq;
     }
@@ -50,7 +50,7 @@ class SignOperation : Equation, IEquatable<SignOperation>
         return v => Math.Sign(eqExpression(v));
     }
 
-    public bool Equals(SignOperation obj)
+    public bool Equals(Sign obj)
     {
         if (obj is null)
         {
@@ -62,7 +62,7 @@ class SignOperation : Equation, IEquatable<SignOperation>
 
     public override bool Equals(object obj)
     {
-        return this.Equals(obj as SignOperation);
+        return this.Equals(obj as Sign);
     }
 
     public override int GetHashCode()
@@ -85,7 +85,7 @@ class SignOperation : Equation, IEquatable<SignOperation>
         return $"Equation.Sign({eq.ToRunnableString()})";
     }
 
-    public static bool operator==(SignOperation left, SignOperation right)
+    public static bool operator==(Sign left, Sign right)
     {
         if (ReferenceEquals(left, right))
         {
@@ -100,7 +100,7 @@ class SignOperation : Equation, IEquatable<SignOperation>
         return left.Equals(right);
     }
 
-    public static bool operator !=(SignOperation left, SignOperation right)
+    public static bool operator !=(Sign left, Sign right)
     {
         return !(left == right);
     }

@@ -15,7 +15,7 @@ namespace Tests
             // ARANGE
 
             // ACT
-            Equation e = Equation.Ln(10);
+            Equation e = Equation.LnOf(10);
 
             // ASSERT
             Assert.IsFalse(e is Constant);

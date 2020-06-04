@@ -4,16 +4,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class LnOperation : Equation, IEquatable<LnOperation>
+class Ln : Equation, IEquatable<Ln>
 {
     private readonly Equation eq;
 
-    new public static Equation Ln(Equation eq)
+    new public static Equation LnOf(Equation eq)
     {
-        return new LnOperation(eq);
+        return new Ln(eq);
     }
 
-    public LnOperation(Equation eq)
+    public Ln(Equation eq)
     {
         this.eq = eq;
     }
@@ -36,7 +36,7 @@ class LnOperation : Equation, IEquatable<LnOperation>
         return derivative / eq;
     }
 
-    public bool Equals(LnOperation other)
+    public bool Equals(Ln other)
     {
         if (other is null)
         {
@@ -48,7 +48,7 @@ class LnOperation : Equation, IEquatable<LnOperation>
 
     public override bool Equals(object obj)
     {
-        return this.Equals(obj as LnOperation);
+        return this.Equals(obj as Ln);
     }
 
     public override int GetHashCode()
@@ -56,7 +56,7 @@ class LnOperation : Equation, IEquatable<LnOperation>
         return eq.GetHashCode() ^ -1043105826;
     }
 
-    public static bool operator ==(LnOperation left, LnOperation right)
+    public static bool operator ==(Ln left, Ln right)
     {
         if (ReferenceEquals(left, right))
         {
@@ -71,7 +71,7 @@ class LnOperation : Equation, IEquatable<LnOperation>
         return left.Equals(right);
     }
 
-    public static bool operator !=(LnOperation left, LnOperation right)
+    public static bool operator !=(Ln left, Ln right)
     {
         return !(left == right);
     }

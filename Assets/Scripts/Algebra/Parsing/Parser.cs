@@ -55,7 +55,7 @@ public class Parser
             }
             else
             {
-                return Addition.Add(terms);
+                return Sum.Add(terms);
             }
 
             // Skip the operator
@@ -100,7 +100,7 @@ public class Parser
             }
             else
             {
-                return Multiplication.Multiply(terms);
+                return Product.Multiply(terms);
             }
 
             // Skip the operator
@@ -227,11 +227,11 @@ public class Parser
             case "log":
             case "ln":
                 requiredParameters = 1;
-                constructor = ns => Equation.Ln(ns[0]);
+                constructor = ns => Equation.LnOf(ns[0]);
                 break;
             case "sign":
                 requiredParameters = 1;
-                constructor = ns => Equation.Sign(ns[0]);
+                constructor = ns => Equation.SignOf(ns[0]);
                 break;
             case "abs":
                 requiredParameters = 1;

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using UnityEngine;
 
-class Multiplication : CommutativeOperation, IEquatable<Multiplication>
+class Product : CommutativeOperation, IEquatable<Product>
 {
     public static Equation Multiply<T>(List<T> eqs) where T : Equation
     {
@@ -14,7 +14,7 @@ class Multiplication : CommutativeOperation, IEquatable<Multiplication>
         List<Equation> collatedEqs = new List<Equation>();
         foreach (Equation eq in eqs)
         {
-            if (eq is Multiplication multeq)
+            if (eq is Product multeq)
             {
                 collatedEqs.AddRange(multeq.eqs);
                 continue;
@@ -48,10 +48,10 @@ class Multiplication : CommutativeOperation, IEquatable<Multiplication>
         {
             Equation baseEq;
             Equation exponentEq;
-            if (eq is Exponentiation expeq)
+            if (eq is Exponent expeq)
             {
                 baseEq = expeq.Base;
-                exponentEq = expeq.Exponent;
+                exponentEq = expeq.Power;
             }
             else
             {
@@ -79,10 +79,10 @@ class Multiplication : CommutativeOperation, IEquatable<Multiplication>
             return newEqs[0];
         }
 
-        return new Multiplication(newEqs);
+        return new Product(newEqs);
     }
 
-    private Multiplication(IEnumerable<Equation> eqs)
+    private Product(IEnumerable<Equation> eqs)
         : base(eqs)
     {
 
@@ -116,10 +116,10 @@ class Multiplication : CommutativeOperation, IEquatable<Multiplication>
             }
             terms.Add(Multiply(term));
         }
-        return Addition.Add(terms);
+        return Sum.Add(terms);
     }
 
-    public bool Equals(Multiplication obj)
+    public bool Equals(Product obj)
     {
         if (obj is null)
         {
@@ -132,7 +132,7 @@ class Multiplication : CommutativeOperation, IEquatable<Multiplication>
 
     public override bool Equals(object obj)
     {
-        return this.Equals(obj as Multiplication);
+        return this.Equals(obj as Product);
     }
 
     public override int GetHashCode()
@@ -186,7 +186,7 @@ class Multiplication : CommutativeOperation, IEquatable<Multiplication>
                 {
                     return others[0];
                 }
-                return new Multiplication(others);
+                return new Product(others);
             }
         }
         return this;
@@ -197,7 +197,7 @@ class Multiplication : CommutativeOperation, IEquatable<Multiplication>
         return "MULTIPLICATION";
     }
 
-    public static bool operator ==(Multiplication left, Multiplication right)
+    public static bool operator ==(Product left, Product right)
     {
         if (ReferenceEquals(left, right))
         {
@@ -212,7 +212,7 @@ class Multiplication : CommutativeOperation, IEquatable<Multiplication>
         return left.Equals(right);
     }
 
-    public static bool operator !=(Multiplication left, Multiplication right)
+    public static bool operator !=(Product left, Product right)
     {
         return !(left == right);
     }
