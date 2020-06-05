@@ -5,27 +5,13 @@ using UnityEngine.Events;
 
 public abstract class EquationProvider : MonoBehaviour
 {
-    private Equation equation = 0;
+    protected readonly OnEquationChange onEquationChange = new OnEquationChange();
 
-    private OnEquationChange onEquationChange = new OnEquationChange();
-
-    class OnEquationChange : UnityEvent<Equation>
+    public class OnEquationChange : UnityEvent<Equation>
     {
-        public OnEquationChange()
-        {
-        }
     }
 
-    protected void SetEquation(Equation e)
-    {
-        equation = e;
-        onEquationChange.Invoke(e);
-    }
-
-    public Equation GetEquation()
-    {
-        return equation;
-    }
+    public abstract Equation GetEquation();
 
     public void AddListener(UnityAction<Equation> call)
     {

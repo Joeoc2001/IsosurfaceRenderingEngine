@@ -9,7 +9,8 @@ using UnityEngine.UI;
 [RequireComponent(typeof(TMP_InputField))]
 public class EquationInputBox : EquationProvider
 {
-    TMP_InputField field;
+    private Equation equation;
+    private TMP_InputField field;
 
     private void Awake()
     {
@@ -19,12 +20,18 @@ public class EquationInputBox : EquationProvider
 
     private void UpdateEquation(string s)
     {
-        SetEquation(Parser.Parse(s));
+        equation = Parser.Parse(s);
+        onEquationChange.Invoke(equation);
     }
 
     // Start is called before the first frame update
     void Start()
     {
         UpdateEquation(field.text);
+    }
+
+    public override Equation GetEquation()
+    {
+        return equation;
     }
 }

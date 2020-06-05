@@ -13,11 +13,11 @@ public class ParsedEquationDisplay : MonoBehaviour
 
     void Awake()
     {
+        text = GetComponent<TMP_Text>();
         provider.AddListener(x => text.text = ("f(x,y,z) = " + x.ToParsableString()));
     }
 
     private void Start()
     {
-        text = GetComponent<TMP_Text>();
     }
 }
