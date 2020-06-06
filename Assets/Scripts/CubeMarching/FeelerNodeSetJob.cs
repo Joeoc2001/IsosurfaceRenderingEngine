@@ -20,7 +20,7 @@ public struct FeelerNodeSetJob : IJob
 
     public void Execute()
     {
-        Equation.ExpressionDelegate expression = Function.Invoke;
+        //Equation.ExpressionDelegate expression = Function.Invoke;
         for (int x = 0; x < Resolution; x++)
         {
             for (int y = 0; y < Resolution; y++)
@@ -32,7 +32,7 @@ public struct FeelerNodeSetJob : IJob
 
                     // Get value
                     VariableSet variableSet = new VariableSet(position);
-                    float value = expression(variableSet);
+                    float value = Function.Invoke(variableSet);
 
                     // Guard for invalid values
                     if (float.IsNaN(value))

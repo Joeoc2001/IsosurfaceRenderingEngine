@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public unsafe struct VariableSet : IVariableSet, IEquatable<VariableSet>
+public unsafe struct VariableSet : IEquatable<VariableSet>
 {
     private fixed float values[Variable.VariablesCount];
 

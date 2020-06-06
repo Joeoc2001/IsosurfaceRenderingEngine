@@ -29,9 +29,11 @@ abstract class CommutativeOperation : Equation
             expressions.Add(e.GetExpression());
         }
 
+        float identityValue = IdentityValue();
+
         return v =>
         {
-            float value = IdentityValue();
+            float value = identityValue;
             foreach (ExpressionDelegate f in expressions)
             {
                 value = Perform(value, f(v));

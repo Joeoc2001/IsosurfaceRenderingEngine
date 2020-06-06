@@ -160,5 +160,57 @@ namespace Tests
             // ASSERT
             Assert.AreEqual(expected, equation);
         }
+
+        [Test]
+        public void Multiplication_Simplify_DOTS()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = (Variable.X + 1) * (Variable.X - 1);
+            Equation expected = Equation.Pow(Variable.X, 2) - 1;
+
+            // ASSERT
+            Assert.AreEqual(expected, equation);
+        }
+
+        [Test]
+        public void Multiplication_Simplify_ExpandsBracesToConstant()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = (Variable.X + 1) * (Variable.X + 2) - (Equation.Pow(Variable.X, 2) + Variable.X * 3);
+            Equation expected = 2;
+
+            // ASSERT
+            Assert.AreEqual(expected, equation);
+        }
+
+        [Test]
+        public void Multiplication_Simplify_Distributes()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = 3 * (Variable.X + 1) - 3;
+            Equation expected = 3 * Variable.X;
+
+            // ASSERT
+            Assert.AreEqual(expected, equation);
+        }
+
+        [Test]
+        public void Multiplication_Simplify_Factorises()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = (Equation.Pow(Variable.X, 2) + (3 * Variable.X) + 2) / (Variable.X + 1);
+            Equation expected = Variable.X + 2;
+
+            // ASSERT
+            Assert.AreEqual(expected, equation);
+        }
     }
 }

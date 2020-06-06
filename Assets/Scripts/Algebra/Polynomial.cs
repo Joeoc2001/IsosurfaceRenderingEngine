@@ -10,7 +10,7 @@ public class Polynomial
         throw new NotImplementedException();
     }
 
-    public float Evaluate(IVariableSet vector)
+    public float Evaluate(VariableSet vector)
     {
         throw new NotImplementedException();
     }

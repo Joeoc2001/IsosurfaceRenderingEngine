@@ -68,8 +68,8 @@ public class Chunk : MonoBehaviour
             Vector3[] chunkNormals = new Vector3[vertices.Length];
             for (int iChunkVertex = 0; iChunkVertex < vertices.Length; iChunkVertex++)
             {
-                IVariableSet IVariableSet = new VariableSet(transform.position + vertices[iChunkVertex]);
-                Vector3 n = norm(IVariableSet).normalized;
+                VariableSet VariableSet = new VariableSet(transform.position + vertices[iChunkVertex]);
+                Vector3 n = norm(VariableSet).normalized;
 
                 chunkNormals[iChunkVertex] = n;
             }
