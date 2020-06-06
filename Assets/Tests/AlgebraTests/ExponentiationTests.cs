@@ -156,5 +156,17 @@ namespace Tests
             // ASSERT
             Assert.AreEqual(expected, equation);
         }
+
+        [Test]
+        public void Exponentiation_GetOrderIndex_Is0()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = Equation.Pow(Variable.Y, 3);
+
+            // ASSERT
+            Assert.AreEqual(10, equation.GetOrderIndex());
+        }
     }
 }

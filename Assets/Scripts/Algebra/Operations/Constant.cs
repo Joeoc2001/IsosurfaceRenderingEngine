@@ -97,4 +97,14 @@ public class Constant : Equation, IEquatable<Constant>
     {
         return $"Constant.From((Rational)({value.Numerator})/({value.Denominator}))";
     }
+
+    public override int GetOrderIndex()
+    {
+        return 0;
+    }
+
+    public override int CompareTo(Equation other)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -216,4 +216,14 @@ class Product : CommutativeOperation, IEquatable<Product>
     {
         return !(left == right);
     }
+
+    public override int GetOrderIndex()
+    {
+        return 20;
+    }
+
+    public override int CompareTo(Equation other)
+    {
+        throw new NotImplementedException();
+    }
 }

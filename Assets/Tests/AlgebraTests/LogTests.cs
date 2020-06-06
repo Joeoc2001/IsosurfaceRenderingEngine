@@ -20,5 +20,17 @@ namespace Tests
             // ASSERT
             Assert.IsFalse(e is Constant);
         }
+
+        [Test]
+        public void Log_GetOrderIndex_Is0()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = Equation.LnOf(Variable.X);
+
+            // ASSERT
+            Assert.AreEqual(0, equation.GetOrderIndex());
+        }
     }
 }

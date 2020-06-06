@@ -147,5 +147,30 @@ namespace Tests
             // ASSERT
             Assert.AreEqual(expected, equation);
         }
+
+        [Test]
+        public void Addition_Simplify_Factorises()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = (Equation.Pow(Variable.X, 2) + (3 * Variable.X) + 2) / (Variable.X + 1);
+            Equation expected = Variable.X + 2;
+
+            // ASSERT
+            Assert.AreEqual(expected, equation);
+        }
+
+        [Test]
+        public void Addition_GetOrderIndex_Is30()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = Variable.X + 1;
+
+            // ASSERT
+            Assert.AreEqual(30, equation.GetOrderIndex());
+        }
     }
 }

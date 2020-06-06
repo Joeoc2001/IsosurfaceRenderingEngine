@@ -201,16 +201,15 @@ namespace Tests
         }
 
         [Test]
-        public void Multiplication_Simplify_Factorises()
+        public void Multiplication_GetOrderIndex_Is0()
         {
             // ARANGE
 
             // ACT
-            Equation equation = (Equation.Pow(Variable.X, 2) + (3 * Variable.X) + 2) / (Variable.X + 1);
-            Equation expected = Variable.X + 2;
+            Equation equation = 3 * Variable.X;
 
             // ASSERT
-            Assert.AreEqual(expected, equation);
+            Assert.AreEqual(20, equation.GetOrderIndex());
         }
     }
 }

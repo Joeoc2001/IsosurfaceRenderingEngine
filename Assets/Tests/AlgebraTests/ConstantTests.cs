@@ -86,5 +86,17 @@ namespace Tests
             // ASSERT
             Assert.AreEqual((Rational)54321, equation.GetValue());
         }
+
+        [Test]
+        public void Constant_GetOrderIndex_Is0()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = 1;
+
+            // ASSERT
+            Assert.AreEqual(0, equation.GetOrderIndex());
+        }
     }
 }

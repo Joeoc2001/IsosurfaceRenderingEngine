@@ -72,5 +72,17 @@ namespace Tests
             // ASSERT
             Assert.AreEqual(-1, e);
         }
+
+        [Test]
+        public void Sign_GetOrderIndex_Is0()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = Equation.SignOf(Variable.X);
+
+            // ASSERT
+            Assert.AreEqual(0, equation.GetOrderIndex());
+        }
     }
 }

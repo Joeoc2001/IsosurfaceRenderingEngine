@@ -657,10 +657,10 @@ namespace Tests
         [Test]
         public void Parser_FuzzerEquationsEqual()
         {
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 // ARANGE
-                Equation expected = EquationTests.GenerateRandomEquation(0.5f, 10);
+                Equation expected = EquationTests.GenerateRandomEquation(0.5f, 3);
                 string equation = expected.ToParsableString();
 
                 // ACT

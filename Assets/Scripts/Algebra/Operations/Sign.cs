@@ -77,12 +77,17 @@ class Sign : Equation, IEquatable<Sign>
 
     public override string ToParsableString()
     {
-        return $"sign {eq.ToParsableString()}";
+        StringBuilder builder = new StringBuilder();
+
+        builder.Append("sign ");
+        builder.Append(ParenthesisedParsableString(eq));
+
+        return builder.ToString();
     }
 
     public override string ToRunnableString()
     {
-        return $"Equation.Sign({eq.ToRunnableString()})";
+        return $"Equation.SignOf({eq.ToRunnableString()})";
     }
 
     public static bool operator==(Sign left, Sign right)
@@ -103,5 +108,15 @@ class Sign : Equation, IEquatable<Sign>
     public static bool operator !=(Sign left, Sign right)
     {
         return !(left == right);
+    }
+
+    public override int GetOrderIndex()
+    {
+        return 0;
+    }
+
+    public override int CompareTo(Equation other)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Equation
+public abstract class Equation : IComparable<Equation>
 {
     public static implicit operator Equation(int r) => (Constant)r;
     public static implicit operator Equation(long r) => (Constant)r;
@@ -117,6 +117,30 @@ public abstract class Equation
 
     public abstract string ToParsableString();
     public abstract string ToRunnableString();
+
+    /* Should be:
+     * 0 -> Node (eg. x, 12, function)
+     * 10 -> Indeces
+     * 20 -> Multiplication
+     * 30 -> Addition
+     * Used to determine order of operations
+     * Less => Higher priority
+     */
+    public abstract int GetOrderIndex();
+    public bool ShouldParenthesise(Equation other)
+    {
+        return this.GetOrderIndex() <= other.GetOrderIndex();
+    }
+    protected string ParenthesisedParsableString(Equation other)
+    {
+        if (ShouldParenthesise(other))
+        {
+            return $"({other.ToParsableString()})";
+        }
+
+        return other.ToParsableString();
+    }
+    public abstract int CompareTo(Equation other);
 
     public static bool operator ==(Equation left, Equation right)
     {

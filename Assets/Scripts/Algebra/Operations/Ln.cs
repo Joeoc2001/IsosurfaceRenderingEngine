@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text;
 
 class Ln : Equation, IEquatable<Ln>
 {
@@ -83,11 +84,26 @@ class Ln : Equation, IEquatable<Ln>
 
     public override string ToParsableString()
     {
-        return $"ln {eq.ToParsableString()}";
+        StringBuilder builder = new StringBuilder();
+
+        builder.Append("ln ");
+        builder.Append(ParenthesisedParsableString(eq));
+
+        return builder.ToString();
     }
 
     public override string ToRunnableString()
     {
         return $"Equation.Ln({eq.ToRunnableString()})";
+    }
+
+    public override int GetOrderIndex()
+    {
+        return 0;
+    }
+
+    public override int CompareTo(Equation other)
+    {
+        throw new NotImplementedException();
     }
 }

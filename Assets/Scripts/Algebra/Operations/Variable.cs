@@ -98,4 +98,14 @@ public class Variable : Equation, IEquatable<Variable>
     {
         return !(left == right);
     }
+
+    public override int GetOrderIndex()
+    {
+        return 0;
+    }
+
+    public override int CompareTo(Equation other)
+    {
+        throw new NotImplementedException();
+    }
 }

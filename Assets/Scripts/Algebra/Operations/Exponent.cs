@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text;
 
 class Exponent : Equation, IEquatable<Exponent>
 {
@@ -128,11 +129,27 @@ class Exponent : Equation, IEquatable<Exponent>
 
     public override string ToParsableString()
     {
-        return $"({Base.ToParsableString()} ^ {Power.ToParsableString()})";
+        StringBuilder builder = new StringBuilder();
+
+        builder.Append(ParenthesisedParsableString(Base));
+        builder.Append("^");
+        builder.Append(ParenthesisedParsableString(Power));
+
+        return builder.ToString();
     }
 
     public override string ToRunnableString()
     {
         return $"Equation.Pow({Base.ToRunnableString()}, {Power.ToRunnableString()})";
+    }
+
+    public override int GetOrderIndex()
+    {
+        return 10;
+    }
+
+    public override int CompareTo(Equation other)
+    {
+        throw new NotImplementedException();
     }
 }

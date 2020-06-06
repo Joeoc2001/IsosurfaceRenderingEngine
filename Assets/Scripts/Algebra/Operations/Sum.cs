@@ -155,4 +155,14 @@ class Sum : CommutativeOperation, IEquatable<Sum>
     {
         return !(left == right);
     }
+
+    public override int GetOrderIndex()
+    {
+        return 30;
+    }
+
+    public override int CompareTo(Equation other)
+    {
+        throw new NotImplementedException();
+    }
 }

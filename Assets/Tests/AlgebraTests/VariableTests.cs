@@ -125,5 +125,17 @@ namespace Tests
                 Assert.AreEqual(values[i], value);
             }
         }
+
+        [Test]
+        public void Variable_GetOrderIndex_Is0()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = Variable.X;
+
+            // ASSERT
+            Assert.AreEqual(0, equation.GetOrderIndex());
+        }
     }
 }

@@ -130,18 +130,14 @@ abstract class CommutativeOperation : Equation
 
         StringBuilder builder = new StringBuilder();
 
-        builder.Append("(");
-
-        builder.Append(eqs[0].ToParsableString());
+        builder.Append(ParenthesisedParsableString(eqs[0]));
         for (int i = 1; i < eqs.Count; i++)
         {
             builder.Append(" ");
             builder.Append(OperationSymbol());
             builder.Append(" ");
-            builder.Append(eqs[i].ToParsableString());
+            builder.Append(ParenthesisedParsableString(eqs[i]));
         }
-
-        builder.Append(")");
 
         return builder.ToString();
     }
