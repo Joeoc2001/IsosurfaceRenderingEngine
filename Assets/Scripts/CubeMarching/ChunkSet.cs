@@ -96,30 +96,30 @@ public class ChunkSet : MonoBehaviour
     {
         List<Vector3Int> newChunks = new List<Vector3Int>();
 
-        // Check if new chunks are entirely contained in old chunks
-        if ((newCenter - oldCenter).magnitude + newR <= oldR)
+        if (oldCenter == newCenter && oldR >= newR)
         {
             return newChunks;
         }
 
-        for (int x = -newR; x <= newR; x++)
+        for (int x = newCenter.x - newR; x <= newCenter.x + newR; x++)
         {
-            float xPartR = Mathf.Sqrt(newR * newR - x * x);
-
-            for (int y = -(int)xPartR; y <= (int)xPartR; y++)
+            for (int y = newCenter.y - newR; y <= newCenter.y + newR; y++)
             {
-                int yPartR = (int)Mathf.Sqrt(xPartR * xPartR - y * y);
-                
-                for(int z = -yPartR; z <= yPartR; z++)
+                // The abstraction for this bit is to imagine the projection of the two cubes
+                // onto the x-y plane and check if we are in the intersection first
+                int minZ = newCenter.y - newR;
+                int maxZ = newCenter.y + newR;
+
+                if (x < oldCenter.x + oldR && x > oldCenter.x - oldR
+                    && y < oldCenter.y + oldR && y > oldCenter.y - oldR) // In bounds
                 {
-                    Vector3Int index = newCenter + new Vector3Int(x, y, z);
+                    minZ = Math.Max(minZ, oldCenter.z - oldR);
+                    maxZ = Math.Min(maxZ, oldCenter.z + oldR);
+                }
 
-                    if ((oldCenter - index).magnitude < oldR)
-                    {
-                        continue;
-                    }
-
-                    newChunks.Add(index);
+                for (int z = minZ; z <= maxZ; z++)
+                {
+                    newChunks.Add(new Vector3Int(x, y, z));
                 }
             }
         }
@@ -192,8 +192,8 @@ public class ChunkSet : MonoBehaviour
 
     private bool ShouldChunkBeKilled(Chunk chunk)
     {
-        Vector3Int index = chunks[chunk];
-        float dist = (index - baseIndex).magnitude;
+        Vector3Int index = chunks[chunk] - baseIndex;
+        int dist = Math.Max(Math.Max(index.x, index.y), index.z);
         return dist > viewDistance + 1;
     }
 
