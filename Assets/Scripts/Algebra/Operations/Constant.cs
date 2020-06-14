@@ -102,9 +102,4 @@ public class Constant : Equation, IEquatable<Constant>
     {
         return 0;
     }
-
-    public override int CompareTo(Equation other)
-    {
-        throw new NotImplementedException();
-    }
 }

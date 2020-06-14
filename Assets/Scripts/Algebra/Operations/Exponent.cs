@@ -147,9 +147,4 @@ class Exponent : Equation, IEquatable<Exponent>
     {
         return 10;
     }
-
-    public override int CompareTo(Equation other)
-    {
-        throw new NotImplementedException();
-    }
 }

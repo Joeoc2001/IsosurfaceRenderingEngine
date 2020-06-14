@@ -4,18 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-class Sign : Equation, IEquatable<Sign>
+class Sign : Monad
 {
-    private readonly Equation eq;
-
-    new public static Equation SignOf(Equation eq)
+    new public static Equation SignOf(Equation argument)
     {
-        if (eq is Sign)
+        if (argument is Sign)
         {
-            return eq;
+            return argument;
         }
 
-        if (eq is Constant constant)
+        if (argument is Constant constant)
         {
             if (constant.GetValue().IsZero)
             {
@@ -31,48 +29,39 @@ class Sign : Equation, IEquatable<Sign>
             }
         }
 
-        return new Sign(eq);
+        return new Sign(argument);
     }
 
-    private Sign(Equation eq)
+    private Sign(Equation argument)
+        : base(argument)
     {
-        this.eq = eq;
+
     }
 
     public override Equation GetDerivative(Variable wrt)
     {
-        return 0; // Not technically true, but true 100% of the time :P
+        return 0; // Not always true, but true 100% of the time :P
     }
 
     public override ExpressionDelegate GetExpression()
     {
-        ExpressionDelegate eqExpression = eq.GetExpression();
+        ExpressionDelegate eqExpression = Argument.GetExpression();
         return v => Math.Sign(eqExpression(v));
-    }
-
-    public bool Equals(Sign obj)
-    {
-        if (obj is null)
-        {
-            return false;
-        }
-
-        return eq.Equals(obj.eq);
     }
 
     public override bool Equals(object obj)
     {
-        return this.Equals(obj as Sign);
+        return this.Equals(obj as Monad);
     }
 
     public override int GetHashCode()
     {
-        return eq.GetHashCode() ^ -322660314;
+        return Argument.GetHashCode() ^ -322660314;
     }
 
     public override string ToString()
     {
-        return $"[SIGN]({eq})";
+        return $"[SIGN]({Argument})";
     }
 
     public override string ToParsableString()
@@ -80,14 +69,14 @@ class Sign : Equation, IEquatable<Sign>
         StringBuilder builder = new StringBuilder();
 
         builder.Append("sign ");
-        builder.Append(ParenthesisedParsableString(eq));
+        builder.Append(ParenthesisedParsableString(Argument));
 
         return builder.ToString();
     }
 
     public override string ToRunnableString()
     {
-        return $"Equation.SignOf({eq.ToRunnableString()})";
+        return $"Equation.SignOf({Argument.ToRunnableString()})";
     }
 
     public static bool operator==(Sign left, Sign right)
@@ -113,10 +102,5 @@ class Sign : Equation, IEquatable<Sign>
     public override int GetOrderIndex()
     {
         return 0;
-    }
-
-    public override int CompareTo(Equation other)
-    {
-        throw new NotImplementedException();
     }
 }

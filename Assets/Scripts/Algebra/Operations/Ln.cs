@@ -1,50 +1,38 @@
 ﻿using Rationals;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 
-class Ln : Equation, IEquatable<Ln>
+class Ln : Monad
 {
-    private readonly Equation eq;
-
-    new public static Equation LnOf(Equation eq)
+    new public static Equation LnOf(Equation argument)
     {
-        return new Ln(eq);
+        return new Ln(argument);
     }
 
-    public Ln(Equation eq)
+    public Ln(Equation argument)
+        : base(argument)
     {
-        this.eq = eq;
+
     }
 
     public override ExpressionDelegate GetExpression()
     {
-        if (eq is Constant constant)
+        if (Argument is Constant constant)
         {
             return v => (float)Rational.Log(constant.GetValue());
         }
 
-        ExpressionDelegate expression = eq.GetExpression();
+        ExpressionDelegate expression = Argument.GetExpression();
 
         return v => Mathf.Log(expression(v));
     }
 
     public override Equation GetDerivative(Variable wrt)
     {
-        Equation derivative = eq.GetDerivative(wrt);
-        return derivative / eq;
-    }
-
-    public bool Equals(Ln other)
-    {
-        if (other is null)
-        {
-            return false;
-        }
-
-        return eq.Equals(other.eq);
+        Equation derivative = Argument.GetDerivative(wrt);
+        return derivative / Argument;
     }
 
     public override bool Equals(object obj)
@@ -54,7 +42,7 @@ class Ln : Equation, IEquatable<Ln>
 
     public override int GetHashCode()
     {
-        return eq.GetHashCode() ^ -1043105826;
+        return Argument.GetHashCode() ^ -1043105826;
     }
 
     public static bool operator ==(Ln left, Ln right)
@@ -79,7 +67,7 @@ class Ln : Equation, IEquatable<Ln>
 
     public override string ToString()
     {
-        return $"[LN]({eq})";
+        return $"[LN]({Argument})";
     }
 
     public override string ToParsableString()
@@ -87,23 +75,18 @@ class Ln : Equation, IEquatable<Ln>
         StringBuilder builder = new StringBuilder();
 
         builder.Append("ln ");
-        builder.Append(ParenthesisedParsableString(eq));
+        builder.Append(ParenthesisedParsableString(Argument));
 
         return builder.ToString();
     }
 
     public override string ToRunnableString()
     {
-        return $"Equation.Ln({eq.ToRunnableString()})";
+        return $"Equation.Ln({Argument.ToRunnableString()})";
     }
 
     public override int GetOrderIndex()
     {
         return 0;
-    }
-
-    public override int CompareTo(Equation other)
-    {
-        throw new NotImplementedException();
     }
 }

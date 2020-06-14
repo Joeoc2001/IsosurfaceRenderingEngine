@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 class Sum : CommutativeOperation, IEquatable<Sum>
 {
@@ -159,10 +158,5 @@ class Sum : CommutativeOperation, IEquatable<Sum>
     public override int GetOrderIndex()
     {
         return 30;
-    }
-
-    public override int CompareTo(Equation other)
-    {
-        throw new NotImplementedException();
     }
 }

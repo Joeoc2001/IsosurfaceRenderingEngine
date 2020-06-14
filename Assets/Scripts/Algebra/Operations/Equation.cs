@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Equation : IComparable<Equation>
+public abstract class Equation
 {
     public static implicit operator Equation(int r) => (Constant)r;
     public static implicit operator Equation(long r) => (Constant)r;
@@ -140,7 +140,6 @@ public abstract class Equation : IComparable<Equation>
 
         return other.ToParsableString();
     }
-    public abstract int CompareTo(Equation other);
 
     public static bool operator ==(Equation left, Equation right)
     {

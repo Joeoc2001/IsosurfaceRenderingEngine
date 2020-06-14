@@ -11,7 +11,6 @@ abstract class CommutativeOperation : Equation
     public CommutativeOperation(IEnumerable<Equation> eqs)
     {
         this.eqs = new List<Equation>(eqs);
-        this.eqs.Sort((x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
     }
 
     public abstract int IdentityValue();
@@ -64,6 +63,13 @@ abstract class CommutativeOperation : Equation
         return ok && counts.Values.All(c => c == 0);
     }
 
+    public List<Equation> GetDisplaySortedArguments()
+    {
+        List<Equation> sortedEqs = new List<Equation>(eqs);
+        sortedEqs.Sort(EquationDisplayComparer.COMPARER);
+        return sortedEqs;
+    }
+
     protected static List<Equation> SimplifyArguments<T>(List<T> eqs, Rational identity, Operation operation) where T : Equation
     {
         List<Equation> newEqs = new List<Equation>(eqs.Count);
@@ -107,13 +113,15 @@ abstract class CommutativeOperation : Equation
             return EmptyName();
         }
 
-        StringBuilder builder = new StringBuilder($"[{OperationName()}](");
-        builder.Append(eqs[0].ToString());
+        List<Equation> sortedEquations = GetDisplaySortedArguments();
 
-        for (int i = 1; i < eqs.Count; i++)
+        StringBuilder builder = new StringBuilder($"[{OperationName()}](");
+        builder.Append(sortedEquations[0].ToString());
+
+        for (int i = 1; i < sortedEquations.Count; i++)
         {
             builder.Append(", ");
-            builder.Append(eqs[i].ToString());
+            builder.Append(sortedEquations[i].ToString());
         }
 
         builder.Append(")");

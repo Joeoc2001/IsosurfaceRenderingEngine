@@ -221,9 +221,4 @@ class Product : CommutativeOperation, IEquatable<Product>
     {
         return 20;
     }
-
-    public override int CompareTo(Equation other)
-    {
-        throw new NotImplementedException();
-    }
 }
