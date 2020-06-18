@@ -18,8 +18,24 @@ public abstract class Equation
     public delegate Vector4 Vector4ExpressionDelegate(VariableSet set);
 
     public abstract ExpressionDelegate GetExpression();
-
     public abstract Equation GetDerivative(Variable wrt);
+    public Equation Map(EquationMapping.EquationMap map) => Map((EquationMapping)map);
+    public abstract Equation Map(EquationMapping map);
+    public override abstract int GetHashCode();
+    public override abstract bool Equals(object obj);
+    public abstract string ToParsableString();
+    public abstract string ToRunnableString();
+
+    /* Used for displaying braces when printing a human-readable string
+     * Should be:
+     * 0 -> Node (eg. x, 12, function)
+     * 10 -> Indeces
+     * 20 -> Multiplication
+     * 30 -> Addition
+     * Used to determine order of operations
+     * Less => Higher priority
+     */
+    public abstract int GetOrderIndex();
 
     public ExpressionDelegate GetDerivitiveExpression(Variable wrt)
     {
@@ -111,22 +127,6 @@ public abstract class Equation
         return 0.5 * (a + b + Abs(a - b));
     }
 
-    public override abstract int GetHashCode();
-
-    public override abstract bool Equals(object obj);
-
-    public abstract string ToParsableString();
-    public abstract string ToRunnableString();
-
-    /* Should be:
-     * 0 -> Node (eg. x, 12, function)
-     * 10 -> Indeces
-     * 20 -> Multiplication
-     * 30 -> Addition
-     * Used to determine order of operations
-     * Less => Higher priority
-     */
-    public abstract int GetOrderIndex();
     public bool ShouldParenthesise(Equation other)
     {
         return this.GetOrderIndex() <= other.GetOrderIndex();

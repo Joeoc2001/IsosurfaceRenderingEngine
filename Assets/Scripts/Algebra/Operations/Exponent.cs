@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 
-class Exponent : Equation, IEquatable<Exponent>
+public class Exponent : Equation, IEquatable<Exponent>
 {
     public readonly Equation Base;
     public readonly Equation Power;
@@ -99,7 +99,7 @@ class Exponent : Equation, IEquatable<Exponent>
 
     public override int GetHashCode()
     {
-        return (31 * Base.GetHashCode() + Power.GetHashCode()) ^ 642859777;
+        return (31 * Base.GetHashCode() - Power.GetHashCode()) ^ 642859777;
     }
 
     public static bool operator ==(Exponent left, Exponent right)
@@ -146,5 +146,25 @@ class Exponent : Equation, IEquatable<Exponent>
     public override int GetOrderIndex()
     {
         return 10;
+    }
+
+    public override Equation Map(EquationMapping map)
+    {
+        Equation currentThis = this;
+
+        if (map.ShouldMapChildren(this))
+        {
+            Equation mappedBase = Base.Map(map);
+            Equation mappedPower = Power.Map(map);
+
+            currentThis = Pow(mappedBase, mappedPower);
+        }
+
+        if (map.ShouldMapThis(this))
+        {
+            currentThis = map.PostMap(currentThis);
+        }
+
+        return currentThis;
     }
 }

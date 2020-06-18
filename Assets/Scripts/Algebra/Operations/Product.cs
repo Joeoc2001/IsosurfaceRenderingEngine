@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using UnityEngine;
 
-class Product : CommutativeOperation, IEquatable<Product>
+public class Product : CommutativeOperation, IEquatable<Product>
 {
     public static Equation Multiply<T>(List<T> eqs) where T : Equation
     {
@@ -220,5 +220,10 @@ class Product : CommutativeOperation, IEquatable<Product>
     public override int GetOrderIndex()
     {
         return 20;
+    }
+
+    public override Func<List<Equation>, Equation> GetSimplifyingConstructor()
+    {
+        return Multiply;
     }
 }

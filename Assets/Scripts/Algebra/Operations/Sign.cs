@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-class Sign : Monad
+public class Sign : Monad
 {
     new public static Equation SignOf(Equation argument)
     {
@@ -102,5 +102,10 @@ class Sign : Monad
     public override int GetOrderIndex()
     {
         return 0;
+    }
+
+    public override Func<Equation, Equation> GetSimplifyingConstructor()
+    {
+        return SignOf;
     }
 }

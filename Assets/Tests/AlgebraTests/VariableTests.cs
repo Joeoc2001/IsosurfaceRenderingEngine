@@ -137,5 +137,32 @@ namespace Tests
             // ASSERT
             Assert.AreEqual(0, equation.GetOrderIndex());
         }
+
+        [Test]
+        public void Variable_Map_DoesntChangeOriginal()
+        {
+            // ARANGE
+            Equation equation1 = Variable.X;
+            Equation equation2 = Variable.X;
+
+            // ACT
+            equation2.Map(a => Variable.Y);
+
+            // ASSERT
+            Assert.AreEqual(equation1, equation2);
+        }
+
+        [Test]
+        public void Variable_Map_ReturnsAlternative()
+        {
+            // ARANGE
+            Equation equation1 = Variable.X;
+
+            // ACT
+            Equation equation2 = equation1.Map(a => Variable.Z);
+
+            // ASSERT
+            Assert.AreEqual(Variable.Z, equation2);
+        }
     }
 }

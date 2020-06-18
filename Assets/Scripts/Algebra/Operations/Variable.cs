@@ -103,4 +103,14 @@ public class Variable : Equation, IEquatable<Variable>
     {
         return 0;
     }
+
+    public override Equation Map(EquationMapping map)
+    {
+        if (!map.ShouldMapThis(this))
+        {
+            return this;
+        }
+
+        return map.PostMap(this);
+    }
 }

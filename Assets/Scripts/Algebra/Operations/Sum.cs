@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-class Sum : CommutativeOperation, IEquatable<Sum>
+public class Sum : CommutativeOperation, IEquatable<Sum>
 {
     public static Equation Add<T>(List<T> eqs) where T : Equation
     {
@@ -158,5 +158,10 @@ class Sum : CommutativeOperation, IEquatable<Sum>
     public override int GetOrderIndex()
     {
         return 30;
+    }
+
+    public override Func<List<Equation>, Equation> GetSimplifyingConstructor()
+    {
+        return Add;
     }
 }

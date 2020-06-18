@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-abstract class CommutativeOperation : Equation
+public abstract class CommutativeOperation : Equation
 {
     protected readonly List<Equation> eqs;
 
@@ -19,6 +19,7 @@ abstract class CommutativeOperation : Equation
     public abstract string OperationName();
     public abstract string EmptyName();
     public abstract string OperationSymbol();
+    public abstract Func<List<Equation>, Equation> GetSimplifyingConstructor();
 
     public override sealed ExpressionDelegate GetExpression()
     {
@@ -171,5 +172,29 @@ abstract class CommutativeOperation : Equation
         builder.Append(")");
 
         return builder.ToString();
+    }
+
+    public override Equation Map(EquationMapping map)
+    {
+        Equation currentThis = this;
+
+        if (map.ShouldMapChildren(this))
+        {
+            List<Equation> mappedEqs = new List<Equation>(eqs.Count);
+
+            foreach (Equation eq in eqs)
+            {
+                mappedEqs.Add(eq.Map(map));
+            }
+
+            currentThis = GetSimplifyingConstructor()(mappedEqs);
+        }
+
+        if (map.ShouldMapThis(this))
+        {
+            currentThis = map.PostMap(currentThis);
+        }
+
+        return currentThis;
     }
 }

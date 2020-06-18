@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
+using System;
 
-class Ln : Monad
+public class Ln : Monad
 {
     new public static Equation LnOf(Equation argument)
     {
@@ -88,5 +89,10 @@ class Ln : Monad
     public override int GetOrderIndex()
     {
         return 0;
+    }
+
+    public override Func<Equation, Equation> GetSimplifyingConstructor()
+    {
+        return LnOf;
     }
 }

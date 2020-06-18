@@ -102,4 +102,14 @@ public class Constant : Equation, IEquatable<Constant>
     {
         return 0;
     }
+
+    public override Equation Map(EquationMapping map)
+    {
+        if (!map.ShouldMapThis(this))
+        {
+            return this;
+        }
+
+        return map.PostMap(this);
+    }
 }

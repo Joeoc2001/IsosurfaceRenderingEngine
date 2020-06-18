@@ -168,5 +168,126 @@ namespace Tests
             // ASSERT
             Assert.AreEqual(10, equation.GetOrderIndex());
         }
+
+        [Test]
+        public void Exponentiation_GetHash_IsNotCommutative1()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation1 = Equation.Pow(Variable.Y, 3);
+            Equation equation2 = Equation.Pow(3, Variable.Y);
+            int hash1 = equation1.GetHashCode();
+            int hash2 = equation2.GetHashCode();
+
+            // ASSERT
+            Assert.AreNotEqual(hash1, hash2);
+        }
+
+        [Test]
+        public void Exponentiation_GetHash_IsNotCommutative2()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation1 = Equation.Pow(Variable.Y, Variable.X);
+            Equation equation2 = Equation.Pow(Variable.X, Variable.Y);
+            int hash1 = equation1.GetHashCode();
+            int hash2 = equation2.GetHashCode();
+
+            // ASSERT
+            Assert.AreNotEqual(hash1, hash2);
+        }
+
+        [Test]
+        public void Exponentiation_GetHash_IsNotCommutative3()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation1 = Equation.Pow(Variable.Y, Variable.X + 1);
+            Equation equation2 = Equation.Pow(Variable.X + 1, Variable.Y);
+            int hash1 = equation1.GetHashCode();
+            int hash2 = equation2.GetHashCode();
+
+            // ASSERT
+            Assert.AreNotEqual(hash1, hash2);
+        }
+
+        [Test]
+        public void Exponentiation_Map_DoesntChangeOriginal()
+        {
+            // ARANGE
+            Equation equation1 = Equation.Pow(Variable.X, 2);
+            Equation equation2 = Equation.Pow(Variable.X, 2);
+
+            // ACT
+            equation2.Map(a => Equation.Pow(Variable.Y, 4));
+
+            // ASSERT
+            Assert.AreEqual(equation1, equation2);
+        }
+
+        [Test]
+        public void Exponentiation_Map_ReturnsAlternative()
+        {
+            // ARANGE
+            Equation equation1 = Equation.Pow(Variable.X, 2);
+
+            // ACT
+            Equation equation2 = equation1.Map(a => Equation.Pow(Variable.Y, 4));
+
+            // ASSERT
+            Assert.AreEqual(Equation.Pow(Variable.Y, 4), equation2);
+        }
+
+        [Test]
+        public void Exponentiation_Map_MapsChildren()
+        {
+            // ARANGE
+            Equation equation1 = Equation.Pow(Variable.X, 5);
+
+            // ACT
+            Equation equation2 = equation1.Map(a => a is Variable ? Variable.Z : a);
+
+            // ASSERT
+            Assert.AreEqual(Equation.Pow(Variable.Z, 5), equation2);
+        }
+
+        [Test]
+        public void Exponentiation_Map_CanSkipSelf()
+        {
+            // ARANGE
+            Equation equation1 = Equation.Pow(Variable.X, Variable.Y);
+            EquationMapping mapping = new EquationMapping()
+            {
+                PostMap = a => Variable.Z,
+                ShouldMapThis = a => !(a is Exponent)
+            };
+
+            // ACT
+            Equation equation2 = equation1.Map(mapping);
+
+            // ASSERT
+            Assert.AreEqual(Equation.Pow(Variable.Z, Variable.Z), equation2);
+        }
+
+        [Test]
+        public void Exponentiation_Map_CanSkipChildren()
+        {
+            // ARANGE
+            Equation equation1 = Equation.Pow(Variable.X, 5);
+            EquationMapping mapping = new EquationMapping()
+            {
+                PostMap = a => a is Variable ? Variable.Z : a,
+                ShouldMapChildren = a => false
+            };
+
+            // ACT
+            Equation equation2 = equation1.Map(mapping);
+
+            // ASSERT
+            Assert.AreEqual(Equation.Pow(Variable.X, 5), equation2);
+        }
     }
 }

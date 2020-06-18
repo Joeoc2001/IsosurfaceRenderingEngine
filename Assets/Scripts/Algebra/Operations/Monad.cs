@@ -1,6 +1,6 @@
 ﻿using System;
 
-abstract class Monad : Equation, IEquatable<Monad>
+public abstract class Monad : Equation, IEquatable<Monad>
 {
     public readonly Equation Argument;
 
@@ -8,6 +8,7 @@ abstract class Monad : Equation, IEquatable<Monad>
     {
         this.Argument = argument;
     }
+    public abstract Func<Equation, Equation> GetSimplifyingConstructor();
 
     public bool Equals(Monad obj)
     {
@@ -32,5 +33,23 @@ abstract class Monad : Equation, IEquatable<Monad>
     public override bool Equals(object obj)
     {
         return this.Equals(obj as Monad);
+    }
+
+    public override Equation Map(EquationMapping map)
+    {
+        Equation currentThis = this;
+
+        if (map.ShouldMapChildren(this))
+        {
+            Equation mappedArg = Argument.Map(map);
+            currentThis = GetSimplifyingConstructor()(mappedArg);
+        }
+
+        if (map.ShouldMapThis(this))
+        {
+            currentThis = map.PostMap(currentThis);
+        }
+
+        return currentThis;
     }
 }

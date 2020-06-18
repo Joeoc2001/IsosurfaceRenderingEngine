@@ -211,5 +211,81 @@ namespace Tests
             // ASSERT
             Assert.AreEqual(20, equation.GetOrderIndex());
         }
+
+        [Test]
+        public void Multiplication_Map_DoesntChangeOriginal()
+        {
+            // ARANGE
+            Equation equation1 = Variable.X * 2;
+            Equation equation2 = Variable.X * 2;
+
+            // ACT
+            equation2.Map(a => Variable.Y * 2);
+
+            // ASSERT
+            Assert.AreEqual(equation1, equation2);
+        }
+
+        [Test]
+        public void Multiplication_Map_ReturnsAlternative()
+        {
+            // ARANGE
+            Equation equation1 = Variable.X * 2;
+
+            // ACT
+            Equation equation2 = equation1.Map(a => Variable.Z);
+
+            // ASSERT
+            Assert.AreEqual(Variable.Z, equation2);
+        }
+
+        [Test]
+        public void Multiplication_Map_MapsChildren()
+        {
+            // ARANGE
+            Equation equation1 = Variable.X * Variable.Y;
+
+            // ACT
+            Equation equation2 = equation1.Map(a => a is Variable ? Variable.Z : a);
+
+            // ASSERT
+            Assert.AreEqual(Variable.Z * Variable.Z, equation2);
+        }
+
+        [Test]
+        public void Multiplication_Map_CanSkipSelf()
+        {
+            // ARANGE
+            Equation equation1 = Variable.X * Variable.Y;
+            EquationMapping mapping = new EquationMapping()
+            {
+                PostMap = a => Variable.Z,
+                ShouldMapThis = a => !(a is Product)
+            };
+
+            // ACT
+            Equation equation2 = equation1.Map(mapping);
+
+            // ASSERT
+            Assert.AreEqual(Variable.Z * Variable.Z, equation2);
+        }
+
+        [Test]
+        public void Multiplication_Map_CanSkipChildren()
+        {
+            // ARANGE
+            Equation equation1 = Variable.X * Variable.Y;
+            EquationMapping mapping = new EquationMapping()
+            {
+                PostMap = a => a is Variable ? Variable.Z : a,
+                ShouldMapChildren = a => false
+            };
+
+            // ACT
+            Equation equation2 = equation1.Map(mapping);
+
+            // ASSERT
+            Assert.AreEqual(Variable.X * Variable.Y, equation2);
+        }
     }
 }
