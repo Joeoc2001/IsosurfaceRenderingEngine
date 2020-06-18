@@ -162,7 +162,7 @@ namespace Tests
         }
 
         [Test]
-        public void Multiplication_Simplify_DOTS()
+        public void Multiplication_DoesNotSimplify_DOTS()
         {
             // ARANGE
 
@@ -171,24 +171,24 @@ namespace Tests
             Equation expected = Equation.Pow(Variable.X, 2) - 1;
 
             // ASSERT
-            Assert.AreEqual(expected, equation);
+            Assert.AreNotEqual(expected, equation);
         }
 
         [Test]
-        public void Multiplication_Simplify_ExpandsBracesToConstant()
+        public void Multiplication_Simplify_DoesNotExpandBraces()
         {
             // ARANGE
 
             // ACT
-            Equation equation = (Variable.X + 1) * (Variable.X + 2) - (Equation.Pow(Variable.X, 2) + Variable.X * 3);
-            Equation expected = 2;
+            Equation equation = (Variable.X + 1) * (Variable.X + 2);
+            Equation expected = Equation.Pow(Variable.X, 2) + 3 * Variable.X + 2;
 
             // ASSERT
-            Assert.AreEqual(expected, equation);
+            Assert.AreNotEqual(expected, equation);
         }
 
         [Test]
-        public void Multiplication_Simplify_Distributes()
+        public void Multiplication_Simplify_DoesNotDistribute()
         {
             // ARANGE
 
@@ -197,7 +197,7 @@ namespace Tests
             Equation expected = 3 * Variable.X;
 
             // ASSERT
-            Assert.AreEqual(expected, equation);
+            Assert.AreNotEqual(expected, equation);
         }
 
         [Test]

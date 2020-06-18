@@ -149,7 +149,7 @@ namespace Tests
         }
 
         [Test]
-        public void Addition_Simplify_Factorises()
+        public void Addition_Simplify_DoesNotFactorise()
         {
             // ARANGE
 
@@ -158,7 +158,7 @@ namespace Tests
             Equation expected = Variable.X + 2;
 
             // ASSERT
-            Assert.AreEqual(expected, equation);
+            Assert.AreNotEqual(expected, equation);
         }
 
         [Test]
