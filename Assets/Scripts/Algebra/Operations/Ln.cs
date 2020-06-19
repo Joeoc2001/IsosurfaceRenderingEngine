@@ -5,94 +5,93 @@ using UnityEngine;
 using System.Text;
 using System;
 
-public class Ln : Monad
+
+namespace Algebra.Operations
 {
-    new public static Equation LnOf(Equation argument)
+    public class Ln : Monad
     {
-        return new Ln(argument);
-    }
-
-    public Ln(Equation argument)
-        : base(argument)
-    {
-
-    }
-
-    public override ExpressionDelegate GetExpression()
-    {
-        if (Argument is Constant constant)
+        new public static Equation LnOf(Equation argument)
         {
-            return v => (float)Rational.Log(constant.GetValue());
+            return new Ln(argument);
         }
 
-        ExpressionDelegate expression = Argument.GetExpression();
-
-        return v => Mathf.Log(expression(v));
-    }
-
-    public override Equation GetDerivative(Variable wrt)
-    {
-        Equation derivative = Argument.GetDerivative(wrt);
-        return derivative / Argument;
-    }
-
-    public override bool Equals(object obj)
-    {
-        return this.Equals(obj as Ln);
-    }
-
-    public override int GetHashCode()
-    {
-        return Argument.GetHashCode() ^ -1043105826;
-    }
-
-    public static bool operator ==(Ln left, Ln right)
-    {
-        if (ReferenceEquals(left, right))
+        public Ln(Equation argument)
+            : base(argument)
         {
-            return true;
+
         }
 
-        if (left is null || right is null)
+        public override ExpressionDelegate GetExpression()
         {
-            return false;
+            if (Argument is Constant constant)
+            {
+                return v => (float)Rational.Log(constant.GetValue());
+            }
+
+            ExpressionDelegate expression = Argument.GetExpression();
+
+            return v => Mathf.Log(expression(v));
         }
 
-        return left.Equals(right);
-    }
+        public override Equation GetDerivative(Variable wrt)
+        {
+            Equation derivative = Argument.GetDerivative(wrt);
+            return derivative / Argument;
+        }
 
-    public static bool operator !=(Ln left, Ln right)
-    {
-        return !(left == right);
-    }
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as Ln);
+        }
 
-    public override string ToString()
-    {
-        return $"[LN]({Argument})";
-    }
+        public override int GetHashCode()
+        {
+            return Argument.GetHashCode() ^ -1043105826;
+        }
 
-    public override string ToParsableString()
-    {
-        StringBuilder builder = new StringBuilder();
+        public static bool operator ==(Ln left, Ln right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
 
-        builder.Append("ln ");
-        builder.Append(ParenthesisedParsableString(Argument));
+            if (left is null || right is null)
+            {
+                return false;
+            }
 
-        return builder.ToString();
-    }
+            return left.Equals(right);
+        }
 
-    public override string ToRunnableString()
-    {
-        return $"Equation.Ln({Argument.ToRunnableString()})";
-    }
+        public static bool operator !=(Ln left, Ln right)
+        {
+            return !(left == right);
+        }
 
-    public override int GetOrderIndex()
-    {
-        return 0;
-    }
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
 
-    public override Func<Equation, Equation> GetSimplifyingConstructor()
-    {
-        return LnOf;
+            builder.Append("ln ");
+            builder.Append(ToParenthesisedString(Argument));
+
+            return builder.ToString();
+        }
+
+        public override string ToRunnableString()
+        {
+            return $"Equation.Ln({Argument.ToRunnableString()})";
+        }
+
+        public override int GetOrderIndex()
+        {
+            return 0;
+        }
+
+        public override Func<Equation, Equation> GetSimplifyingConstructor()
+        {
+            return LnOf;
+        }
     }
 }

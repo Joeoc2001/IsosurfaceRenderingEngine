@@ -4,18 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public class EquivalenceClass
+namespace Algebra.Equivalence
 {
-    public static readonly List<EquivalencePath> DEFAULT_PATHS = new List<EquivalencePath> {
-        EquivalencePath.IDENTITY // Not necissary but helps with testing
+    public class EquivalenceClass
+    {
+        public static readonly List<EquivalencePath> DEFAULT_PATHS = new List<EquivalencePath> {
+        EquivalencePaths.IDENTITY,
+        EquivalencePaths.EXPAND_BRACES
     };
 
-    private readonly Equation anchorEquation; // The equation used to define the equivalence class
-    private readonly List<EquivalencePath> paths;
+        private readonly Equation anchorEquation; // The equation used to define the equivalence class
+        private readonly List<EquivalencePath> paths;
 
-    public EquivalenceClass(Equation anchorEquation, List<EquivalencePath> paths = null)
-    {
-        this.paths = paths ?? DEFAULT_PATHS;
-        this.anchorEquation = anchorEquation;
+        public EquivalenceClass(Equation anchorEquation, List<EquivalencePath> paths = null)
+        {
+            this.paths = paths ?? DEFAULT_PATHS;
+            this.anchorEquation = anchorEquation;
+        }
     }
 }

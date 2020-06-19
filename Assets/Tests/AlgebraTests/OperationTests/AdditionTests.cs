@@ -4,17 +4,20 @@ using NUnit.Framework;
 using Rationals;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Algebra;
+using Algebra.Operations;
+using Algebra.Parsing;
 
-namespace Tests
+namespace OperationsTests
 {
-    public class MultiplicationTests
+    public class AdditionTests
     {
         [Test]
-        public void Multiplication_IsEqual_WhenSame()
+        public void Addition_IsEqual_WhenSame()
         {
             // ARANGE
-            Equation v1 = Variable.X * 2;
-            Equation v2 = Variable.X * 2;
+            Equation v1 = Variable.X + 1;
+            Equation v2 = Variable.X + 1;
 
             // ACT
 
@@ -30,11 +33,11 @@ namespace Tests
         }
 
         [Test]
-        public void Multiplication_IsEqual_Commutative()
+        public void Addition_IsEqual_Commutative()
         {
             // ARANGE
-            Equation v1 = Variable.X * 7;
-            Equation v2 = 7 * Variable.X;
+            Equation v1 = Variable.X + 1;
+            Equation v2 = 1 + Variable.X;
 
             // ACT
 
@@ -50,11 +53,11 @@ namespace Tests
         }
 
         [Test]
-        public void Multiplication_EqualReturnFalse_WhenDifferent()
+        public void Addition_EqualReturnFalse_WhenDifferent()
         {
             // ARANGE
-            Equation v1 = Variable.X * 1;
-            Equation v2 = Variable.X * 2;
+            Equation v1 = Variable.X + 1;
+            Equation v2 = Variable.X + 2;
 
             // ACT
 
@@ -70,11 +73,11 @@ namespace Tests
         }
 
         [Test]
-        public void Multiplication_Derivative_IsTermsSum()
+        public void Addition_Derivative_IsDerivativeSum()
         {
             // ARANGE
-            Equation value = Variable.X * Variable.Y;
-            Equation expected = 1 * Variable.Y + Variable.X * 0;
+            Equation value = Variable.X + Variable.Y;
+            Equation expected = Constant.From(1) + Constant.From(0);
 
             // ACT
             Equation derivative = value.GetDerivative(Variable.X);
@@ -84,51 +87,51 @@ namespace Tests
         }
 
         [Test]
-        public void Multiplication_EvaluatesCorrectly()
+        public void Addition_EvaluatesCorrectly()
         {
             // ARANGE
-            Equation equation = Constant.From(54321) * Constant.From(7);
+            Equation equation = Constant.From(54321) + Constant.From(7);
 
             // ACT
             float value = equation.GetExpression()(new VariableSet());
 
             // ASSERT
-            Assert.AreEqual(54321 * 7, value);
+            Assert.AreEqual(54321 + 7, value);
         }
 
         [Test]
-        public void Multiplication_Simplify_CollectsConstants()
+        public void Addition_Simplify_CollectsConstants()
         {
             // ARANGE
 
             // ACT
-            Equation equation = Constant.From(54321) * Variable.Z * Constant.From(54321);
-            Equation expected = Constant.From(((Rational)54321) * 54321) * Variable.Z;
+            Equation equation = Constant.From(54321) + Variable.Z + Constant.From(54321);
+            Equation expected = Constant.From(54321 + 54321) + Variable.Z;
 
             // ASSERT
             Assert.AreEqual(expected, equation);
         }
 
         [Test]
-        public void Multiplication_Simplify_CollectsPowers()
+        public void Addition_Simplify_CollectsCoefficients()
         {
             // ARANGE
 
             // ACT
-            Equation equation = Equation.Pow(Variable.Z, 2) * Equation.Pow(Variable.Z, Variable.Y) * Variable.Z;
-            Equation expected = Equation.Pow(Variable.Z, 3 + Variable.Y);
+            Equation equation = (Constant.From(54321) * Variable.Z) + (Constant.From(54321) * Variable.Z) + Variable.Z;
+            Equation expected = Constant.From(54321 + 54321 + 1) * Variable.Z;
 
             // ASSERT
             Assert.AreEqual(expected, equation);
         }
 
         [Test]
-        public void Multiplication_Simplify_RemovesOnes()
+        public void Addition_Simplify_RemovesZeros()
         {
             // ARANGE
 
             // ACT
-            Equation equation = 1 * 2 * Variable.Z * (Rational)0.5M;
+            Equation equation = Constant.From(0) + Constant.From(1) + Constant.From(-1) + Variable.Z;
             Equation expected = Variable.Z;
 
             // ASSERT
@@ -136,101 +139,101 @@ namespace Tests
         }
 
         [Test]
-        public void Multiplication_Simplify_CollatesMultiplication()
+        public void Addition_Simplify_CancelsVaraibles()
         {
             // ARANGE
 
             // ACT
-            Equation equation = Equation.Multiply(new List<Equation>() { Equation.Multiply(new List<Equation>() { Variable.X, Variable.Y }), Variable.Z });
-            Equation expected = Equation.Multiply(new List<Equation>() { Variable.X, Variable.Y, Variable.Z });
+            Equation equation = Variable.Z - Variable.Z;
+            Equation expected = Constant.From(0);
 
             // ASSERT
             Assert.AreEqual(expected, equation);
         }
 
         [Test]
-        public void Multiplication_Simplify_GoesToConstantZero()
+        public void Addition_Simplify_CancelsVaraiblesPlusOne()
         {
             // ARANGE
 
             // ACT
-            Equation equation = 0 * 2 * Variable.Z * (Rational)0.5M;
-            Equation expected = 0;
+            Equation equation = Constant.From(1) + Variable.Z - Variable.Z;
+            Equation expected = Constant.From(1);
 
             // ASSERT
             Assert.AreEqual(expected, equation);
         }
 
         [Test]
-        public void Multiplication_DoesNotSimplify_DOTS()
+        public void Addition_Simplify_RemovesVaraibleCoefficientIfOne()
         {
             // ARANGE
 
             // ACT
-            Equation equation = (Variable.X + 1) * (Variable.X - 1);
-            Equation expected = Equation.Pow(Variable.X, 2) - 1;
+            Equation equation = Constant.From(1) + 2 * Variable.Z - Variable.Z;
+            Equation expected = Constant.From(1) + Variable.Z;
+
+            // ASSERT
+            Assert.AreEqual(expected, equation);
+        }
+
+        [Test]
+        public void Addition_Simplify_CollatesAdditions()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = Equation.Add(new List<Equation>() { Equation.Add(new List<Equation>() { Variable.X, Variable.Y }), Variable.Z });
+            Equation expected = Equation.Add(new List<Equation>() { Variable.X, Variable.Y, Variable.Z });
+
+            // ASSERT
+            Assert.AreEqual(expected, equation);
+        }
+
+        [Test]
+        public void Addition_Simplify_DoesNotFactorise()
+        {
+            // ARANGE
+
+            // ACT
+            Equation equation = (Equation.Pow(Variable.X, 2) + (3 * Variable.X) + 2) / (Variable.X + 1);
+            Equation expected = Variable.X + 2;
 
             // ASSERT
             Assert.AreNotEqual(expected, equation);
         }
 
         [Test]
-        public void Multiplication_Simplify_DoesNotExpandBraces()
+        public void Addition_GetOrderIndex_Is30()
         {
             // ARANGE
 
             // ACT
-            Equation equation = (Variable.X + 1) * (Variable.X + 2);
-            Equation expected = Equation.Pow(Variable.X, 2) + 3 * Variable.X + 2;
+            Equation equation = Variable.X + 1;
 
             // ASSERT
-            Assert.AreNotEqual(expected, equation);
+            Assert.AreEqual(30, equation.GetOrderIndex());
         }
 
         [Test]
-        public void Multiplication_Simplify_DoesNotDistribute()
+        public void Addition_Map_DoesntChangeOriginal()
         {
             // ARANGE
+            Equation equation1 = Variable.X + 1;
+            Equation equation2 = Variable.X + 1;
 
             // ACT
-            Equation equation = 3 * (Variable.X + 1) - 3;
-            Equation expected = 3 * Variable.X;
-
-            // ASSERT
-            Assert.AreNotEqual(expected, equation);
-        }
-
-        [Test]
-        public void Multiplication_GetOrderIndex_Is0()
-        {
-            // ARANGE
-
-            // ACT
-            Equation equation = 3 * Variable.X;
-
-            // ASSERT
-            Assert.AreEqual(20, equation.GetOrderIndex());
-        }
-
-        [Test]
-        public void Multiplication_Map_DoesntChangeOriginal()
-        {
-            // ARANGE
-            Equation equation1 = Variable.X * 2;
-            Equation equation2 = Variable.X * 2;
-
-            // ACT
-            equation2.Map(a => Variable.Y * 2);
+            equation2.Map(a => Variable.Y + 2);
 
             // ASSERT
             Assert.AreEqual(equation1, equation2);
         }
 
         [Test]
-        public void Multiplication_Map_ReturnsAlternative()
+        public void Addition_Map_ReturnsAlternative()
         {
             // ARANGE
-            Equation equation1 = Variable.X * 2;
+            Equation equation1 = Variable.X + 1;
 
             // ACT
             Equation equation2 = equation1.Map(a => Variable.Z);
@@ -240,41 +243,41 @@ namespace Tests
         }
 
         [Test]
-        public void Multiplication_Map_MapsChildren()
+        public void Addition_Map_MapsChildren()
         {
             // ARANGE
-            Equation equation1 = Variable.X * Variable.Y;
+            Equation equation1 = Variable.X + Variable.Y;
 
             // ACT
-            Equation equation2 = equation1.Map(a => a is Variable ? Variable.Z : a);
+            Equation equation2 = equation1.Map(a => a is Variable? Variable.Z : a);
 
             // ASSERT
-            Assert.AreEqual(Variable.Z * Variable.Z, equation2);
+            Assert.AreEqual(2 * Variable.Z, equation2);
         }
 
         [Test]
-        public void Multiplication_Map_CanSkipSelf()
+        public void Addition_Map_CanSkipSelf()
         {
             // ARANGE
-            Equation equation1 = Variable.X * Variable.Y;
+            Equation equation1 = Variable.X + 1;
             EquationMapping mapping = new EquationMapping()
             {
                 PostMap = a => Variable.Z,
-                ShouldMapThis = a => !(a is Product)
+                ShouldMapThis = a => !(a is Sum)
             };
 
             // ACT
             Equation equation2 = equation1.Map(mapping);
 
             // ASSERT
-            Assert.AreEqual(Variable.Z * Variable.Z, equation2);
+            Assert.AreEqual(2 * Variable.Z, equation2);
         }
 
         [Test]
-        public void Multiplication_Map_CanSkipChildren()
+        public void Addition_Map_CanSkipChildren()
         {
             // ARANGE
-            Equation equation1 = Variable.X * Variable.Y;
+            Equation equation1 = Variable.X + 1;
             EquationMapping mapping = new EquationMapping()
             {
                 PostMap = a => a is Variable ? Variable.Z : a,
@@ -285,7 +288,7 @@ namespace Tests
             Equation equation2 = equation1.Map(mapping);
 
             // ASSERT
-            Assert.AreEqual(Variable.X * Variable.Y, equation2);
+            Assert.AreEqual(Variable.X + 1, equation2);
         }
     }
 }

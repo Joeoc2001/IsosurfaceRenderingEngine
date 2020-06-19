@@ -1,11 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Algebra;
+using Algebra.Operations;
+using Algebra.Parsing;
 using NUnit.Framework;
 using Rationals;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests
+namespace AlgebraTests
 {
     public class ParserTests
     {
@@ -654,20 +657,25 @@ namespace Tests
             Assert.AreEqual(expected, result);
         }
 
-        [Test]
-        public void Parser_FuzzerEquationsEqual()
+        [UnityTest]
+        public IEnumerator Parser_FuzzerEquationsEqual()
         {
-            for (int i = 0; i < 1000; i++)
+            Random.InitState(0);
+
+            for (int i = 0; i < 10000; i++)
             {
                 // ARANGE
                 Equation expected = EquationTests.GenerateRandomEquation(0.5f, 3);
-                string equation = expected.ToParsableString();
+                string equation = expected.ToString();
 
                 // ACT
                 Equation result = Parser.Parse(equation);
 
                 // ASSERT
                 Assert.AreEqual(expected, result, $"Inputted string: {equation}\nExpected equation: {expected.ToRunnableString()}");
+
+                // Let the editor not crash
+                yield return null;
             }
         }
 

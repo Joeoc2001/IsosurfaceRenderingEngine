@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Algebra.Operations;
+using System;
 using UnityEngine;
 
 public unsafe struct VariableSet : IEquatable<VariableSet>

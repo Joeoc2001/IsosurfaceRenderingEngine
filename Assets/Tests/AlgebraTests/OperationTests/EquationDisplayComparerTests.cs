@@ -1,6 +1,9 @@
 ﻿using NUnit.Framework;
+using Algebra;
+using Algebra.Operations;
+using Algebra.Parsing;
 
-namespace Tests
+namespace OperationsTests
 {
     class EquationDisplayComparerTests
     {

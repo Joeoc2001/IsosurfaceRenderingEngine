@@ -1,200 +1,180 @@
 ﻿using Rationals;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
-public abstract class CommutativeOperation : Equation
+namespace Algebra.Operations
 {
-    protected readonly List<Equation> eqs;
-
-    public CommutativeOperation(IEnumerable<Equation> eqs)
+    public abstract class CommutativeOperation : Equation
     {
-        this.eqs = new List<Equation>(eqs);
-    }
+        public readonly ReadOnlyCollection<Equation> Arguments;
 
-    public abstract int IdentityValue();
-    public abstract float Perform(float a, float b);
-    public delegate Rational Operation(Rational a, Rational b);
-    public abstract string OperationName();
-    public abstract string EmptyName();
-    public abstract string OperationSymbol();
-    public abstract Func<List<Equation>, Equation> GetSimplifyingConstructor();
-
-    public override sealed ExpressionDelegate GetExpression()
-    {
-        List<ExpressionDelegate> expressions = new List<ExpressionDelegate>(eqs.Count());
-        foreach (Equation e in eqs)
+        public CommutativeOperation(IList<Equation> eqs)
         {
-            expressions.Add(e.GetExpression());
+            this.Arguments = new ReadOnlyCollection<Equation>(eqs);
         }
 
-        float identityValue = IdentityValue();
+        public abstract int IdentityValue();
+        public abstract float Perform(float a, float b);
+        public delegate Rational Operation(Rational a, Rational b);
+        public abstract string EmptyName();
+        public abstract string OperationSymbol();
+        public abstract Func<List<Equation>, Equation> GetSimplifyingConstructor();
 
-        return v =>
+        public override sealed ExpressionDelegate GetExpression()
         {
-            float value = identityValue;
-            foreach (ExpressionDelegate f in expressions)
+            List<ExpressionDelegate> expressions = new List<ExpressionDelegate>(Arguments.Count());
+            foreach (Equation e in Arguments)
             {
-                value = Perform(value, f(v));
-            }
-            return value;
-        };
-    }
-
-    public bool OperandsEquals(List<Equation> operands)
-    {
-        // Check for commutativity
-        var counts = eqs
-            .GroupBy(v => v)
-            .ToDictionary(g => g.Key, g => g.Count());
-        var ok = true;
-        foreach (Equation n in operands)
-        {
-            if (counts.TryGetValue(n, out int c))
-            {
-                counts[n] = c - 1;
-            }
-            else
-            {
-                ok = false;
-                break;
-            }
-        }
-        return ok && counts.Values.All(c => c == 0);
-    }
-
-    public List<Equation> GetDisplaySortedArguments()
-    {
-        List<Equation> sortedEqs = new List<Equation>(eqs);
-        sortedEqs.Sort(EquationDisplayComparer.COMPARER);
-        return sortedEqs;
-    }
-
-    protected static List<Equation> SimplifyArguments<T>(List<T> eqs, Rational identity, Operation operation) where T : Equation
-    {
-        List<Equation> newEqs = new List<Equation>(eqs.Count);
-
-        Rational collectedConstants = identity;
-
-        // Loop & simplify
-        foreach (Equation eq in eqs)
-        {
-            if (eq is Constant constEq)
-            {
-                collectedConstants = operation(collectedConstants, constEq.GetValue());
-                continue;
+                expressions.Add(e.GetExpression());
             }
 
-            newEqs.Add(eq);
+            float identityValue = IdentityValue();
+
+            return v =>
+            {
+                float value = identityValue;
+                foreach (ExpressionDelegate f in expressions)
+                {
+                    value = Perform(value, f(v));
+                }
+                return value;
+            };
         }
 
-        if (!collectedConstants.Equals(identity))
+        public bool OperandsEquals(IList<Equation> operands)
         {
-            newEqs.Add(Constant.From(collectedConstants));
+            // Check for commutativity
+            var counts = Arguments
+                .GroupBy(v => v)
+                .ToDictionary(g => g.Key, g => g.Count());
+            var ok = true;
+            foreach (Equation n in operands)
+            {
+                if (counts.TryGetValue(n, out int c))
+                {
+                    counts[n] = c - 1;
+                }
+                else
+                {
+                    ok = false;
+                    break;
+                }
+            }
+            return ok && counts.Values.All(c => c == 0);
         }
 
-        return newEqs;
-    }
-
-    public override int GetHashCode()
-    {
-        int value = -1906136416 ^ OperationSymbol().GetHashCode();
-        foreach (Equation eq in eqs)
+        public List<Equation> GetDisplaySortedArguments()
         {
-            value ^= eq.GetHashCode();
-        }
-        return value;
-    }
-
-    public override string ToString()
-    {
-        if (eqs.Count == 0)
-        {
-            return EmptyName();
+            List<Equation> sortedEqs = new List<Equation>(Arguments);
+            sortedEqs.Sort(EquationDisplayComparer.COMPARER);
+            return sortedEqs;
         }
 
-        List<Equation> sortedEquations = GetDisplaySortedArguments();
-
-        StringBuilder builder = new StringBuilder($"[{OperationName()}](");
-        builder.Append(sortedEquations[0].ToString());
-
-        for (int i = 1; i < sortedEquations.Count; i++)
+        protected static List<Equation> SimplifyArguments<T>(List<T> eqs, Rational identity, Operation operation) where T : Equation
         {
-            builder.Append(", ");
-            builder.Append(sortedEquations[i].ToString());
-        }
+            List<Equation> newEqs = new List<Equation>(eqs.Count);
 
-        builder.Append(")");
+            Rational collectedConstants = identity;
 
-        return builder.ToString();
-    }
-
-    public override string ToParsableString()
-    {
-        if (eqs.Count == 0)
-        {
-            return "()";
-        }
-
-        StringBuilder builder = new StringBuilder();
-
-        builder.Append(ParenthesisedParsableString(eqs[0]));
-        for (int i = 1; i < eqs.Count; i++)
-        {
-            builder.Append(" ");
-            builder.Append(OperationSymbol());
-            builder.Append(" ");
-            builder.Append(ParenthesisedParsableString(eqs[i]));
-        }
-
-        return builder.ToString();
-    }
-
-    public override string ToRunnableString()
-    {
-        if (eqs.Count == 0)
-        {
-            return EmptyName();
-        }
-
-        StringBuilder builder = new StringBuilder("(");
-        builder.Append(eqs[0].ToRunnableString());
-
-        for (int i = 1; i < eqs.Count; i++)
-        {
-            builder.Append(" ");
-            builder.Append(OperationSymbol());
-            builder.Append(" ");
-            builder.Append(eqs[i].ToRunnableString());
-        }
-
-        builder.Append(")");
-
-        return builder.ToString();
-    }
-
-    public override Equation Map(EquationMapping map)
-    {
-        Equation currentThis = this;
-
-        if (map.ShouldMapChildren(this))
-        {
-            List<Equation> mappedEqs = new List<Equation>(eqs.Count);
-
+            // Loop & simplify
             foreach (Equation eq in eqs)
             {
-                mappedEqs.Add(eq.Map(map));
+                if (eq is Constant constEq)
+                {
+                    collectedConstants = operation(collectedConstants, constEq.GetValue());
+                    continue;
+                }
+
+                newEqs.Add(eq);
             }
 
-            currentThis = GetSimplifyingConstructor()(mappedEqs);
+            if (!collectedConstants.Equals(identity))
+            {
+                newEqs.Add(Constant.From(collectedConstants));
+            }
+
+            return newEqs;
         }
 
-        if (map.ShouldMapThis(this))
+        public override int GetHashCode()
         {
-            currentThis = map.PostMap(currentThis);
+            int value = -1906136416 ^ OperationSymbol().GetHashCode();
+            foreach (Equation eq in Arguments)
+            {
+                value ^= eq.GetHashCode();
+            }
+            return value;
         }
 
-        return currentThis;
+        public override string ToString()
+        {
+            if (Arguments.Count == 0)
+            {
+                return "()";
+            }
+
+            StringBuilder builder = new StringBuilder();
+
+            builder.Append(ToParenthesisedString(Arguments[0]));
+            for (int i = 1; i < Arguments.Count; i++)
+            {
+                builder.Append(" ");
+                builder.Append(OperationSymbol());
+                builder.Append(" ");
+                builder.Append(ToParenthesisedString(Arguments[i]));
+            }
+
+            return builder.ToString();
+        }
+
+        public override string ToRunnableString()
+        {
+            if (Arguments.Count == 0)
+            {
+                return EmptyName();
+            }
+
+            StringBuilder builder = new StringBuilder("(");
+            builder.Append(Arguments[0].ToRunnableString());
+
+            for (int i = 1; i < Arguments.Count; i++)
+            {
+                builder.Append(" ");
+                builder.Append(OperationSymbol());
+                builder.Append(" ");
+                builder.Append(Arguments[i].ToRunnableString());
+            }
+
+            builder.Append(")");
+
+            return builder.ToString();
+        }
+
+        public override Equation Map(EquationMapping map)
+        {
+            Equation currentThis = this;
+
+            if (map.ShouldMapChildren(this))
+            {
+                List<Equation> mappedEqs = new List<Equation>(Arguments.Count);
+
+                foreach (Equation eq in Arguments)
+                {
+                    mappedEqs.Add(eq.Map(map));
+                }
+
+                currentThis = GetSimplifyingConstructor()(mappedEqs);
+            }
+
+            if (map.ShouldMapThis(this))
+            {
+                currentThis = map.PostMap(currentThis);
+            }
+
+            return currentThis;
+        }
     }
 }

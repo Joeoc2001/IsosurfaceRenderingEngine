@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Algebra;
+using Algebra.Operations;
+using Algebra.Parsing;
 
-namespace Tests
+namespace OperationsTests
 {
     public class VariableTests
     {

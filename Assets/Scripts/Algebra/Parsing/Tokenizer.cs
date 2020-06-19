@@ -1,139 +1,143 @@
-﻿using Rationals;
+﻿using Algebra.Operations;
+using Rationals;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
 
-public class Tokenizer
+namespace Algebra.Parsing
 {
-    private readonly TextReader reader;
-
-    public Token Token { get; private set; }
-    public Rational Number { get; private set; }
-    public Variable VariableValue { get; private set; }
-    public string FunctionName { get; private set; }
-
-    private char currentChar;
-
-    public Tokenizer(TextReader reader)
+    public class Tokenizer
     {
-        this.reader = reader;
-        NextChar();
-        NextToken();
-    }
+        private readonly TextReader reader;
 
-    void NextChar()
-    {
-        int c = reader.Read();
-        currentChar = c < 0 ? '\0' : char.ToLower((char)c);
-    }
+        public Token Token { get; private set; }
+        public Rational Number { get; private set; }
+        public Variable VariableValue { get; private set; }
+        public string FunctionName { get; private set; }
 
-    public void NextToken()
-    {
-        while (char.IsWhiteSpace(currentChar))
+        private char currentChar;
+
+        public Tokenizer(TextReader reader)
         {
+            this.reader = reader;
             NextChar();
+            NextToken();
         }
 
-        switch (currentChar)
+        void NextChar()
         {
-            case '\0':
-                Token = Token.EOF;
-                return;
-
-            case '+':
-                NextChar();
-                Token = Token.Add;
-                return;
-
-            case '-':
-                NextChar();
-                Token = Token.Subtract;
-                return;
-
-            case '*':
-                NextChar();
-                Token = Token.Multiply;
-                return;
-
-            case '/':
-                NextChar();
-                Token = Token.Divide;
-                return;
-
-            case '^':
-                NextChar();
-                Token = Token.Exponent;
-                return;
-
-            case '(':
-                NextChar();
-                Token = Token.OpenBrace;
-                return;
-
-            case ')':
-                NextChar();
-                Token = Token.CloseBrace;
-                return;
-
-            case ',':
-                NextChar();
-                Token = Token.Comma;
-                return;
+            int c = reader.Read();
+            currentChar = c < 0 ? '\0' : char.ToLower((char)c);
         }
 
-        if (char.IsDigit(currentChar))
+        public void NextToken()
         {
-            StringBuilder stringBuilder = new StringBuilder();
-
-            bool haveDecimalPoint = false;
-            bool haveDenominator = false;
-
-            while (char.IsDigit(currentChar)
-                || (!haveDecimalPoint && !haveDenominator && currentChar == '.')
-                || (!haveDecimalPoint && !haveDenominator && currentChar == '/'))
+            while (char.IsWhiteSpace(currentChar))
             {
-                stringBuilder.Append(currentChar);
-                haveDecimalPoint = haveDecimalPoint || currentChar == '.';
-                haveDenominator = haveDenominator ||currentChar == '/';
                 NextChar();
             }
 
-            if (!haveDenominator)
+            switch (currentChar)
             {
-                Number = Rational.ParseDecimal(stringBuilder.ToString());
-            }
-            else
-            {
-                Number = Rational.Parse(stringBuilder.ToString());
-            }
-            Token = Token.Decimal;
-            return;
-        }
+                case '\0':
+                    Token = Token.EOF;
+                    return;
 
-        if (char.IsLetter(currentChar))
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            while (char.IsLetter(currentChar))
-            {
-                stringBuilder.Append(currentChar);
-                NextChar();
+                case '+':
+                    NextChar();
+                    Token = Token.Add;
+                    return;
+
+                case '-':
+                    NextChar();
+                    Token = Token.Subtract;
+                    return;
+
+                case '*':
+                    NextChar();
+                    Token = Token.Multiply;
+                    return;
+
+                case '/':
+                    NextChar();
+                    Token = Token.Divide;
+                    return;
+
+                case '^':
+                    NextChar();
+                    Token = Token.Exponent;
+                    return;
+
+                case '(':
+                    NextChar();
+                    Token = Token.OpenBrace;
+                    return;
+
+                case ')':
+                    NextChar();
+                    Token = Token.CloseBrace;
+                    return;
+
+                case ',':
+                    NextChar();
+                    Token = Token.Comma;
+                    return;
             }
 
-            string identifier = stringBuilder.ToString();
-            if (Variable.VariableDict.TryGetValue(identifier, out Variable v))
+            if (char.IsDigit(currentChar))
             {
-                VariableValue = v;
-                Token = Token.Variable;
+                StringBuilder stringBuilder = new StringBuilder();
+
+                bool haveDecimalPoint = false;
+                bool haveDenominator = false;
+
+                while (char.IsDigit(currentChar)
+                    || (!haveDecimalPoint && !haveDenominator && currentChar == '.')
+                    || (!haveDecimalPoint && !haveDenominator && currentChar == '/'))
+                {
+                    stringBuilder.Append(currentChar);
+                    haveDecimalPoint = haveDecimalPoint || currentChar == '.';
+                    haveDenominator = haveDenominator || currentChar == '/';
+                    NextChar();
+                }
+
+                if (!haveDenominator)
+                {
+                    Number = Rational.ParseDecimal(stringBuilder.ToString());
+                }
+                else
+                {
+                    Number = Rational.Parse(stringBuilder.ToString());
+                }
+                Token = Token.Decimal;
                 return;
             }
 
-            Token = Token.Function;
-            FunctionName = identifier;
-            return;
-        }
+            if (char.IsLetter(currentChar))
+            {
+                StringBuilder stringBuilder = new StringBuilder();
+                while (char.IsLetter(currentChar))
+                {
+                    stringBuilder.Append(currentChar);
+                    NextChar();
+                }
 
-        throw new InvalidDataException($"Unexpected token '{currentChar + reader.ReadToEnd()}'");
+                string identifier = stringBuilder.ToString();
+                if (Variable.VariableDict.TryGetValue(identifier, out Variable v))
+                {
+                    VariableValue = v;
+                    Token = Token.Variable;
+                    return;
+                }
+
+                Token = Token.Function;
+                FunctionName = identifier;
+                return;
+            }
+
+            throw new InvalidDataException($"Unexpected token '{currentChar + reader.ReadToEnd()}'");
+        }
     }
 }

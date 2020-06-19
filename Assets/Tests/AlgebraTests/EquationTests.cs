@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Algebra;
+using Algebra.Operations;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
-using Rationals;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests
+namespace AlgebraTests
 {
     public class EquationTests
     {
@@ -89,20 +89,32 @@ namespace Tests
             }
         }
 
-        [Test]
-        public void Equation_FuzzHashCollisions()
+        [UnityTest]
+        public IEnumerator Equation_FuzzHashCollisions()
         {
-            Dictionary<int, Equation> hashes = new Dictionary<int, Equation>();
+            Random.InitState(0);
+
+            Dictionary<int, int> hashes = new Dictionary<int, int>();
+            int collisions = 0;
             for (int i = 0; i < 1000; i++)
             {
-                Equation newEq = GenerateRandomEquation(0f, 5);
+                Equation newEq = GenerateRandomEquation(0.3f, 3);
                 int newHash = newEq.GetHashCode();
 
                 if (hashes.ContainsKey(newHash))
                 {
-                    Assert.Fail($"Equation {newEq} has same hash {newHash} as equation {hashes[newHash]}");
+                    collisions += hashes[newHash];
+                    hashes[newHash] += 1;
                 }
+                else
+                {
+                    hashes.Add(newHash, 1);
+                }
+
+                yield return null;
             }
+
+            Assert.That(collisions, Is.LessThan(10));
         }
     }
 }

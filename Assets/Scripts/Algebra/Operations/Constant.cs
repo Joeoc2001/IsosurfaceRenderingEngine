@@ -2,114 +2,113 @@
 using System;
 using UnityEngine;
 
-public class Constant : Equation, IEquatable<Constant>
+
+namespace Algebra.Operations
 {
-    public static readonly Constant ZERO = 0;
-    public static readonly Constant ONE = 1;
-    public static readonly Constant MINUS_ONE = -1;
-
-    public static implicit operator Constant(int r) => Constant.From(r);
-    public static implicit operator Constant(long r) => Constant.From(r);
-    public static implicit operator Constant(float r) => Rational.Approximate(r);
-    public static implicit operator Constant(double r) => Rational.Approximate(r);
-    public static implicit operator Constant(decimal r) => Rational.Approximate(r);
-    public static implicit operator Constant(Rational r) => Constant.From(r);
-
-    private readonly Rational value;
-
-    public static Constant From(Rational value)
+    public class Constant : Equation, IEquatable<Constant>
     {
-        return new Constant(value.CanonicalForm);
-    }
+        public static readonly Constant ZERO = 0;
+        public static readonly Constant ONE = 1;
+        public static readonly Constant MINUS_ONE = -1;
 
-    private Constant(Rational value)
-    {
-        this.value = value;
-    }
+        public static implicit operator Constant(int r) => Constant.From(r);
+        public static implicit operator Constant(long r) => Constant.From(r);
+        public static implicit operator Constant(float r) => Rational.Approximate(r);
+        public static implicit operator Constant(double r) => Rational.Approximate(r);
+        public static implicit operator Constant(decimal r) => Rational.Approximate(r);
+        public static implicit operator Constant(Rational r) => Constant.From(r);
 
-    public override ExpressionDelegate GetExpression()
-    {
-        float approximation = (float)value;
-        return v => approximation;
-    }
+        private readonly Rational value;
 
-    public override Equation GetDerivative(Variable wrt)
-    {
-        return 0;
-    }
-
-    public bool Equals(Constant obj)
-    {
-        if (obj == null)
+        public static Constant From(Rational value)
         {
-            return false;
+            return new Constant(value.CanonicalForm);
         }
 
-        return value.Equals(obj.value);
-    }
-
-    public override bool Equals(object obj)
-    {
-        return this.Equals(obj as Constant);
-    }
-
-    public override int GetHashCode()
-    {
-        return value.GetHashCode();
-    }
-
-    public static bool operator ==(Constant left, Constant right)
-    {
-        if (ReferenceEquals(left, right))
+        private Constant(Rational value)
         {
-            return true;
+            this.value = value;
         }
 
-        if (left is null || right is null)
+        public override ExpressionDelegate GetExpression()
         {
-            return false;
+            float approximation = (float)value;
+            return v => approximation;
         }
 
-        return left.Equals(right);
-    }
-
-    public static bool operator !=(Constant left, Constant right)
-    {
-        return !(left == right);
-    }
-
-    public Rational GetValue()
-    {
-        return value;
-    }
-
-    public override string ToString()
-    {
-        return $"[CONSTANT]({value})";
-    }
-
-    public override string ToParsableString()
-    {
-        return $"{value}";
-    }
-
-    public override string ToRunnableString()
-    {
-        return $"Constant.From((Rational)({value.Numerator})/({value.Denominator}))";
-    }
-
-    public override int GetOrderIndex()
-    {
-        return 0;
-    }
-
-    public override Equation Map(EquationMapping map)
-    {
-        if (!map.ShouldMapThis(this))
+        public override Equation GetDerivative(Variable wrt)
         {
-            return this;
+            return 0;
         }
 
-        return map.PostMap(this);
+        public bool Equals(Constant obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            return value.Equals(obj.value);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as Constant);
+        }
+
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
+
+        public static bool operator ==(Constant left, Constant right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Constant left, Constant right)
+        {
+            return !(left == right);
+        }
+
+        public Rational GetValue()
+        {
+            return value;
+        }
+
+        public override string ToString()
+        {
+            return $"{value}";
+        }
+
+        public override string ToRunnableString()
+        {
+            return $"Constant.From((Rational)({value.Numerator})/({value.Denominator}))";
+        }
+
+        public override int GetOrderIndex()
+        {
+            return 0;
+        }
+
+        public override Equation Map(EquationMapping map)
+        {
+            if (!map.ShouldMapThis(this))
+            {
+                return this;
+            }
+
+            return map.PostMap(this);
+        }
     }
 }

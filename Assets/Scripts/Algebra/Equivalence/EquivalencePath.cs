@@ -1,18 +1,6 @@
-﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-public class EquivalencePath
+namespace Algebra.Equivalence
 {
-    public static readonly EquivalencePath IDENTITY = new EquivalencePath(
-        eq => new List<Equation> { eq }
-    );
-    
-
-    public readonly Func<Equation, IEnumerable<Equation>> func;
-
-    public EquivalencePath(Func<Equation, IEnumerable<Equation>> func)
-    {
-        this.func = func;
-    }
+    public delegate List<Equation> EquivalencePath(Equation eq);
 }

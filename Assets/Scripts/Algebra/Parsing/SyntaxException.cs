@@ -3,9 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SyntaxException : Exception
+namespace Algebra.Parsing
 {
-    public SyntaxException(string message) : base(message)
+    public class SyntaxException : Exception
     {
+        public SyntaxException(string message) : base(message)
+        {
+        }
     }
 }

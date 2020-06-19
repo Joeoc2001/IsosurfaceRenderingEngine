@@ -4,8 +4,11 @@ using NUnit.Framework;
 using Rationals;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Algebra;
+using Algebra.Operations;
+using Algebra.Parsing;
 
-namespace Tests
+namespace OperationsTests
 {
     public class ConstantTests
     {

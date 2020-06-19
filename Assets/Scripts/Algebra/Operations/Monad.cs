@@ -1,55 +1,59 @@
 ﻿using System;
 
-public abstract class Monad : Equation, IEquatable<Monad>
+
+namespace Algebra.Operations
 {
-    public readonly Equation Argument;
-
-    protected Monad(Equation argument)
+    public abstract class Monad : Equation, IEquatable<Monad>
     {
-        this.Argument = argument;
-    }
-    public abstract Func<Equation, Equation> GetSimplifyingConstructor();
+        public readonly Equation Argument;
 
-    public bool Equals(Monad obj)
-    {
-        if (obj is null)
+        protected Monad(Equation argument)
         {
-            return false;
+            this.Argument = argument;
+        }
+        public abstract Func<Equation, Equation> GetSimplifyingConstructor();
+
+        public bool Equals(Monad obj)
+        {
+            if (obj is null)
+            {
+                return false;
+            }
+
+            if (this.GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            return Argument.Equals(obj.Argument);
         }
 
-        if (this.GetType() != obj.GetType())
+        public override int GetHashCode()
         {
-            return false;
+            return Argument.GetHashCode() ^ -326072314;
         }
 
-        return Argument.Equals(obj.Argument);
-    }
-
-    public override int GetHashCode()
-    {
-        return Argument.GetHashCode() ^ -326072314;
-    }
-
-    public override bool Equals(object obj)
-    {
-        return this.Equals(obj as Monad);
-    }
-
-    public override Equation Map(EquationMapping map)
-    {
-        Equation currentThis = this;
-
-        if (map.ShouldMapChildren(this))
+        public override bool Equals(object obj)
         {
-            Equation mappedArg = Argument.Map(map);
-            currentThis = GetSimplifyingConstructor()(mappedArg);
+            return this.Equals(obj as Monad);
         }
 
-        if (map.ShouldMapThis(this))
+        public override Equation Map(EquationMapping map)
         {
-            currentThis = map.PostMap(currentThis);
-        }
+            Equation currentThis = this;
 
-        return currentThis;
+            if (map.ShouldMapChildren(this))
+            {
+                Equation mappedArg = Argument.Map(map);
+                currentThis = GetSimplifyingConstructor()(mappedArg);
+            }
+
+            if (map.ShouldMapThis(this))
+            {
+                currentThis = map.PostMap(currentThis);
+            }
+
+            return currentThis;
+        }
     }
 }
