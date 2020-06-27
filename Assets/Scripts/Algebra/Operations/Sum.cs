@@ -37,35 +37,33 @@ namespace Algebra.Operations
             }
 
             // Collate Multiplication terms
-            Dictionary<Equation, List<Equation>> terms = new Dictionary<Equation, List<Equation>>();
+            Dictionary<Equation, Constant> terms = new Dictionary<Equation, Constant>();
             foreach (Equation eq in newEqs)
             {
                 Equation baseEq;
-                Equation coefficientEq;
+                Constant newCoefficient;
                 if (eq is Product multeq)
                 {
                     baseEq = multeq.GetVariable();
-                    coefficientEq = multeq.GetConstantCoefficient();
+                    newCoefficient = multeq.GetConstantCoefficient();
                 }
                 else
                 {
                     baseEq = eq;
-                    coefficientEq = 1;
+                    newCoefficient = 1;
                 }
 
-                if (!terms.ContainsKey(baseEq))
+                if (terms.TryGetValue(baseEq, out Constant coefficient))
                 {
-                    terms.Add(baseEq, new List<Equation>());
+                    newCoefficient = Constant.From(newCoefficient.GetValue() + coefficient.GetValue());
                 }
-                terms[baseEq].Add(coefficientEq);
+                terms[baseEq] = newCoefficient;
             }
             // Put back into exponent form
             newEqs.Clear();
             foreach (Equation eq in terms.Keys)
             {
-                List<Equation> coefficients = terms[eq];
-
-                Equation newEq = eq * Add(coefficients);
+                Equation newEq = eq * terms[eq];
 
                 if (newEq.Equals(Constant.ZERO))
                 {

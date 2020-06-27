@@ -62,11 +62,14 @@ namespace Algebra.Operations
                     exponentEq = 1;
                 }
 
-                if (!exponents.ContainsKey(baseEq))
+                if (exponents.TryGetValue(baseEq, out List<Equation> exponentList))
                 {
-                    exponents.Add(baseEq, new List<Equation>());
+                    exponentList.Add(exponentEq);
                 }
-                exponents[baseEq].Add(exponentEq);
+                else
+                {
+                    exponents.Add(baseEq, new List<Equation>() { exponentEq });
+                }
             }
             // Put back into exponent form
             newEqs.Clear();
@@ -175,7 +178,7 @@ namespace Algebra.Operations
         }
 
         // Finds the first constant in the multiplication, or returns 1 if there are none
-        public Equation GetConstantCoefficient()
+        public Constant GetConstantCoefficient()
         {
             foreach (Equation eq in Arguments)
             {
