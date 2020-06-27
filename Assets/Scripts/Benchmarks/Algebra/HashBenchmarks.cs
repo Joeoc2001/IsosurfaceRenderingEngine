@@ -18,14 +18,14 @@ public class HashBenchmarks : MonoBehaviour
     public TMPro.TMP_Text text;
 
     // Displayed values
-    float avgNumPerSecond = 100;
+    float avgNumPerSecond = 1000;
     float hashFunctionQuality = 0;
 
     // Working values
     private readonly RandomEquationGenerator randomEquationGenerator = new RandomEquationGenerator();
     private float batchStartTime;
     private int sampled;
-    private readonly Dictionary<int, int> seenHashes = new Dictionary<int, int>();
+    private readonly Dictionary<int, HashSet<Equation>> seenHashes = new Dictionary<int, HashSet<Equation>>();
 
     void Update()
     {
@@ -59,9 +59,9 @@ public class HashBenchmarks : MonoBehaviour
 
             if (!seenHashes.ContainsKey(hash))
             {
-                seenHashes.Add(hash, 0);
+                seenHashes.Add(hash, new HashSet<Equation>());
             }
-            seenHashes[hash] += 1;
+            seenHashes[hash].Add(newEq);
         }
         sampled += toGen;
 
@@ -74,7 +74,7 @@ public class HashBenchmarks : MonoBehaviour
         float sum = 0;
         foreach (int hash in seenHashes.Keys)
         {
-            int i = seenHashes[hash];
+            int i = seenHashes[hash].Count;
             sum += (i * (i + 1)) / 2;
         }
         float n = sampled;
