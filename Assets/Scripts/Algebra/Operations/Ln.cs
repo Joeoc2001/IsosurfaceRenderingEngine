@@ -39,34 +39,24 @@ namespace Algebra.Operations
             return derivative / Argument;
         }
 
-        public override bool Equals(object obj)
+        public bool Equals(Ln other)
         {
-            return this.Equals(obj as Ln);
-        }
-
-        public override int GetHashCode()
-        {
-            return Argument.GetHashCode() ^ -1043105826;
-        }
-
-        public static bool operator ==(Ln left, Ln right)
-        {
-            if (ReferenceEquals(left, right))
-            {
-                return true;
-            }
-
-            if (left is null || right is null)
+            if (other is null)
             {
                 return false;
             }
 
-            return left.Equals(right);
+            return Argument.Equals(other.Argument);
         }
 
-        public static bool operator !=(Ln left, Ln right)
+        public override bool Equals(Equation obj)
         {
-            return !(left == right);
+            return this.Equals(obj as Ln);
+        }
+
+        public override int GenHashCode()
+        {
+            return Argument.GenHashCode() ^ -1043105826;
         }
 
         public override string ToString()

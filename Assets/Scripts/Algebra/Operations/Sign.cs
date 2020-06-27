@@ -52,14 +52,24 @@ namespace Algebra.Operations
             return v => Math.Sign(eqExpression(v));
         }
 
-        public override bool Equals(object obj)
+        public bool Equals(Sign other)
         {
-            return this.Equals(obj as Monad);
+            if (other is null)
+            {
+                return false;
+            }
+
+            return Argument.Equals(other.Argument);
         }
 
-        public override int GetHashCode()
+        public override bool Equals(Equation obj)
         {
-            return Argument.GetHashCode() ^ -322660314;
+            return this.Equals(obj as Sign);
+        }
+
+        public override int GenHashCode()
+        {
+            return Argument.GenHashCode() ^ -322660314;
         }
 
         public override string ToString()
@@ -75,26 +85,6 @@ namespace Algebra.Operations
         public override string ToRunnableString()
         {
             return $"Equation.SignOf({Argument.ToRunnableString()})";
-        }
-
-        public static bool operator ==(Sign left, Sign right)
-        {
-            if (ReferenceEquals(left, right))
-            {
-                return true;
-            }
-
-            if (left is null || right is null)
-            {
-                return false;
-            }
-
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(Sign left, Sign right)
-        {
-            return !(left == right);
         }
 
         public override int GetOrderIndex()

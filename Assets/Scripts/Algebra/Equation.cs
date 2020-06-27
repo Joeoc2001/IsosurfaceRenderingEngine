@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Algebra
 {
-    public abstract class Equation
+    public abstract class Equation : IEquatable<Equation>
     {
         public static implicit operator Equation(int r) => (Constant)r;
         public static implicit operator Equation(long r) => (Constant)r;
@@ -24,8 +24,8 @@ namespace Algebra
         public abstract Equation GetDerivative(Variable wrt);
         public Equation Map(EquationMapping.EquationMap map) => Map((EquationMapping)map);
         public abstract Equation Map(EquationMapping map);
-        public override abstract int GetHashCode();
-        public override abstract bool Equals(object obj);
+        public abstract int GenHashCode();
+        public abstract bool Equals(Equation obj);
         public abstract string ToRunnableString();
 
         /* Used for displaying braces when printing a human-readable string
@@ -38,6 +38,23 @@ namespace Algebra
          * Less => Higher priority
          */
         public abstract int GetOrderIndex();
+
+        // Cache hash
+        int? hash = null;
+        public override sealed int GetHashCode()
+        {
+            if (!hash.HasValue)
+            {
+                hash = GenHashCode();
+            }
+
+            return hash.Value;
+        }
+
+        public sealed override bool Equals(object obj)
+        {
+            return Equals(obj as Equation);
+        }
 
         public ExpressionDelegate GetDerivitiveExpression(Variable wrt)
         {

@@ -114,14 +114,14 @@ namespace Algebra.Operations
             return OperandsEquals(obj.Arguments);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(Equation obj)
         {
             return this.Equals(obj as Sum);
         }
 
-        public override int GetHashCode()
+        public override int GenHashCode()
         {
-            return base.GetHashCode() ^ -1375070008;
+            return base.GenHashCode() ^ -1375070008;
         }
 
         public override int IdentityValue()
@@ -142,26 +142,6 @@ namespace Algebra.Operations
         public override string OperationSymbol()
         {
             return "+";
-        }
-
-        public static bool operator ==(Sum left, Sum right)
-        {
-            if (ReferenceEquals(left, right))
-            {
-                return true;
-            }
-
-            if (left is null || right is null)
-            {
-                return false;
-            }
-
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(Sum left, Sum right)
-        {
-            return !(left == right);
         }
 
         public override int GetOrderIndex()

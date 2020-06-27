@@ -51,34 +51,14 @@ namespace Algebra.Operations
             return value.Equals(obj.value);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(Equation obj)
         {
             return this.Equals(obj as Constant);
         }
 
-        public override int GetHashCode()
+        public override int GenHashCode()
         {
             return value.GetHashCode();
-        }
-
-        public static bool operator ==(Constant left, Constant right)
-        {
-            if (ReferenceEquals(left, right))
-            {
-                return true;
-            }
-
-            if (left is null || right is null)
-            {
-                return false;
-            }
-
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(Constant left, Constant right)
-        {
-            return !(left == right);
         }
 
         public Rational GetValue()

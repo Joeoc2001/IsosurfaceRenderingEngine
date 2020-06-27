@@ -95,34 +95,14 @@ namespace Algebra.Operations
             return Base.Equals(other.Base) && Power.Equals(other.Power);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(Equation obj)
         {
             return this.Equals(obj as Exponent);
         }
 
-        public override int GetHashCode()
+        public override int GenHashCode()
         {
-            return (31 * Base.GetHashCode() - Power.GetHashCode()) ^ 642859777;
-        }
-
-        public static bool operator ==(Exponent left, Exponent right)
-        {
-            if (ReferenceEquals(left, right))
-            {
-                return true;
-            }
-
-            if (left is null || right is null)
-            {
-                return false;
-            }
-
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(Exponent left, Exponent right)
-        {
-            return !(left == right);
+            return (31 * Base.GenHashCode() - Power.GenHashCode()) ^ 642859777;
         }
 
         public override string ToString()

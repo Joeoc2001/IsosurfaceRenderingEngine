@@ -99,12 +99,13 @@ namespace Algebra.Operations
             return newEqs;
         }
 
-        public override int GetHashCode()
+        public override int GenHashCode()
         {
             int value = -1906136416 ^ OperationSymbol().GetHashCode();
-            foreach (Equation eq in Arguments)
+            foreach (Equation eq in GetDisplaySortedArguments())
             {
-                value ^= eq.GetHashCode();
+                value *= 33;
+                value ^= eq.GenHashCode();
             }
             return value;
         }

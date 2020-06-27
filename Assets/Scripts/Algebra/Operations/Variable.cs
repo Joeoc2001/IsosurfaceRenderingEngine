@@ -57,12 +57,12 @@ namespace Algebra.Operations
             return this.Index.Equals(obj.Index);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(Equation obj)
         {
             return this.Equals(obj as Variable);
         }
 
-        public override int GetHashCode()
+        public override int GenHashCode()
         {
             return Index * 1513357220;
         }
@@ -75,26 +75,6 @@ namespace Algebra.Operations
         public override string ToRunnableString()
         {
             return $"Variable.{Name.ToUpper()}";
-        }
-
-        public static bool operator ==(Variable left, Variable right)
-        {
-            if (ReferenceEquals(left, right))
-            {
-                return true;
-            }
-
-            if (left is null || right is null)
-            {
-                return false;
-            }
-
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(Variable left, Variable right)
-        {
-            return !(left == right);
         }
 
         public override int GetOrderIndex()
