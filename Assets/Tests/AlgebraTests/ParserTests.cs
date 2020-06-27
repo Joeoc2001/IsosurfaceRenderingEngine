@@ -660,12 +660,17 @@ namespace AlgebraTests
         [UnityTest]
         public IEnumerator Parser_FuzzerEquationsEqual()
         {
+            RandomEquationGenerator gen = new RandomEquationGenerator()
+            {
+                baseProb = 0.5f,
+                maxDepth = 3
+            };
             Random.InitState(0);
 
             for (int i = 0; i < 10000; i++)
             {
                 // ARANGE
-                Equation expected = EquationTests.GenerateRandomEquation(0.5f, 3);
+                Equation expected = gen.Next();
                 string equation = expected.ToString();
 
                 // ACT
