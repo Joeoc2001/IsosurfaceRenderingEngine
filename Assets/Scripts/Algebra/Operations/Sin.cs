@@ -8,14 +8,14 @@ using System;
 
 namespace Algebra.Operations
 {
-    public class Ln : Monad
+    public class Sin : Monad
     {
-        new public static Equation LnOf(Equation argument)
+        new public static Equation SinOf(Equation argument)
         {
-            return new Ln(argument);
+            return new Sin(argument);
         }
 
-        public Ln(Equation argument)
+        public Sin(Equation argument)
             : base(argument)
         {
 
@@ -23,23 +23,18 @@ namespace Algebra.Operations
 
         public override ExpressionDelegate GetExpression()
         {
-            if (Argument is Constant constant)
-            {
-                return v => (float)Rational.Log(constant.GetValue());
-            }
-
             ExpressionDelegate expression = Argument.GetExpression();
 
-            return v => Mathf.Log(expression(v));
+            return v => Mathf.Sin(expression(v));
         }
 
         public override Equation GetDerivative(Variable wrt)
         {
             Equation derivative = Argument.GetDerivative(wrt);
-            return derivative / Argument;
+            return derivative * CosOf(Argument);
         }
 
-        public bool Equals(Ln other)
+        public bool Equals(Sin other)
         {
             if (other is null)
             {
@@ -51,19 +46,19 @@ namespace Algebra.Operations
 
         public override bool Equals(Equation obj)
         {
-            return this.Equals(obj as Ln);
+            return this.Equals(obj as Sin);
         }
 
         public override int GenHashCode()
         {
-            return Argument.GenHashCode() ^ -1043105826;
+            return Argument.GenHashCode() ^ -1010034057;
         }
 
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.Append("ln ");
+            builder.Append("sin ");
             builder.Append(ToParenthesisedString(Argument));
 
             return builder.ToString();
@@ -71,7 +66,7 @@ namespace Algebra.Operations
 
         public override string ToRunnableString()
         {
-            return $"Equation.LnOf({Argument.ToRunnableString()})";
+            return $"Equation.SinOf({Argument.ToRunnableString()})";
         }
 
         public override int GetOrderIndex()
@@ -81,7 +76,7 @@ namespace Algebra.Operations
 
         public override Func<Equation, Equation> GetSimplifyingConstructor()
         {
-            return LnOf;
+            return SinOf;
         }
     }
 }

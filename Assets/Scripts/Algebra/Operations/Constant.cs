@@ -10,6 +10,8 @@ namespace Algebra.Operations
         public static readonly Constant ZERO = 0;
         public static readonly Constant ONE = 1;
         public static readonly Constant MINUS_ONE = -1;
+        public static readonly Constant PI = Math.PI;
+        public static readonly Constant E = Math.E;
 
         public static implicit operator Constant(int r) => Constant.From(r);
         public static implicit operator Constant(long r) => Constant.From(r);

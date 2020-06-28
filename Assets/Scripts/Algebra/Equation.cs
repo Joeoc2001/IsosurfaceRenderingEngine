@@ -131,6 +131,21 @@ namespace Algebra
             return Sign.SignOf(eq);
         }
 
+        public static Equation SinOf(Equation eq)
+        {
+            return Sin.SinOf(eq);
+        }
+
+        public static Equation CosOf(Equation eq)
+        {
+            return SinOf(eq + (Constant.PI / 2));
+        }
+
+        public static Equation TanOf(Equation eq)
+        {
+            return SinOf(eq) / CosOf(eq);
+        }
+
         public static Equation Abs(Equation eq)
         {
             return eq * SignOf(eq);
