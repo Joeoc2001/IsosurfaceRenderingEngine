@@ -249,6 +249,18 @@ namespace Algebra.Parsing
                     requiredParameters = 2;
                     constructor = ns => Equation.Max(ns[0], ns[1]);
                     break;
+                case "sin":
+                    requiredParameters = 1;
+                    constructor = ns => Equation.SinOf(ns[0]);
+                    break;
+                case "cos":
+                    requiredParameters = 1;
+                    constructor = ns => Equation.CosOf(ns[0]);
+                    break;
+                case "tan":
+                    requiredParameters = 1;
+                    constructor = ns => Equation.TanOf(ns[0]);
+                    break;
                 default:
                     throw new SyntaxException($"Unknown function name: {tokenizer.FunctionName}");
             }

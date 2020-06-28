@@ -49,19 +49,34 @@ namespace Algebra
                 else if (functionValue < 0.3)
                 {
                     // Return a min function
-                    return Equation.Min(Gen(baseProb, maxDepth - 3),
-                        Gen(baseProb, maxDepth - 3));
+                    return Equation.Min(Gen(baseProb, maxDepth - 1),
+                        Gen(baseProb, maxDepth - 1));
                 }
                 else if (functionValue < 0.4)
                 {
                     // Return a max function
-                    return Equation.Max(Gen(baseProb, maxDepth - 3),
-                        Gen(baseProb, maxDepth - 3));
+                    return Equation.Max(Gen(baseProb, maxDepth - 1),
+                        Gen(baseProb, maxDepth - 1));
                 }
                 else if (functionValue < 0.5)
                 {
                     // Return an Abs function
-                    return Equation.Abs(Gen(baseProb, maxDepth - 2));
+                    return Equation.Abs(Gen(baseProb, maxDepth - 1));
+                }
+                else if (functionValue < 0.6)
+                {
+                    // Return an Sin function
+                    return Equation.SinOf(Gen(baseProb, maxDepth - 1));
+                }
+                else if (functionValue < 0.7)
+                {
+                    // Return an Sin function
+                    return Equation.CosOf(Gen(baseProb, maxDepth - 1));
+                }
+                else if (functionValue < 0.8)
+                {
+                    // Return an Sin function
+                    return Equation.TanOf(Gen(baseProb, maxDepth - 1));
                 }
                 else
                 {
