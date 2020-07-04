@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ChunkVertexCache
 {
@@ -26,9 +27,17 @@ public class ChunkVertexCache
             }
         }
     }
+    public bool IsSet(Vector3Int p, int axis)
+    {
+        return IsSet(p.x, p.y, p.z, axis);
+    }
     public bool IsSet(int x, int y, int z, int axis)
     {
         return Values[x, y, z, axis] != 0;
+    }
+    public void Set(Vector3Int p, int axis, int value)
+    {
+        Set(p.x, p.y, p.z, axis, value);
     }
     public void Set(int x, int y, int z, int axis, int value)
     {
@@ -38,6 +47,10 @@ public class ChunkVertexCache
         }
 
         Values[x, y, z, axis] = value + 1;
+    }
+    public int Get(Vector3Int p, int axis)
+    {
+        return Get(p.x, p.y, p.z, axis);
     }
     public int Get(int x, int y, int z, int axis)
     {

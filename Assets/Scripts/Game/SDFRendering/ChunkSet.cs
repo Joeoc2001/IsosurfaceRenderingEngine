@@ -40,9 +40,8 @@ public class ChunkSet : MonoBehaviour
         }
     }
 
-    public Chunk baseChunk;
-
     public EquationProvider distanceField;
+    public ChunkManagementSystem chunkSystem;
 
     public int lastUpdates = 0;
     public double updatesPerSecond = 0;
@@ -59,12 +58,16 @@ public class ChunkSet : MonoBehaviour
     [Range(0, 50)]
     public float normalApproxDistance;
 
+    [Range(0, 10)]
+    public float baseQuality;
+
     [Range(0, 2)]
     public float qualityDropoff;
 
     public Vector3Int baseIndex;
 
     private TwoWayDict<Vector3Int, Chunk> chunks;
+    private Dictionary<Chunk, ChunkContainer> containers;
 
     private Priority_Queue.FastPriorityQueue<ChunkContainer> updatePriority;
 
@@ -72,6 +75,7 @@ public class ChunkSet : MonoBehaviour
     void Start()
     {
         chunks = new TwoWayDict<Vector3Int, Chunk>();
+        containers = new Dictionary<Chunk, ChunkContainer>();
         updatePriority = new Priority_Queue.FastPriorityQueue<ChunkContainer>(GetMaxChunks());
     }
 
@@ -81,17 +85,19 @@ public class ChunkSet : MonoBehaviour
         return side * side * side;
     }
 
-    bool ShouldApproximateNormals(double dist)
-    {
-        return dist >= normalApproxDistance;
-    }
+    //private bool ShouldChunkBeKilled(Chunk chunk)
+    //{
+    //    Vector3Int index = chunks[chunk] - baseIndex;
+    //    int dist = Math.Max(Math.Max(index.x, index.y), index.z);
+    //    return dist > viewDistance + 1;
+    //}
 
-    int GetQuality(double dist)
-    {
-        return (int)Math.Max(1,
-                baseChunk.quality - (qualityDropoff * dist) + 0.5
-            );
-    }
+    //int GetQuality(Chunk chunk)
+    //{
+    //    Vector3Int index = chunks[chunk] - baseIndex;
+    //    int dist = Math.Max(Math.Max(index.x, index.y), index.z);
+    //    return (int)Math.Max(1, baseQuality - (qualityDropoff * dist) + 0.5);
+    //}
 
     private static IEnumerable<Vector3Int> GetNewChunkIndexes(Vector3Int oldCenter, int oldR, Vector3Int newCenter, int newR)
     {
@@ -128,9 +134,53 @@ public class ChunkSet : MonoBehaviour
         return newChunks;
     }
 
+    public Chunk GenerateChunk(Vector3Int index)
+    {
+        // Generate a new chunk
+        Vector3 position = new Vector3(index.x, index.y, index.z) * Chunk.SIZE;
+        Chunk newChunk = chunkSystem.InstantiateNewChunk(this, index, position);
+
+        // Set fields
+        newChunk.OwningSet = this;
+
+        // Add new chunk to data structures
+        ChunkContainer container = new ChunkContainer(newChunk);
+        containers.Add(newChunk, container);
+        updatePriority.Enqueue(container, container.Priority);
+
+        chunks.Add(index, newChunk);
+
+        return newChunk;
+    }
+
+    public void RemoveChunk(Vector3Int index)
+    {
+        // If the index isn't in chunks then the chunk doesn't exist
+        if (!chunks.TryGetValue(index, out Chunk chunk))
+        {
+            return;
+        }
+
+        chunk.OwningSet = null;
+
+        // Remove the chunk from the list of chunks to be ticked (if it is present)
+        ChunkContainer container = containers[chunk];
+        if(updatePriority.Contains(container))
+        {
+            updatePriority.Remove(container);
+        }
+
+        // Remove the chunk from the dictionaries
+        containers.Remove(chunk);
+        chunks.Remove(index);
+
+        // Kill it
+        Destroy(chunk.gameObject);
+    }
+
     private Vector3Int generatedBaseIndex = new Vector3Int(0, 0, 0);
     private int generatedViewDistance = 0;
-    public void GenerateChunks()
+    public void GenerateNewChunks()
     {
         IEnumerable<Vector3Int> newChunkIndexes = GetNewChunkIndexes(generatedBaseIndex, generatedViewDistance, baseIndex, viewDistance);
 
@@ -144,99 +194,64 @@ public class ChunkSet : MonoBehaviour
         {
             if (!chunks.ContainsKey(index))
             {
-                Vector3 offset = new Vector3(index.x, index.y, index.z) * baseChunk.size;
-                Chunk chunk = Instantiate<Chunk>(baseChunk, offset, Quaternion.identity, transform);
-
-                ChunkContainer container = new ChunkContainer(chunk);
-                updatePriority.Enqueue(container, container.Priority);
-
-                chunks.Add(index, chunk);
+                GenerateChunk(index);
             }
-            //Assert.IsNotNull(chunks[index]);
+
+            Assert.IsNotNull(chunks[index]);
         }
 
         generatedBaseIndex = baseIndex;
         generatedViewDistance = viewDistance;
     }
 
-    private readonly Dictionary<ChunkContainer, (JobHandle handle, FeelerNodeSetJob job)> chunkFeelerNodeJobs
-        = new Dictionary<ChunkContainer, (JobHandle handle, FeelerNodeSetJob job)>();
+    private readonly Dictionary<ChunkContainer, (IPriorGenTaskHandle handle, PriorGenTask job)> priorGenJobs
+        = new Dictionary<ChunkContainer, (IPriorGenTaskHandle handle, PriorGenTask job)>();
 
-    private List<(ChunkContainer, FeelerNodeSet)> FinishFeelerNodeJobs()
+    private List<(ChunkContainer, PriorGenTask)> FinishPriorGenJobs()
     {
-        List<(ChunkContainer, FeelerNodeSet)> data
-            = new List<(ChunkContainer, FeelerNodeSet)>(chunkFeelerNodeJobs.Count);
+        List<(ChunkContainer, PriorGenTask)> completedJobs
+            = new List<(ChunkContainer, PriorGenTask)>(priorGenJobs.Count);
 
-        foreach (ChunkContainer chunkContainer in chunkFeelerNodeJobs.Keys)
+        foreach (ChunkContainer chunkContainer in priorGenJobs.Keys)
         {
-            (JobHandle handle, FeelerNodeSetJob job) = chunkFeelerNodeJobs[chunkContainer];
+            (IPriorGenTaskHandle handle, PriorGenTask job) = priorGenJobs[chunkContainer];
             handle.Complete();
 
-            // Extract completed datas
-            FeelerNode[] feelerNodes = new FeelerNode[job.Target.Length];
-            job.Target.CopyTo(feelerNodes);
-            int resolution = job.Resolution;
-            FeelerNodeSet feelerNodeSet = new FeelerNodeSet(resolution, feelerNodes);
-
-            // Clean up
-            job.Target.Dispose();
-
             // Add chunk to be modified
-            data.Add((chunkContainer, feelerNodeSet));
-
+            completedJobs.Add((chunkContainer, job));
         }
 
-        chunkFeelerNodeJobs.Clear();
+        priorGenJobs.Clear();
 
-        return data;
+        return completedJobs;
     }
 
-    private bool ShouldChunkBeKilled(Chunk chunk)
-    {
-        Vector3Int index = chunks[chunk] - baseIndex;
-        int dist = Math.Max(Math.Max(index.x, index.y), index.z);
-        return dist > viewDistance + 1;
-    }
-
-    private FeelerNodeSetJob CreateFeelerNodeJob(ChunkContainer chunkContainer, Equation.ExpressionDelegate distFunc)
-    {
-        Chunk chunk = chunkContainer.Chunk;
-        int resolution = (1 << chunk.quality) + 1;
-        return new FeelerNodeSetJob()
-        {
-            // Get a pointer to the distance function
-            Function = new FunctionPointer<Equation.ExpressionDelegate>(Marshal.GetFunctionPointerForDelegate(distFunc)),
-
-            Resolution = resolution,
-            Delta = chunk.size / (1 << chunk.quality),
-            Origin = chunk.transform.position,
-
-            Target = new NativeArray<FeelerNode>(resolution * resolution * resolution, Allocator.TempJob)
-        };
-    }
-
-    private void RandomTickChunk(ChunkContainer chunkContainer, Equation.ExpressionDelegate distFunc)
+    private void RandomTickChunk(ChunkContainer chunkContainer, SDF sdf)
     {
         Chunk chunk = chunkContainer.Chunk;
         Vector3Int index = chunks[chunk];
-        float dist = (index - baseIndex).magnitude;
+
+        // Check to see if the chunk should be changed
+        if (chunkSystem.ShouldChunkBeReinstantiated(chunk))
+        {
+            chunk = GenerateChunk(index);
+        }
 
         // Check to see if the chunk should be deleted
-        if (ShouldChunkBeKilled(chunk))
+        if (chunkSystem.ShouldChunkBeKilled(chunk))
         {
-            chunks.Remove(index);
-            Destroy(chunk.gameObject);
+            RemoveChunk(index);
             return;
         }
 
         // Update fields
-        chunk.approximateNormals = baseChunk.approximateNormals || ShouldApproximateNormals(dist);
-        chunk.quality = GetQuality(dist);
+        int quality = chunkSystem.GetChunkQuality(chunk);
+        chunk.SetQuality(quality);
 
         // Create new feeler node update job
-        FeelerNodeSetJob feelerNodeSetJob = CreateFeelerNodeJob(chunkContainer, distFunc);
-        JobHandle handle = feelerNodeSetJob.Schedule();
-        chunkFeelerNodeJobs.Add(chunkContainer, (handle, feelerNodeSetJob));
+        PriorGenTask feelerNodeSetJob = chunk.CreatePriorJob(sdf);
+        IPriorGenTaskHandle handle = feelerNodeSetJob.Schedule();
+        priorGenJobs.Add(chunkContainer, (handle, feelerNodeSetJob));
     }
 
     private int GetNumberOfChunksToTick()
@@ -260,15 +275,16 @@ public class ChunkSet : MonoBehaviour
     {
         // Calculate functions
         Equation distEq = distanceField.GetEquation();
-        Equation.ExpressionDelegate distFunc = distEq.GetExpression();
-        Equation.Vector3ExpressionDelegate normFunc = distEq.GetDerivitiveExpressionWrtXYZ();
+        SDF sdf = new SDF(distEq);
 
-        // Complete all feeler node tasks
-        List<(ChunkContainer, FeelerNodeSet)> chunkNodes = FinishFeelerNodeJobs();
-        foreach ((ChunkContainer chunkContainer, FeelerNodeSet nodes) in chunkNodes)
+        // Complete all prior gen node tasks
+        List<(ChunkContainer, PriorGenTask)> chunkNodes = FinishPriorGenJobs();
+        foreach ((ChunkContainer chunkContainer, PriorGenTask job) in chunkNodes)
         {
-            // Update chunk's mesh
-            chunkContainer.Chunk.GenerateMesh(nodes, normFunc);
+            // Update Chunk
+            job.AfterFinished();
+
+            // Requeue chunk
             chunkContainer.SetLastUpdatedTime();
             updatePriority.Enqueue(chunkContainer, chunkContainer.Priority);
         }
@@ -278,7 +294,7 @@ public class ChunkSet : MonoBehaviour
         for (int i = 0; i < updates; i++)
         {
             ChunkContainer chunkContainer = updatePriority.Dequeue();
-            RandomTickChunk(chunkContainer, distFunc);
+            RandomTickChunk(chunkContainer, sdf);
         }
 
         UpdateMetrics(updates);
@@ -287,13 +303,13 @@ public class ChunkSet : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        GenerateChunks(); // Checks which chunks should exist given the position etc of this set
+        GenerateNewChunks(); // Checks which chunks should exist given the position etc of this set
         TickChunks(); // Updates a collection of the chunks
     }
 
     void OnDestroy()
     {
         // Clean up any leftover tasks
-        FinishFeelerNodeJobs();
+        FinishPriorGenJobs();
     }
 }
