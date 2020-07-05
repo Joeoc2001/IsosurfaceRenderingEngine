@@ -55,21 +55,34 @@ public class ChunkSet : MonoBehaviour
     [Range(1, 50)]
     public int viewDistance;
 
-    [Range(0, 50)]
-    public float normalApproxDistance;
-
-    [Range(0, 10)]
-    public float baseQuality;
-
-    [Range(0, 2)]
-    public float qualityDropoff;
-
-    public Vector3Int baseIndex;
+    public Vector3Int BaseIndex { get; set; }
 
     private TwoWayDict<Vector3Int, Chunk> chunks;
     private Dictionary<Chunk, ChunkContainer> containers;
 
     private Priority_Queue.FastPriorityQueue<ChunkContainer> updatePriority;
+
+    public Vector3Int? GetChunkIndex(Chunk chunk)
+    {
+        if(chunks.TryGetValue(chunk, out Vector3Int index))
+        {
+            return index;
+        }
+
+        return null;
+    }
+
+    public Vector3Int? GetChunkOffset(Chunk chunk)
+    {
+        Vector3Int? indexQuery = GetChunkIndex(chunk);
+        if (!indexQuery.HasValue)
+        {
+            return null;
+        }
+
+        Vector3Int index = indexQuery.Value;
+        return index - BaseIndex;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -85,19 +98,18 @@ public class ChunkSet : MonoBehaviour
         return side * side * side;
     }
 
-    //private bool ShouldChunkBeKilled(Chunk chunk)
-    //{
-    //    Vector3Int index = chunks[chunk] - baseIndex;
-    //    int dist = Math.Max(Math.Max(index.x, index.y), index.z);
-    //    return dist > viewDistance + 1;
-    //}
+    public bool ShouldChunkBeKilled(Chunk chunk)
+    {
+        Vector3Int? offsetQuery = GetChunkOffset(chunk);
+        if (!offsetQuery.HasValue)
+        {
+            return false; // If the chunk isn't present then it probably shouldn't be killed
+        }
 
-    //int GetQuality(Chunk chunk)
-    //{
-    //    Vector3Int index = chunks[chunk] - baseIndex;
-    //    int dist = Math.Max(Math.Max(index.x, index.y), index.z);
-    //    return (int)Math.Max(1, baseQuality - (qualityDropoff * dist) + 0.5);
-    //}
+        Vector3Int offset = offsetQuery.Value;
+        int dist = Math.Max(Math.Max(offset.x, offset.y), offset.z);
+        return dist > viewDistance + 1;
+    }
 
     private static IEnumerable<Vector3Int> GetNewChunkIndexes(Vector3Int oldCenter, int oldR, Vector3Int newCenter, int newR)
     {
@@ -134,21 +146,34 @@ public class ChunkSet : MonoBehaviour
         return newChunks;
     }
 
+    public void UpdateChunkFields(Chunk chunk)
+    {
+        Vector3Int? indexQuery = GetChunkIndex(chunk);
+        if (!indexQuery.HasValue)
+        {
+            return;
+        }
+
+        Vector3Int index = indexQuery.Value;
+        Vector3 position = new Vector3(index.x, index.y, index.z) * Chunk.SIZE;
+        chunk.transform.localPosition = position;
+        chunk.OwningSet = this;
+        chunk.SetQuality(chunkSystem.GetChunkQuality(this, chunk));
+    }
+
     public Chunk GenerateChunk(Vector3Int index)
     {
         // Generate a new chunk
-        Vector3 position = new Vector3(index.x, index.y, index.z) * Chunk.SIZE;
-        Chunk newChunk = chunkSystem.InstantiateNewChunk(this, index, position);
-
-        // Set fields
-        newChunk.OwningSet = this;
+        Chunk newChunk = chunkSystem.InstantiateNewChunk(this, index);
 
         // Add new chunk to data structures
         ChunkContainer container = new ChunkContainer(newChunk);
         containers.Add(newChunk, container);
         updatePriority.Enqueue(container, container.Priority);
-
         chunks.Add(index, newChunk);
+
+        // Set fields
+        UpdateChunkFields(newChunk);
 
         return newChunk;
     }
@@ -182,7 +207,7 @@ public class ChunkSet : MonoBehaviour
     private int generatedViewDistance = 0;
     public void GenerateNewChunks()
     {
-        IEnumerable<Vector3Int> newChunkIndexes = GetNewChunkIndexes(generatedBaseIndex, generatedViewDistance, baseIndex, viewDistance);
+        IEnumerable<Vector3Int> newChunkIndexes = GetNewChunkIndexes(generatedBaseIndex, generatedViewDistance, BaseIndex, viewDistance);
 
         // Check if priority queue needs resizing
         if (viewDistance > generatedViewDistance || viewDistance < generatedViewDistance / 1.2)
@@ -200,25 +225,29 @@ public class ChunkSet : MonoBehaviour
             Assert.IsNotNull(chunks[index]);
         }
 
-        generatedBaseIndex = baseIndex;
+        generatedBaseIndex = BaseIndex;
         generatedViewDistance = viewDistance;
     }
 
     private readonly Dictionary<ChunkContainer, (IPriorGenTaskHandle handle, PriorGenTask job)> priorGenJobs
         = new Dictionary<ChunkContainer, (IPriorGenTaskHandle handle, PriorGenTask job)>();
 
-    private List<(ChunkContainer, PriorGenTask)> FinishPriorGenJobs()
+    private List<ChunkContainer> FinishPriorGenJobs()
     {
-        List<(ChunkContainer, PriorGenTask)> completedJobs
-            = new List<(ChunkContainer, PriorGenTask)>(priorGenJobs.Count);
+        List<ChunkContainer> completedJobs = new List<ChunkContainer>(priorGenJobs.Count);
 
         foreach (ChunkContainer chunkContainer in priorGenJobs.Keys)
         {
             (IPriorGenTaskHandle handle, PriorGenTask job) = priorGenJobs[chunkContainer];
+
+            // Run job to completion
             handle.Complete();
 
+            // Update Chunk
+            job.AfterFinished();
+
             // Add chunk to be modified
-            completedJobs.Add((chunkContainer, job));
+            completedJobs.Add(chunkContainer);
         }
 
         priorGenJobs.Clear();
@@ -231,22 +260,21 @@ public class ChunkSet : MonoBehaviour
         Chunk chunk = chunkContainer.Chunk;
         Vector3Int index = chunks[chunk];
 
+        // Check to see if the chunk should be deleted
+        if (ShouldChunkBeKilled(chunk))
+        {
+            RemoveChunk(index);
+            return;
+        }
+
         // Check to see if the chunk should be changed
         if (chunkSystem.ShouldChunkBeReinstantiated(chunk))
         {
             chunk = GenerateChunk(index);
         }
 
-        // Check to see if the chunk should be deleted
-        if (chunkSystem.ShouldChunkBeKilled(chunk))
-        {
-            RemoveChunk(index);
-            return;
-        }
-
         // Update fields
-        int quality = chunkSystem.GetChunkQuality(chunk);
-        chunk.SetQuality(quality);
+        UpdateChunkFields(chunk);
 
         // Create new feeler node update job
         PriorGenTask feelerNodeSetJob = chunk.CreatePriorJob(sdf);
@@ -278,12 +306,9 @@ public class ChunkSet : MonoBehaviour
         SDF sdf = new SDF(distEq);
 
         // Complete all prior gen node tasks
-        List<(ChunkContainer, PriorGenTask)> chunkNodes = FinishPriorGenJobs();
-        foreach ((ChunkContainer chunkContainer, PriorGenTask job) in chunkNodes)
+        List<ChunkContainer> chunkContainers = FinishPriorGenJobs();
+        foreach (ChunkContainer chunkContainer in chunkContainers)
         {
-            // Update Chunk
-            job.AfterFinished();
-
             // Requeue chunk
             chunkContainer.SetLastUpdatedTime();
             updatePriority.Enqueue(chunkContainer, chunkContainer.Priority);

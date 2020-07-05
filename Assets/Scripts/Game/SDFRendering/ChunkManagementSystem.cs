@@ -6,9 +6,7 @@ public abstract class ChunkManagementSystem : MonoBehaviour
 {
     public abstract bool ShouldChunkBeReinstantiated(Chunk chunk);
 
-    public abstract bool ShouldChunkBeKilled(Chunk chunk);
+    public abstract Chunk InstantiateNewChunk(ChunkSet destination, Vector3Int index);
 
-    public abstract Chunk InstantiateNewChunk(ChunkSet destination, Vector3Int index, Vector3 position);
-
-    public abstract int GetChunkQuality(Chunk chunk);
+    public abstract int GetChunkQuality(ChunkSet owner, Chunk chunk);
 }

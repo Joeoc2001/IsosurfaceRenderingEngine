@@ -682,6 +682,7 @@ GameObject:
   m_Component:
   - component: {fileID: 430997005}
   - component: {fileID: 430997004}
+  - component: {fileID: 430997008}
   - component: {fileID: 430997006}
   - component: {fileID: 430997007}
   m_Layer: 0
@@ -734,16 +735,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   distanceField: {fileID: 430997007}
-  chunkSystem: {fileID: 0}
+  chunkSystem: {fileID: 430997008}
   lastUpdates: 0
   updatesPerSecond: 0
   updatesPerChunkSecond: 1
-  maxUpdatesPerSecond: 5000
-  viewDistance: 20
-  normalApproxDistance: 50
-  baseQuality: 0
-  qualityDropoff: 0.2
-  baseIndex: {x: 0, y: 0, z: 0}
+  maxUpdatesPerSecond: 5
+  viewDistance: 3
 --- !u!114 &430997007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -757,6 +754,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   defaultEquation: x ^ 2 + y ^ 2 + z ^ 2 - 100
+--- !u!114 &430997008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430997003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a34c47b27c45944e84a60879b428adf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  templateChunk: {fileID: 5007514093602490432, guid: 2f0a4f44fc30699489ecc43a7ea4d784,
+    type: 3}
+  baseQuality: 3
+  qualityDropoff: 0.5
 --- !u!1 &438786792
 GameObject:
   m_ObjectHideFlags: 0
