@@ -734,13 +734,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48248865f23400d4a85ff51792655a1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distanceField: {fileID: 430997007}
-  chunkSystem: {fileID: 430997008}
-  lastUpdates: 0
-  updatesPerSecond: 0
-  updatesPerChunkSecond: 1
-  maxUpdatesPerSecond: 5
-  viewDistance: 3
 --- !u!114 &430997007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -766,6 +759,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a34c47b27c45944e84a60879b428adf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ChunkSet: {fileID: 0}
   templateChunk: {fileID: 5007514093602490432, guid: 2f0a4f44fc30699489ecc43a7ea4d784,
     type: 3}
   baseQuality: 3

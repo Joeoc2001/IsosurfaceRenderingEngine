@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CubeMarchedChunkSystem : ChunkManagementSystem
+public class CubeMarchedChunkSystem : ChunkSystem
 {
     public CubeMarchedChunk templateChunk;
 
