@@ -33,6 +33,8 @@ namespace Algebra
                     return 2;
                 case Sign _:
                     return 1;
+                case Sin _:
+                    return 0;
                 default:
                     throw new NotImplementedException($"Unsuported Equation type {e.GetType()}");
             };
@@ -63,6 +65,8 @@ namespace Algebra
                     return CompareMonad(c, (Ln)y);
                 case Sign c:
                     return CompareMonad(c, (Sign)y);
+                case Sin c:
+                    return CompareMonad(c, (Sin)y);
                 default:
                     throw new NotImplementedException($"Unsuported Equation type {x.GetType()}");
             };
