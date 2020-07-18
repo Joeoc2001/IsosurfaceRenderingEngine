@@ -2,94 +2,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CubeMarcher
+public class CubeMarcher : PointCloudMeshifier
 {
-    class MarchingDatas
-    {
-        public List<Vector3> chunkVertices = new List<Vector3>();
-        public List<int> chunkTriangles = new List<int>();
-        public ChunkVertexCache chunkVertexCache = new ChunkVertexCache(1);
-
-        public void Clear(int nodes)
-        {
-            chunkVertices.Clear();
-            chunkTriangles.Clear();
-
-            if (chunkVertexCache == null || chunkVertexCache.Width != nodes)
-            {
-                chunkVertexCache = new ChunkVertexCache(nodes);
-            }
-            else
-            {
-                chunkVertexCache.Clear();
-            }
-        }
-    }
-
     public static readonly CubeMarcher Instance = new CubeMarcher();
 
-    private readonly ObjectPool<MarchingDatas> pool;
-
     private CubeMarcher()
+        : base(1, 0)
     {
-        pool = new ObjectPool<MarchingDatas>(() => new MarchingDatas());
     }
 
-    public void MarchIntoMeshCore(Mesh mesh, FeelerNodeSet nodes, Vector3 offset)
+    protected override void GenerateForNode(Datas space, FeelerNodeSet nodes, Vector3Int index)
     {
-        mesh.Clear();
-
-        // Optimization because no triangles are needed if all nodes are the same
-        if (nodes.IsUniform)
-        {
-            return;
-        }
-
-        // Get a set of spaces in memory to march into
-        MarchingDatas space = pool.GetObject();
-        space.Clear(nodes.Resolution);
-
-        // http://transvoxel.org/Lengyel-VoxelTerrain.pdf
-
-        for (int cellX = 2; cellX < nodes.Resolution - 1; cellX++)
-        {
-            for (int cellY = 2; cellY < nodes.Resolution - 1; cellY++)
-            {
-                for (int cellZ = 2; cellZ < nodes.Resolution - 1; cellZ++)
-                {
-                    Vector3Int cellIndex = new Vector3Int(cellX, cellY, cellZ);
-                    FeelerNode[] cell = ExtractCell(nodes, cellIndex);
-                    AddRegularCellToData(space, cell, cellIndex, offset);
-                }
-            }
-        }
-
-        Vector3[] vertices = space.chunkVertices.ToArray();
-        mesh.vertices = vertices;
-        int[] triangles = space.chunkTriangles.ToArray();
-        mesh.triangles = triangles;
-
-        // Return datas
-        pool.PutObject(space);
+        FeelerNode[] cell = ExtractCell(nodes, index);
+        AddRegularCellToData(space, cell, index);
     }
 
     private FeelerNode[] ExtractCell(FeelerNodeSet nodes, Vector3Int cellIndex)
     {
         FeelerNode[] cell = new FeelerNode[8];
 
-        cell[0] = nodes[cellIndex.x - 1, cellIndex.y - 1, cellIndex.z - 1];
-        cell[1] = nodes[cellIndex.x, cellIndex.y - 1, cellIndex.z - 1];
-        cell[2] = nodes[cellIndex.x - 1, cellIndex.y, cellIndex.z - 1];
-        cell[3] = nodes[cellIndex.x, cellIndex.y, cellIndex.z - 1];
-        cell[4] = nodes[cellIndex.x - 1, cellIndex.y - 1, cellIndex.z];
-        cell[5] = nodes[cellIndex.x, cellIndex.y - 1, cellIndex.z];
-        cell[6] = nodes[cellIndex.x - 1, cellIndex.y, cellIndex.z];
-        cell[7] = nodes[cellIndex.x, cellIndex.y, cellIndex.z];
+        cell[0] = nodes[cellIndex + new Vector3Int(-1, -1, -1)];
+        cell[1] = nodes[cellIndex + new Vector3Int(0, -1, -1)];
+        cell[2] = nodes[cellIndex + new Vector3Int(-1, 0, -1)];
+        cell[3] = nodes[cellIndex + new Vector3Int(0, 0, -1)];
+        cell[4] = nodes[cellIndex + new Vector3Int(-1, -1, 0)];
+        cell[5] = nodes[cellIndex + new Vector3Int(0, -1, 0)];
+        cell[6] = nodes[cellIndex + new Vector3Int(-1, 0, 0)];
+        cell[7] = nodes[cellIndex + new Vector3Int(0, 0, 0)];
 
         return cell;
     }
 
-    private void AddRegularCellToData(MarchingDatas data, FeelerNode[] cell, Vector3Int cellIndex, Vector3 offset)
+    private void AddRegularCellToData(Datas data, FeelerNode[] cell, Vector3Int cellIndex)
     {
         int casecode = cell[0].SignBit
             | cell[1].SignBit << 1
@@ -141,7 +85,6 @@ public class CubeMarcher
                     Vector3 v;
                     float t = node1.Val / (node1.Val - node2.Val);
                     v = t * node2.Pos + (1 - t) * node1.Pos;
-                    v += offset;
 
                     iChunkVertex = data.chunkVertices.Count;
                     data.chunkVertices.Add(v);
@@ -152,9 +95,5 @@ public class CubeMarcher
                 data.chunkTriangles.Add(iChunkVertex);
             }
         }
-    }
-
-    private void AddTransCellToData(MarchingDatas data, FeelerNode[] cell, Vector3Int cellIndex, Vector3 offset)
-    {
     }
 }

@@ -17,9 +17,34 @@ public class ChunkUpdateModule : ChunkSetManagementModule
     private readonly Dictionary<Vector3Int, (IPriorGenTaskHandle handle, PriorGenTask job)> priorGenJobs
         = new Dictionary<Vector3Int, (IPriorGenTaskHandle handle, PriorGenTask job)>();
 
+    private SDF lastSDF = null;
+
     public override void Init(ChunkSet set, ChunkSystem system)
     {
+        // Also caputure system. Probably won't cause a memory leak beacause these objects should always exist
+        set.OnChunkAdded += (s, c, i) => Set_OnChunkAdded(s, system, c, i);
         set.OnChunkRemoved += Set_OnChunkRemoved;
+    }
+
+    private SDF genSDF()
+    {
+        // Calculate functions
+        lastSDF = new SDF(distanceField.GetEquation());
+        return lastSDF;
+    }
+
+    private SDF getLastSDF()
+    {
+        if (lastSDF == null)
+        {
+            return genSDF();
+        }
+        return lastSDF;
+    }
+
+    private void Set_OnChunkAdded(ChunkSet set, ChunkSystem system, Chunk chunk, Vector3Int index)
+    {
+        RandomTickChunk(set, system, index, getLastSDF());
     }
 
     private void Set_OnChunkRemoved(ChunkSet set, Chunk chunk, Vector3Int index)
@@ -71,6 +96,9 @@ public class ChunkUpdateModule : ChunkSetManagementModule
             set.SetChunk(index, chunk);
         }
 
+        // Update the chunk's quality
+        chunk.Quality = system.GetChunkQuality(set, chunk);
+
         // Create new feeler node update job
         PriorGenTask feelerNodeSetJob = chunk.CreatePriorJob(sdf);
         IPriorGenTaskHandle handle = feelerNodeSetJob.Schedule();
@@ -82,8 +110,7 @@ public class ChunkUpdateModule : ChunkSetManagementModule
         FinishPriorGenJobs();
 
         // Calculate functions
-        Equation distEq = distanceField.GetEquation();
-        SDF sdf = new SDF(distEq);
+        SDF sdf = genSDF();
 
         // Calculate how many chunks to tick
         int updates = (int)(set.Count * Time.deltaTime * updatesPerChunkSecond);
@@ -96,6 +123,7 @@ public class ChunkUpdateModule : ChunkSetManagementModule
 
             if (updatedThisFrame.Contains(index))
             {
+                i--;
                 continue;
             }
             updatedThisFrame.Add(index);

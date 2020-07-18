@@ -9,7 +9,7 @@ using UnityEngine;
  */
 public class FeelerNodeSet : IEnumerable
 {
-    public readonly int Resolution;
+    public readonly int Resolution; // The number of nodes along any one of the sides of the chunk
     private readonly FeelerNode[] Nodes;
     public readonly bool IsUniform;
 
@@ -69,6 +69,19 @@ public class FeelerNodeSet : IEnumerable
         {
             return Nodes[(x * Resolution + y) * Resolution + z];
         }
+    }
+
+    public FeelerNode this[Vector3Int index]
+    {
+        get
+        {
+            return this[index.x, index.y, index.z];
+        }
+    }
+
+    public float Spacing 
+    {
+        get => (this[Resolution - 1, 0, 0].Pos.x - this[0, 0, 0].Pos.x) / (Resolution - 1);
     }
 
     IEnumerator IEnumerable.GetEnumerator()

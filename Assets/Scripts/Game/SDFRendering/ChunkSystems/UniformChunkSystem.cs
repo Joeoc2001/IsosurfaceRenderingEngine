@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CubeMarchedChunkSystem : ChunkSystem
+public class UniformChunkSystem : ChunkSystem
 {
-    public CubeMarchedChunk templateChunk;
+    public Chunk templateChunk;
 
     [Range(0, 10)]
     public int baseQuality;
@@ -28,7 +28,7 @@ public class CubeMarchedChunkSystem : ChunkSystem
 
     public override Chunk InstantiateNewChunk(ChunkSet destination, Vector3Int index)
     {
-        CubeMarchedChunk newChunk = Instantiate(templateChunk, destination.transform, false);
+        Chunk newChunk = Instantiate(templateChunk, destination.transform, false);
         return newChunk;
     }
 
