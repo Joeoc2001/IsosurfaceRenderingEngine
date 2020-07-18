@@ -34,7 +34,9 @@ public class SmoothWASDMove : MonoBehaviour
         }
         velocities.Add(dir.normalized * speed);
 
-        int frameCounter = (int)(Universe.Instance.FPSAverage * secondsAveraged);
+        float deltaTime = Time.smoothDeltaTime;
+        deltaTime = deltaTime == 0 ? 0.1f : deltaTime;
+        int frameCounter = (int)(secondsAveraged / deltaTime);
         frameCounter = Math.Min(2, frameCounter);
         if (velocities.Count >= frameCounter)
         {

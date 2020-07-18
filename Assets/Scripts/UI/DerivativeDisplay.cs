@@ -1,5 +1,6 @@
 ﻿using Algebra;
 using Algebra.Operations;
+using AlgebraExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -31,7 +32,7 @@ public class DerivativeDisplay : MonoBehaviour
     private void Start()
     {
         text = GetComponent<Text>();
-        provider.AddListener(x => GenerateDerivativeDisplay());
+        provider.OnEquationChange += (p, e) => GenerateDerivativeDisplay();
         GenerateDerivativeDisplay();
     }
 }

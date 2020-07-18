@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEditor.UIElements;
 using UnityEngine;
 using System;
+using AlgebraExtensions;
 
 public class EquationLoader : MonoBehaviour
 {

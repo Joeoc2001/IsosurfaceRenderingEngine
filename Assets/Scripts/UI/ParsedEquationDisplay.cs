@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using AlgebraExtensions;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -14,7 +15,7 @@ public class ParsedEquationDisplay : MonoBehaviour
     void Awake()
     {
         text = GetComponent<TMP_Text>();
-        provider.AddListener(x => text.text = ("f(x,y,z) = " + x.ToString()));
+        provider.OnEquationChange += (p, e) => text.text = $"f(x,y,z) = {e}";
     }
 
     private void Start()

@@ -25,7 +25,9 @@ public class SmoothMouseLook : MonoBehaviour
 
 	void Update()
 	{
-		int frameCounter = (int)(Universe.Instance.FPSAverage * secondsAveraged);
+		float deltaTime = Time.smoothDeltaTime;
+		deltaTime = deltaTime == 0 ? 0.1f : deltaTime;
+		int frameCounter = (int)(secondsAveraged / deltaTime);
 		frameCounter = Math.Min(2, frameCounter);
 
 		float rotAverageY = 0f;

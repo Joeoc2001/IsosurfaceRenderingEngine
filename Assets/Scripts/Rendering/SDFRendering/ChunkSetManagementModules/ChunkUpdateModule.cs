@@ -1,4 +1,5 @@
 ﻿using Algebra;
+using AlgebraExtensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;

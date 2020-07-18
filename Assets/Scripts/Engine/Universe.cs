@@ -8,8 +8,6 @@ public class Universe : MonoBehaviour
 
     public static Universe Instance { get; private set; }
 
-    public Player mainPlayer;
-
     public double FPSAim;
 
     public double TimeDeltaAim { get => 1 / FPSAim; }

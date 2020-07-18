@@ -762,13 +762,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a34c47b27c45944e84a60879b428adf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ViewDistance: 5
+  ViewDistance: 3
   modules:
   - {fileID: 430997011}
   - {fileID: 430997009}
   - {fileID: 430997010}
   ChunkSet: {fileID: 430997006}
-  templateChunk: {fileID: 5007514093602490432, guid: 2f0a4f44fc30699489ecc43a7ea4d784,
+  templateChunk: {fileID: 4146629734243397598, guid: 4fce854409d4cd84e8db74e0027971e5,
     type: 3}
   baseQuality: 3
   qualityDropoff: 0.5

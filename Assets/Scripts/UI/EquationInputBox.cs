@@ -1,5 +1,6 @@
 ﻿using Algebra;
 using Algebra.Parsing;
+using AlgebraExtensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ public class EquationInputBox : EquationProvider
     private void UpdateEquation(string s)
     {
         equation = Parser.Parse(s);
-        onEquationChange.Invoke(equation);
+        EquationHasChanged(equation);
     }
 
     // Start is called before the first frame update
