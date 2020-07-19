@@ -18,7 +18,7 @@ public class VoxelPriorGenTask : PriorGenTask
     {
         int resolution = (1 << chunk.Quality) + 2; // Overscan by 2 so we can gen edges properly
         float delta = Chunk.SIZE / (1 << chunk.Quality);
-        Vector3 offset = new Vector3(delta / 2, delta / 2, delta / 2);
+        Vector3 offset = new Vector3(1, 1, 1) * ((delta + Chunk.SIZE) / 2);
         job = new FeelerNodeSetJob()
         {
             // Get a pointer to the distance function

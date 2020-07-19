@@ -18,6 +18,7 @@ public class CubeMarchPriorGenTask : PriorGenTask
     {
         int edgesPerEdge = 1 << chunk.Quality;
         int verticesPerEdge = edgesPerEdge + 1;
+        Vector3 offset = new Vector3(1, 1, 1) * (Chunk.SIZE / 2);
         job = new FeelerNodeSetJob()
         {
             // Get a pointer to the distance function
@@ -25,7 +26,7 @@ public class CubeMarchPriorGenTask : PriorGenTask
 
             Resolution = verticesPerEdge,
             Delta = Chunk.SIZE / edgesPerEdge,
-            Origin = float3.zero,
+            Origin = -offset,
             SamplingOffset = chunk.transform.position,
 
             Target = new NativeArray<FeelerNode>(verticesPerEdge * verticesPerEdge * verticesPerEdge, Allocator.TempJob)

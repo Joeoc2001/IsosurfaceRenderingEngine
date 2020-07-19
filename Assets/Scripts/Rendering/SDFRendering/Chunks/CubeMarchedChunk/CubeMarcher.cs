@@ -1,17 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CubeMarcher : PointCloudMeshifier
 {
     public static readonly CubeMarcher Instance = new CubeMarcher();
 
     private CubeMarcher()
-        : base(1, 0)
+        : base(1, 0, 3)
     {
     }
 
-    protected override void GenerateForNode(Datas space, FeelerNodeSet nodes, Vector3Int index)
+    protected override void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, Vector3Int index)
     {
         FeelerNode[] cell = ExtractCell(nodes, index);
         AddRegularCellToData(space, cell, index);
@@ -33,7 +31,7 @@ public class CubeMarcher : PointCloudMeshifier
         return cell;
     }
 
-    private void AddRegularCellToData(Datas data, FeelerNode[] cell, Vector3Int cellIndex)
+    private void AddRegularCellToData(MeshifierData data, FeelerNode[] cell, Vector3Int cellIndex)
     {
         int casecode = cell[0].SignBit
             | cell[1].SignBit << 1
@@ -55,9 +53,9 @@ public class CubeMarcher : PointCloudMeshifier
 
         for (int iCellTri = 0; iCellTri < cellData.VertexIndex.Length / 3; iCellTri++)
         {
+            int[] triangle = new int[3];
             for (int iCellTriVertex = 0; iCellTriVertex < 3; iCellTriVertex++)
             {
-                // TODO: Shared vertices
                 int iCellVertex = cellData.VertexIndex[iCellTri * 3 + iCellTriVertex];
                 ushort vData = vertexDatas[iCellVertex];
 
@@ -72,28 +70,20 @@ public class CubeMarcher : PointCloudMeshifier
 
                 Vector3Int parent = cellIndex - new Vector3Int(offsetX, offsetY, offsetZ);
 
-                int iChunkVertex;
-                if (data.chunkVertexCache.IsSet(parent, axis))
-                {
-                    iChunkVertex = data.chunkVertexCache.Get(parent, axis);
-                }
-                else
+                Vector3 generateVertex()
                 {
                     FeelerNode node1 = cell[iNode1];
                     FeelerNode node2 = cell[iNode2];
 
-                    Vector3 v;
                     float t = node1.Val / (node1.Val - node2.Val);
-                    v = t * node2.Pos + (1 - t) * node1.Pos;
-
-                    iChunkVertex = data.chunkVertices.Count;
-                    data.chunkVertices.Add(v);
-
-                    data.chunkVertexCache.Set(parent, axis, iChunkVertex);
+                    return t * node2.Pos + (1 - t) * node1.Pos;
                 }
 
-                data.chunkTriangles.Add(iChunkVertex);
+                int iChunkVertex = data.GetOrAddVertex(parent, axis, generateVertex);
+                triangle[iCellTriVertex] = iChunkVertex;
             }
+
+            data.AddToTriangles(triangle[0], triangle[1], triangle[2]);
         }
     }
 }

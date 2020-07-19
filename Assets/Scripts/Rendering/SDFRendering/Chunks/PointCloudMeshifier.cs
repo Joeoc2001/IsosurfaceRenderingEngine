@@ -1,47 +1,30 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public abstract class PointCloudMeshifier
 {
-    protected class Datas
-    {
-        public List<Vector3> chunkVertices = new List<Vector3>();
-        public List<int> chunkTriangles = new List<int>();
-        public ChunkVertexCache chunkVertexCache = new ChunkVertexCache(1);
 
-        public void Clear(int nodes)
-        {
-            chunkVertices.Clear();
-            chunkTriangles.Clear();
-
-            if (chunkVertexCache == null || chunkVertexCache.Width != nodes)
-            {
-                chunkVertexCache = new ChunkVertexCache(nodes);
-            }
-            else
-            {
-                chunkVertexCache.Clear();
-            }
-        }
-    }
-
-    private readonly ObjectPool<Datas> pool;
+    private readonly ObjectPool<MeshifierData> pool;
     private readonly int padL;
     private readonly int padR;
+    private readonly int depth;
 
-    protected PointCloudMeshifier(int padL, int padR)
+    /// <summary>
+    /// Protected constructor
+    /// </summary>
+    /// <param name="padL">The number of elements of the point cloud to skip on the left for each dimension</param>
+    /// <param name="padR">The number of elements of the point cloud to skip on the right for each dimension</param>
+    /// <param name="depth">The possible number of vertices for each node</param>
+    protected PointCloudMeshifier(int padL, int padR, int depth)
     {
-        pool = new ObjectPool<Datas>(() => new Datas());
+        pool = new ObjectPool<MeshifierData>(() => new MeshifierData());
 
         this.padL = padL;
         this.padR = padR;
+        this.depth = depth;
     }
 
     public void MarchIntoMesh(Mesh mesh, FeelerNodeSet nodes)
     {
-        mesh.Clear();
-
         // Optimization because no triangles are needed if all nodes are the same
         if (nodes.IsUniform)
         {
@@ -49,8 +32,8 @@ public abstract class PointCloudMeshifier
         }
 
         // Get a set of spaces in memory to march into
-        Datas space = pool.GetObject();
-        space.Clear(nodes.Resolution);
+        MeshifierData space = pool.GetObject();
+        space.Clear(nodes.Resolution, depth);
 
 
         for (int x = padL; x < nodes.Resolution - padR; x++)
@@ -64,14 +47,11 @@ public abstract class PointCloudMeshifier
             }
         }
 
-        Vector3[] vertices = space.chunkVertices.ToArray();
-        mesh.vertices = vertices;
-        int[] triangles = space.chunkTriangles.ToArray();
-        mesh.triangles = triangles;
+        space.PlaceInMesh(mesh);
 
         // Return datas
         pool.PutObject(space);
     }
 
-    protected abstract void GenerateForNode(Datas space, FeelerNodeSet nodes, Vector3Int index);
+    protected abstract void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, Vector3Int index);
 }

@@ -6,54 +6,45 @@ using UnityEngine;
 public class ChunkVertexCache
 {
     public readonly int Width;
+    public readonly int Depth;
     private readonly int[,,,] Values;
-    public ChunkVertexCache(int width)
+    public ChunkVertexCache(int width, int depth)
     {
         Width = width;
-        Values = new int[width, width, width, 3];
+        Depth = depth;
+        Values = new int[width, width, width, depth];
     }
     public void Clear()
     {
-        for (int i = 0; i < Width; i++)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-                for (int k = 0; k < Width; k++)
-                {
-                    Values[i, j, k, 0] = 0;
-                    Values[i, j, k, 1] = 0;
-                    Values[i, j, k, 2] = 0;
-                }
-            }
-        }
+        Array.Clear(Values, 0, Width * Width * Width * Depth);
     }
-    public bool IsSet(Vector3Int p, int axis)
+    public bool IsSet(Vector3Int p, int d)
     {
-        return IsSet(p.x, p.y, p.z, axis);
+        return IsSet(p.x, p.y, p.z, d);
     }
-    public bool IsSet(int x, int y, int z, int axis)
+    public bool IsSet(int x, int y, int z, int d)
     {
-        return Values[x, y, z, axis] != 0;
+        return Values[x, y, z, d] != 0;
     }
-    public void Set(Vector3Int p, int axis, int value)
+    public void Set(Vector3Int p, int d, int value)
     {
-        Set(p.x, p.y, p.z, axis, value);
+        Set(p.x, p.y, p.z, d, value);
     }
-    public void Set(int x, int y, int z, int axis, int value)
+    public void Set(int x, int y, int z, int d, int value)
     {
         if (value == -1)
         {
             throw new ArgumentOutOfRangeException("Value can't be -1");
         }
 
-        Values[x, y, z, axis] = value + 1;
+        Values[x, y, z, d] = value + 1;
     }
-    public int Get(Vector3Int p, int axis)
+    public int Get(Vector3Int p, int d)
     {
-        return Get(p.x, p.y, p.z, axis);
+        return Get(p.x, p.y, p.z, d);
     }
-    public int Get(int x, int y, int z, int axis)
+    public int Get(int x, int y, int z, int d)
     {
-        return Values[x, y, z, axis] - 1;
+        return Values[x, y, z, d] - 1;
     }
 }
