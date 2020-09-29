@@ -5,11 +5,11 @@ using UnityEngine;
 [RequireComponent(typeof(Canvas))]
 public class ShowHideableCanvas : MonoBehaviour
 {
-    private Canvas canvas;
+    private Canvas _canvas;
 
     private void Awake()
     {
-        canvas = GetComponent<Canvas>();
+        _canvas = GetComponent<Canvas>();
     }
 
     public void Show()
@@ -18,7 +18,7 @@ public class ShowHideableCanvas : MonoBehaviour
         {
             return;
         }
-        canvas.enabled = true;
+        _canvas.enabled = true;
     }
 
     public void Hide()
@@ -27,7 +27,7 @@ public class ShowHideableCanvas : MonoBehaviour
         {
             return;
         }
-        canvas.enabled = false;
+        _canvas.enabled = false;
     }
 
     public void Toggle()
@@ -44,7 +44,7 @@ public class ShowHideableCanvas : MonoBehaviour
 
     public bool IsShowing()
     {
-        return canvas.enabled;
+        return _canvas.enabled;
     }
 
     public bool IsHiding()

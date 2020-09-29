@@ -200,7 +200,6 @@ GameObject:
   - component: {fileID: 178830616}
   - component: {fileID: 178830615}
   - component: {fileID: 178830613}
-  - component: {fileID: 178830618}
   - component: {fileID: 178830614}
   m_Layer: 5
   m_Name: Menu Canvas
@@ -326,18 +325,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &178830618
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 178830611}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cde2aafedaefa6b49a1a6e97c61ef110, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &247357621
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,15 +479,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 5
-    m_Right: 5
+    m_Left: 3
+    m_Right: 3
     m_Top: 5
     m_Bottom: 5
-  m_ChildAlignment: 4
-  m_Spacing: 5
+  m_ChildAlignment: 2
+  m_Spacing: 0
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
+  m_ChildControlWidth: 1
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 1
@@ -1735,7 +1722,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MouseLookLock: {fileID: 963194229}
   WASDMoveLock: {fileID: 963194230}
-  MainMenu: {fileID: 178830613}
+  ShowOnOpen:
+  - {fileID: 178830613}
+  ShowOnClose:
+  - {fileID: 1930190280}
+  IsOpen: 0
 --- !u!4 &1419633227
 Transform:
   m_ObjectHideFlags: 0
@@ -2114,7 +2105,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 246.41, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1612513123
 MonoBehaviour:
@@ -2170,7 +2161,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_textAlignment: 257
+  m_textAlignment: 260
   m_characterSpacing: 0
   m_wordSpacing: 0
   m_lineSpacing: 0
@@ -2201,7 +2192,7 @@ MonoBehaviour:
   m_firstVisibleCharacter: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 7.022522, y: 0, z: 9.4823, w: 0}
   m_textInfo:
     textComponent: {fileID: 1612513123}
     characterCount: 22
@@ -2418,7 +2409,6 @@ GameObject:
   - component: {fileID: 1930190282}
   - component: {fileID: 1930190281}
   - component: {fileID: 1930190280}
-  - component: {fileID: 1930190279}
   m_Layer: 5
   m_Name: Stats Canvas
   m_TagString: Untagged
@@ -2446,18 +2436,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &1930190279
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1930190277}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cde2aafedaefa6b49a1a6e97c61ef110, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1930190280
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2494,7 +2472,7 @@ MonoBehaviour:
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 1
-  m_ChildScaleHeight: 0
+  m_ChildScaleHeight: 1
 --- !u!114 &1930190282
 MonoBehaviour:
   m_ObjectHideFlags: 0

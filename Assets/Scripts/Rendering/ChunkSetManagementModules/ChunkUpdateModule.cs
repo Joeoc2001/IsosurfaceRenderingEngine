@@ -114,6 +114,7 @@ namespace SDFRendering.ChunkSetManagementModules
 
             // Calculate how many chunks to tick
             int updates = (int)(set.Count * Time.deltaTime * updatesPerChunkSecond);
+            updates = Math.Min(updates, maxUpdatesPerTick);
 
             // Loop through some and update
             HashSet<Vector3Int> updatedThisFrame = new HashSet<Vector3Int>();

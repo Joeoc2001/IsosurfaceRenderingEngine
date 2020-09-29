@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +8,15 @@ public class MainMenuControl : MonoBehaviour
     public SmoothMouseLook MouseLookLock;
     public SmoothWASDMove WASDMoveLock;
 
-    public ShowHideableCanvas MainMenu;
+    public ShowHideableCanvas[] ShowOnOpen;
+    public ShowHideableCanvas[] ShowOnClose;
+
+    public bool IsOpen = false;
+
+    void Start()
+    {
+        Set();
+    }
 
     void Update()
     {
@@ -17,13 +26,40 @@ public class MainMenuControl : MonoBehaviour
         }
     }
 
-    public void Toggle()
+    internal void Toggle()
     {
-        MainMenu.Toggle();
+        IsOpen = !IsOpen;
+        Set();
+    }
 
-        Cursor.lockState = MainMenu.IsShowing() ? CursorLockMode.None : CursorLockMode.Locked;
+    public void Set()
+    {
+        Cursor.lockState = IsOpen ? CursorLockMode.None : CursorLockMode.Locked;
+        MouseLookLock.enabled = !IsOpen;
+        WASDMoveLock.enabled = !IsOpen;
 
-        MouseLookLock.enabled = MainMenu.IsHiding();
-        WASDMoveLock.enabled = MainMenu.IsHiding();
+        foreach (var item in ShowOnOpen)
+        {
+            if (IsOpen)
+            {
+                item.Show();
+            }
+            else
+            {
+                item.Hide();
+            }
+        }
+
+        foreach (var item in ShowOnClose)
+        {
+            if (IsOpen)
+            {
+                item.Hide();
+            }
+            else
+            {
+                item.Show();
+            }
+        }
     }
 }
