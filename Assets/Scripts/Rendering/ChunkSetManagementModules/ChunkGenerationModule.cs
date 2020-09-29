@@ -7,8 +7,8 @@ namespace SDFRendering.ChunkSetManagementModules
 {
     public class ChunkGenerationModule : ChunkSetManagementModule
     {
-        private Vector3Int generatedBaseIndex = new Vector3Int(0, 0, 0);
-        private int generatedViewDistance = 0;
+        private Vector3Int _generatedBaseIndex = new Vector3Int(0, 0, 0);
+        private int _generatedViewDistance = 0;
 
         public override void Tick(ChunkSet set, ChunkSystem system)
         {
@@ -21,7 +21,7 @@ namespace SDFRendering.ChunkSetManagementModules
             Vector3Int baseIndex = chunkSet.BaseIndex;
 
             IEnumerable<Vector3Int> newChunkIndexes =
-                chunkSystem.GetNewChunkIndexes(generatedBaseIndex, generatedViewDistance, baseIndex, viewDistance);
+                chunkSystem.GetNewChunkIndexes(_generatedBaseIndex, _generatedViewDistance, baseIndex, viewDistance);
 
             foreach (Vector3Int index in newChunkIndexes)
             {
@@ -32,8 +32,8 @@ namespace SDFRendering.ChunkSetManagementModules
                 }
             }
 
-            generatedBaseIndex = baseIndex;
-            generatedViewDistance = viewDistance;
+            _generatedBaseIndex = baseIndex;
+            _generatedViewDistance = viewDistance;
         }
     }
 }

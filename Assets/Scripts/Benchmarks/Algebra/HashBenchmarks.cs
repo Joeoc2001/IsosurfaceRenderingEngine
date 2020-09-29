@@ -18,52 +18,52 @@ public class HashBenchmarks : MonoBehaviour
     public TMPro.TMP_Text text;
 
     // Displayed values
-    float avgNumPerSecond = 1000;
-    float hashFunctionQuality = 0;
+    float _avgNumPerSecond = 1000;
+    float _hashFunctionQuality = 0;
 
     // Working values
-    private readonly RandomEquationGenerator randomEquationGenerator = new RandomEquationGenerator();
-    private float batchStartTime;
-    private int sampled;
-    private readonly Dictionary<int, HashSet<Equation>> seenHashes = new Dictionary<int, HashSet<Equation>>();
+    private readonly RandomExpressionGenerator _randomExpressionGenerator = new RandomExpressionGenerator();
+    private float _batchStartTime;
+    private int _sampled;
+    private readonly Dictionary<int, HashSet<Expression>> _seenHashes = new Dictionary<int, HashSet<Expression>>();
 
     void Update()
     {
         // Set values
-        randomEquationGenerator.baseProb = baseProbSlider.value;
-        randomEquationGenerator.maxDepth = (int)maxDepthSlider.value;
+        _randomExpressionGenerator.BaseProb = baseProbSlider.value;
+        _randomExpressionGenerator.MaxDepth = (int)maxDepthSlider.value;
 
         // Calculate metrics
         float currentTime = Time.realtimeSinceStartup;
-        float numPerSecond = sampled / (currentTime - batchStartTime);
+        float numPerSecond = _sampled / (currentTime - _batchStartTime);
 
         float avgNewRatio = 0.9f * Time.deltaTime;
 
-        avgNumPerSecond *= 1 - avgNewRatio;
-        avgNumPerSecond += numPerSecond * avgNewRatio;
+        _avgNumPerSecond *= 1 - avgNewRatio;
+        _avgNumPerSecond += numPerSecond * avgNewRatio;
 
         // Check if done
-        if (sampled >= totalSampledSlider.value)
+        if (_sampled >= totalSampledSlider.value)
         {
             ResetMetrics();
         }
 
         // Generate hashes
-        int toGen = (int)Math.Max(1, avgNumPerSecond / 60);
-        int max = (int)totalSampledSlider.value - sampled;
+        int toGen = (int)Math.Max(1, _avgNumPerSecond / 60);
+        int max = (int)totalSampledSlider.value - _sampled;
         toGen = Math.Min(toGen, max);
         for (int i = 0; i < toGen; i++)
         {
-            Equation newEq = randomEquationGenerator.Next();
+            Expression newEq = _randomExpressionGenerator.Next();
             int hash = newEq.GetHashCode();
 
-            if (!seenHashes.ContainsKey(hash))
+            if (!_seenHashes.ContainsKey(hash))
             {
-                seenHashes.Add(hash, new HashSet<Equation>());
+                _seenHashes.Add(hash, new HashSet<Expression>());
             }
-            seenHashes[hash].Add(newEq);
+            _seenHashes[hash].Add(newEq);
         }
-        sampled += toGen;
+        _sampled += toGen;
 
         // Update display
         Display();
@@ -72,26 +72,26 @@ public class HashBenchmarks : MonoBehaviour
     private void ResetMetrics()
     {
         float sum = 0;
-        foreach (int hash in seenHashes.Keys)
+        foreach (int hash in _seenHashes.Keys)
         {
-            int i = seenHashes[hash].Count;
+            int i = _seenHashes[hash].Count;
             sum += (i * (i + 1)) / 2;
         }
-        float n = sampled;
+        float n = _sampled;
         float m = (float)int.MaxValue * 2 + 2;
-        hashFunctionQuality = sum / ((n / (2 * m)) * (n + 2 * m - 1)); // From red dragon book
+        _hashFunctionQuality = sum / ((n / (2 * m)) * (n + 2 * m - 1)); // From red dragon book
 
-        batchStartTime = Time.realtimeSinceStartup;
-        sampled = 0;
-        seenHashes.Clear();
+        _batchStartTime = Time.realtimeSinceStartup;
+        _sampled = 0;
+        _seenHashes.Clear();
     }
 
     private void Display()
     {
         StringBuilder builder = new StringBuilder();
-        builder.Append($"Average hashed per second: {avgNumPerSecond}\n");
-        builder.Append($"Hash function quality: {hashFunctionQuality}\n");
-        builder.Append($"Sampled so far: {sampled}\n");
+        builder.Append($"Average hashed per second: {_avgNumPerSecond}\n");
+        builder.Append($"Hash function quality: {_hashFunctionQuality}\n");
+        builder.Append($"Sampled so far: {_sampled}\n");
         text.text = builder.ToString();
     }
 }

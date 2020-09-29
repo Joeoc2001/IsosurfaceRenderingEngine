@@ -12,13 +12,13 @@ namespace SDFRendering
     public class FeelerNodeSet : IEnumerable
     {
         public readonly int Resolution; // The number of nodes along any one of the sides of the chunk
-        private readonly FeelerNode[] Nodes;
+        private readonly FeelerNode[] _nodes;
         public readonly bool IsUniform;
 
         public FeelerNodeSet(int resolution, FeelerNode[] nodes)
         {
             Resolution = resolution;
-            Nodes = nodes;
+            _nodes = nodes;
 
             IsUniform = true;
             bool allInside = true;
@@ -69,7 +69,7 @@ namespace SDFRendering
         {
             get
             {
-                return Nodes[(x * Resolution + y) * Resolution + z];
+                return _nodes[(x * Resolution + y) * Resolution + z];
             }
         }
 
@@ -88,7 +88,7 @@ namespace SDFRendering
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return Nodes.GetEnumerator();
+            return _nodes.GetEnumerator();
         }
     }
 }

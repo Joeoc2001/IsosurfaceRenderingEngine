@@ -10,31 +10,31 @@ namespace SDFRendering.Chunks.VoxelChunk
     [RequireComponent(typeof(MeshFilter))]
     public class VoxelChunk : Chunk
     {
-        private Mesh mesh;
+        private Mesh _mesh;
 
         void Awake()
         {
-            mesh = new Mesh();
-            GetComponent<MeshFilter>().mesh = mesh;
+            _mesh = new Mesh();
+            GetComponent<MeshFilter>().mesh = _mesh;
         }
 
         // Returns true if the mesh changed
         public void GenerateMesh(FeelerNodeSet nodes, Vector3Expression norm)
         {
-            Voxeliser.Instance.MarchIntoMesh(mesh, nodes);
+            Voxeliser.Instance.MarchIntoMesh(_mesh, nodes);
 
             // Extract for speed
-            Vector3[] vertices = mesh.vertices;
-            int[] triangles = mesh.triangles;
+            Vector3[] vertices = _mesh.vertices;
+            int[] triangles = _mesh.triangles;
 
             // Calculate normals
             if (ShouldApproximateNormals)
             {
-                mesh.normals = ApproximateNormals(vertices, triangles);
+                _mesh.normals = ApproximateNormals(vertices, triangles);
             }
             else
             {
-                mesh.normals = CalculateNormals(vertices, transform.position, norm);
+                _mesh.normals = CalculateNormals(vertices, transform.position, norm);
             }
         }
 

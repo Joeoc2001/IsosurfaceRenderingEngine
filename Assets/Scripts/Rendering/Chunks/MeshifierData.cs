@@ -6,22 +6,22 @@ namespace SDFRendering.Chunks
 {
     public class MeshifierData
     {
-        private readonly List<Vector3> chunkVertices = new List<Vector3>();
-        private readonly List<int> chunkTriangles = new List<int>();
-        private ChunkVertexCache chunkVertexCache = new ChunkVertexCache(1, 1);
+        private readonly List<Vector3> _chunkVertices = new List<Vector3>();
+        private readonly List<int> _chunkTriangles = new List<int>();
+        private ChunkVertexCache _chunkVertexCache = new ChunkVertexCache(1, 1);
 
         public void Clear(int nodes, int depth)
         {
-            chunkVertices.Clear();
-            chunkTriangles.Clear();
+            _chunkVertices.Clear();
+            _chunkTriangles.Clear();
 
-            if (chunkVertexCache.Width != nodes || chunkVertexCache.Depth != depth)
+            if (_chunkVertexCache.Width != nodes || _chunkVertexCache.Depth != depth)
             {
-                chunkVertexCache = new ChunkVertexCache(nodes, depth);
+                _chunkVertexCache = new ChunkVertexCache(nodes, depth);
             }
             else
             {
-                chunkVertexCache.Clear();
+                _chunkVertexCache.Clear();
             }
         }
 
@@ -34,34 +34,34 @@ namespace SDFRendering.Chunks
         {
 
             int iChunkVertex;
-            if (chunkVertexCache.IsSet(index, depth))
+            if (_chunkVertexCache.IsSet(index, depth))
             {
-                iChunkVertex = chunkVertexCache.Get(index, depth);
+                iChunkVertex = _chunkVertexCache.Get(index, depth);
             }
             else
             {
-                iChunkVertex = chunkVertices.Count;
-                chunkVertices.Add(vector());
+                iChunkVertex = _chunkVertices.Count;
+                _chunkVertices.Add(vector());
 
-                chunkVertexCache.Set(index, depth, iChunkVertex);
+                _chunkVertexCache.Set(index, depth, iChunkVertex);
             }
             return iChunkVertex;
         }
 
         public void AddToTriangles(int index1, int index2, int index3)
         {
-            chunkTriangles.Add(index1);
-            chunkTriangles.Add(index2);
-            chunkTriangles.Add(index3);
+            _chunkTriangles.Add(index1);
+            _chunkTriangles.Add(index2);
+            _chunkTriangles.Add(index3);
         }
 
         public void PlaceInMesh(Mesh mesh)
         {
             mesh.Clear();
 
-            Vector3[] vertices = chunkVertices.ToArray();
+            Vector3[] vertices = _chunkVertices.ToArray();
             mesh.vertices = vertices;
-            int[] triangles = chunkTriangles.ToArray();
+            int[] triangles = _chunkTriangles.ToArray();
             mesh.triangles = triangles;
         }
     }

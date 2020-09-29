@@ -10,54 +10,54 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
     [RequireComponent(typeof(MeshFilter))]
     public class CubeMarchedChunk : Chunk
     {
-        private Mesh coreMesh;
-        private Mesh transitionMesh;
+        private Mesh _coreMesh;
+        private Mesh _transitionMesh;
 
-        private Mesh totalMesh;
+        private Mesh _totalMesh;
 
         void Awake()
         {
-            coreMesh = new Mesh();
-            transitionMesh = new Mesh();
+            _coreMesh = new Mesh();
+            _transitionMesh = new Mesh();
 
-            totalMesh = new Mesh();
-            GetComponent<MeshFilter>().mesh = totalMesh;
+            _totalMesh = new Mesh();
+            GetComponent<MeshFilter>().mesh = _totalMesh;
         }
 
         // Returns true if the mesh changed
         public void GenerateMesh(FeelerNodeSet nodes, Vector3Expression norm)
         {
-            CubeMarcher.Instance.MarchIntoMesh(coreMesh, nodes);
+            CubeMarcher.Instance.MarchIntoMesh(_coreMesh, nodes);
 
             // Extract for speed
-            Vector3[] vertices = coreMesh.vertices;
-            int[] triangles = coreMesh.triangles;
+            Vector3[] vertices = _coreMesh.vertices;
+            int[] triangles = _coreMesh.triangles;
 
             // Calculate normals
             if (ShouldApproximateNormals)
             {
-                coreMesh.normals = ApproximateNormals(vertices, triangles);
+                _coreMesh.normals = ApproximateNormals(vertices, triangles);
             }
             else
             {
-                coreMesh.normals = CalculateNormals(vertices, transform.position, norm);
+                _coreMesh.normals = CalculateNormals(vertices, transform.position, norm);
             }
         }
 
         public void MergeAndSetMeshes()
         {
-            totalMesh.Clear();
+            _totalMesh.Clear();
 
             CombineInstance[] instances = new CombineInstance[] {
             new CombineInstance() {
-                mesh = coreMesh
+                mesh = _coreMesh
             },
             new CombineInstance() {
-                mesh = transitionMesh
+                mesh = _transitionMesh
             },
         };
 
-            totalMesh.CombineMeshes(instances, true, false, false);
+            _totalMesh.CombineMeshes(instances, true, false, false);
         }
 
         public override GenTask CreateGetTask(ImplicitSurface sdf)

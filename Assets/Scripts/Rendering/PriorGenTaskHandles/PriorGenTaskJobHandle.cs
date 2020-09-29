@@ -7,16 +7,16 @@ namespace SDFRendering.JobHandles
 {
     public struct PriorGenTaskJobHandle : IPriorGenTaskHandle
     {
-        private readonly JobHandle jobHandle;
+        private readonly JobHandle _jobHandle;
 
         public PriorGenTaskJobHandle(JobHandle jobHandle)
         {
-            this.jobHandle = jobHandle;
+            this._jobHandle = jobHandle;
         }
 
         public void Complete()
         {
-            jobHandle.Complete();
+            _jobHandle.Complete();
         }
     }
 }

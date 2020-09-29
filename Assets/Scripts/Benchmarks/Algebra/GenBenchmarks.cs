@@ -17,12 +17,12 @@ public class GenBenchmarks : MonoBehaviour
     public TMPro.TMP_Text text;
 
     // Displayed values
-    float avgNumPerSecond = 1000;
+    float _avgNumPerSecond = 1000;
 
     // Working values
-    private readonly RandomEquationGenerator randomEquationGenerator = new RandomEquationGenerator();
-    private float startTime;
-    private int generated;
+    private readonly RandomExpressionGenerator _randomExpressionGenerator = new RandomExpressionGenerator();
+    private float _startTime;
+    private int _generated;
 
     private void Start()
     {
@@ -35,25 +35,25 @@ public class GenBenchmarks : MonoBehaviour
     void Update()
     {
         // Set values
-        randomEquationGenerator.baseProb = baseProbSlider.value;
-        randomEquationGenerator.maxDepth = (int)maxDepthSlider.value;
+        _randomExpressionGenerator.BaseProb = baseProbSlider.value;
+        _randomExpressionGenerator.MaxDepth = (int)maxDepthSlider.value;
 
         // Calculate metrics
         float currentTime = Time.realtimeSinceStartup;
-        float numPerSecond = generated / (currentTime - startTime);
+        float numPerSecond = _generated / (currentTime - _startTime);
 
         float avgNewRatio = 0.9f * Time.deltaTime;
 
-        avgNumPerSecond *= 1 - avgNewRatio;
-        avgNumPerSecond += numPerSecond * avgNewRatio;
+        _avgNumPerSecond *= 1 - avgNewRatio;
+        _avgNumPerSecond += numPerSecond * avgNewRatio;
 
         // Generate hashes
-        int toGen = (int)Math.Max(1, avgNumPerSecond / 60);
+        int toGen = (int)Math.Max(1, _avgNumPerSecond / 60);
         for (int i = 0; i < toGen; i++)
         {
-            randomEquationGenerator.Next();
+            _randomExpressionGenerator.Next();
         }
-        generated += toGen;
+        _generated += toGen;
 
         // Update display
         Display();
@@ -61,14 +61,14 @@ public class GenBenchmarks : MonoBehaviour
 
     private void ResetValues()
     {
-        generated = 0;
-        startTime = Time.realtimeSinceStartup;
+        _generated = 0;
+        _startTime = Time.realtimeSinceStartup;
     }
 
     private void Display()
     {
         StringBuilder builder = new StringBuilder();
-        builder.Append($"Average generated per second: {avgNumPerSecond}\n");
+        builder.Append($"Average generated per second: {_avgNumPerSecond}\n");
         text.text = builder.ToString();
     }
 }

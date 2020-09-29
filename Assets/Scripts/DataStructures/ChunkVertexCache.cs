@@ -7,16 +7,16 @@ public class ChunkVertexCache
 {
     public readonly int Width;
     public readonly int Depth;
-    private readonly int[,,,] Values;
+    private readonly int[,,,] _values;
     public ChunkVertexCache(int width, int depth)
     {
         Width = width;
         Depth = depth;
-        Values = new int[width, width, width, depth];
+        _values = new int[width, width, width, depth];
     }
     public void Clear()
     {
-        Array.Clear(Values, 0, Width * Width * Width * Depth);
+        Array.Clear(_values, 0, Width * Width * Width * Depth);
     }
     public bool IsSet(Vector3Int p, int d)
     {
@@ -24,7 +24,7 @@ public class ChunkVertexCache
     }
     public bool IsSet(int x, int y, int z, int d)
     {
-        return Values[x, y, z, d] != 0;
+        return _values[x, y, z, d] != 0;
     }
     public void Set(Vector3Int p, int d, int value)
     {
@@ -37,7 +37,7 @@ public class ChunkVertexCache
             throw new ArgumentOutOfRangeException("Value can't be -1");
         }
 
-        Values[x, y, z, d] = value + 1;
+        _values[x, y, z, d] = value + 1;
     }
     public int Get(Vector3Int p, int d)
     {
@@ -45,6 +45,6 @@ public class ChunkVertexCache
     }
     public int Get(int x, int y, int z, int d)
     {
-        return Values[x, y, z, d] - 1;
+        return _values[x, y, z, d] - 1;
     }
 }

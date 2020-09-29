@@ -10,12 +10,12 @@ public class ParsedExpressionDisplay : MonoBehaviour
 {
     public ExpressionProvider provider;
 
-    private TMP_Text text;
+    private TMP_Text _text;
 
     void Awake()
     {
-        text = GetComponent<TMP_Text>();
-        provider.OnExpressionChange += (p, e) => text.text = $"f(x,y,z) = {e}";
+        _text = GetComponent<TMP_Text>();
+        provider.OnExpressionChange += (p, e) => _text.text = $"f(x,y,z) = {e}";
     }
 
     private void Start()

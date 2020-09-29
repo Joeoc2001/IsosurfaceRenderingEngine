@@ -15,11 +15,11 @@ public class FastRemovableQueue<T>
 {
     // Essentially a two-way dict but slightly faster
     // Keep a log of where items are if they need to be removed so that all operations are O(1)
-    private T[] backingData = new T[1];
-    private readonly Dictionary<T, int> indexes = new Dictionary<T, int>(); 
+    private T[] _backingData = new T[1];
+    private readonly Dictionary<T, int> _indexes = new Dictionary<T, int>(); 
 
-    private int head = 0;
-    private int tail = 0;
+    private int _head = 0;
+    private int _tail = 0;
 
     public int Length { get; private set; } = 0;
 
@@ -36,29 +36,29 @@ public class FastRemovableQueue<T>
             throw new ArgumentNullException("Cannot add a default (null) item to this queue");
         }
 
-        if (indexes.ContainsKey(item))
+        if (_indexes.ContainsKey(item))
         {
             throw new InvalidOperationException("Item is already present in the queue");
         }
 
         // Check if we need to add more space
-        if (Length >= backingData.Length)
+        if (Length >= _backingData.Length)
         {
-            Resize(backingData.Length * 2);
+            Resize(_backingData.Length * 2);
         }
 
         // Check if we need to defrag the array
-        if (head == tail && Length != 0)
+        if (_head == _tail && Length != 0)
         {
-            Resize(backingData.Length);
+            Resize(_backingData.Length);
         }
 
-        indexes.Add(item, head);
-        backingData[head] = item;
+        _indexes.Add(item, _head);
+        _backingData[_head] = item;
 
         Length++;
-        head++;
-        head %= backingData.Length;
+        _head++;
+        _head %= _backingData.Length;
     }
 
     /// <summary>
@@ -76,18 +76,18 @@ public class FastRemovableQueue<T>
 
         do
         {
-            item = backingData[tail];
+            item = _backingData[_tail];
 
-            tail++;
-            tail %= backingData.Length;
+            _tail++;
+            _tail %= _backingData.Length;
 
         } while (item.Equals(default(T)));
 
         Remove(item);
 
-        if (Length <= backingData.Length / 4)
+        if (Length <= _backingData.Length / 4)
         {
-            Resize(backingData.Length / 2);
+            Resize(_backingData.Length / 2);
         }
 
         return item;
@@ -113,13 +113,13 @@ public class FastRemovableQueue<T>
     /// <returns>True if the item was present, false if no item was present to be removed</returns>
     public bool TryRemoveItem(T item)
     {
-        if (!indexes.TryGetValue(item, out int index))
+        if (!_indexes.TryGetValue(item, out int index))
         {
             return false;
         }
 
-        backingData[index] = default;
-        indexes.Remove(item);
+        _backingData[index] = default;
+        _indexes.Remove(item);
 
         Length--;
 
@@ -148,20 +148,20 @@ public class FastRemovableQueue<T>
 
             do
             {
-                item = backingData[tail];
+                item = _backingData[_tail];
 
-                tail++;
-                tail %= backingData.Length;
+                _tail++;
+                _tail %= _backingData.Length;
 
             } while (item.Equals(default(T)));
 
             newBackingData[i] = item;
-            indexes[item] = i;
+            _indexes[item] = i;
         }
 
-        backingData = newBackingData;
+        _backingData = newBackingData;
 
-        tail = 0;
-        head = Length;
+        _tail = 0;
+        _head = Length;
     }
 }

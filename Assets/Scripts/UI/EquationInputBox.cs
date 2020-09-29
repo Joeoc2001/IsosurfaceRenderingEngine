@@ -12,29 +12,29 @@ using UnityEngine.UI;
 [RequireComponent(typeof(TMP_InputField))]
 public class ExpressionInputBox : ExpressionProvider
 {
-    private Expression equation;
-    private TMP_InputField field;
+    private Expression _equation;
+    private TMP_InputField _field;
 
     private void Awake()
     {
-        field = GetComponent<TMP_InputField>();
-        field.onEndEdit.AddListener(s => UpdateExpression(s));
+        _field = GetComponent<TMP_InputField>();
+        _field.onEndEdit.AddListener(s => UpdateExpression(s));
     }
 
     private void UpdateExpression(string s)
     {
-        equation = Parser.Parse(s);
-        ExpressionHasChanged(equation);
+        _equation = Parser.Parse(s);
+        ExpressionHasChanged(_equation);
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        UpdateExpression(field.text);
+        UpdateExpression(_field.text);
     }
 
     public override Expression GetExpression()
     {
-        return equation;
+        return _equation;
     }
 }

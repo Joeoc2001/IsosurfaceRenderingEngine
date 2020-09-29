@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class SmoothWASDMove : MonoBehaviour
 {
-    private readonly List<Vector3> velocities = new List<Vector3>();
+    private readonly List<Vector3> _velocities = new List<Vector3>();
 
     [Range(1f, 100f)]
     public float speed = 20f;
@@ -32,23 +32,23 @@ public class SmoothWASDMove : MonoBehaviour
         {
             dir += transform.rotation * Vector3.right;
         }
-        velocities.Add(dir.normalized * speed);
+        _velocities.Add(dir.normalized * speed);
 
         float deltaTime = Time.smoothDeltaTime;
         deltaTime = deltaTime == 0 ? 0.1f : deltaTime;
         int frameCounter = (int)(secondsAveraged / deltaTime);
         frameCounter = Math.Min(2, frameCounter);
-        if (velocities.Count >= frameCounter)
+        if (_velocities.Count >= frameCounter)
         {
-            velocities.RemoveAt(0);
+            _velocities.RemoveAt(0);
         }
 
         Vector3 averageVelocity = Vector3.zero;
-        for (int j = 0; j < velocities.Count; j++)
+        for (int j = 0; j < _velocities.Count; j++)
         {
-            averageVelocity += velocities[j];
+            averageVelocity += _velocities[j];
         }
-        averageVelocity /= velocities.Count;
+        averageVelocity /= _velocities.Count;
 
         transform.localPosition += averageVelocity * Time.deltaTime;
     }

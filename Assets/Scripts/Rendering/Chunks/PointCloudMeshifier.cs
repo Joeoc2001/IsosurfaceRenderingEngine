@@ -5,10 +5,10 @@ namespace SDFRendering.Chunks
     public abstract class PointCloudMeshifier
     {
 
-        private readonly ObjectPool<MeshifierData> pool;
-        private readonly int padL;
-        private readonly int padR;
-        private readonly int depth;
+        private readonly ObjectPool<MeshifierData> _pool;
+        private readonly int _padL;
+        private readonly int _padR;
+        private readonly int _depth;
 
         /// <summary>
         /// Protected constructor
@@ -18,11 +18,11 @@ namespace SDFRendering.Chunks
         /// <param name="depth">The possible number of vertices for each node</param>
         protected PointCloudMeshifier(int padL, int padR, int depth)
         {
-            pool = new ObjectPool<MeshifierData>(() => new MeshifierData());
+            _pool = new ObjectPool<MeshifierData>(() => new MeshifierData());
 
-            this.padL = padL;
-            this.padR = padR;
-            this.depth = depth;
+            this._padL = padL;
+            this._padR = padR;
+            this._depth = depth;
         }
 
         public void MarchIntoMesh(Mesh mesh, FeelerNodeSet nodes)
@@ -34,15 +34,15 @@ namespace SDFRendering.Chunks
             }
 
             // Get a set of spaces in memory to march into
-            MeshifierData space = pool.GetObject();
-            space.Clear(nodes.Resolution, depth);
+            MeshifierData space = _pool.GetObject();
+            space.Clear(nodes.Resolution, _depth);
 
 
-            for (int x = padL; x < nodes.Resolution - padR; x++)
+            for (int x = _padL; x < nodes.Resolution - _padR; x++)
             {
-                for (int y = padL; y < nodes.Resolution - padR; y++)
+                for (int y = _padL; y < nodes.Resolution - _padR; y++)
                 {
-                    for (int z = padL; z < nodes.Resolution - padR; z++)
+                    for (int z = _padL; z < nodes.Resolution - _padR; z++)
                     {
                         GenerateForNode(space, nodes, new Vector3Int(x, y, z));
                     }
@@ -52,7 +52,7 @@ namespace SDFRendering.Chunks
             space.PlaceInMesh(mesh);
 
             // Return datas
-            pool.PutObject(space);
+            _pool.PutObject(space);
         }
 
         protected abstract void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, Vector3Int index);
