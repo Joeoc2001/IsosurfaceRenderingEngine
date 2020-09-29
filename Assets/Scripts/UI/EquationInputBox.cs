@@ -10,30 +10,30 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(TMP_InputField))]
-public class EquationInputBox : EquationProvider
+public class ExpressionInputBox : ExpressionProvider
 {
-    private Equation equation;
+    private Expression equation;
     private TMP_InputField field;
 
     private void Awake()
     {
         field = GetComponent<TMP_InputField>();
-        field.onEndEdit.AddListener(s => UpdateEquation(s));
+        field.onEndEdit.AddListener(s => UpdateExpression(s));
     }
 
-    private void UpdateEquation(string s)
+    private void UpdateExpression(string s)
     {
         equation = Parser.Parse(s);
-        EquationHasChanged(equation);
+        ExpressionHasChanged(equation);
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        UpdateEquation(field.text);
+        UpdateExpression(field.text);
     }
 
-    public override Equation GetEquation()
+    public override Expression GetExpression()
     {
         return equation;
     }

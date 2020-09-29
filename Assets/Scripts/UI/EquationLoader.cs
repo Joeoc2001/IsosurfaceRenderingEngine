@@ -6,17 +6,17 @@ using UnityEngine;
 using System;
 using AlgebraExtensions;
 
-public class EquationLoader : MonoBehaviour
+public class ExpressionLoader : MonoBehaviour
 {
     public const string EXTENSION = "eqdata";
 
-    public EquationHolder holder;
+    public ExpressionHolder holder;
 
     public void LoadFile()
     {
         string documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
         ExtensionFilter[] filters = new ExtensionFilter [] { 
-            new ExtensionFilter("Equation File", EXTENSION)
+            new ExtensionFilter("Expression File", EXTENSION)
         };
         string[] files = StandaloneFileBrowser.OpenFilePanel("Select a file", documentsPath, filters, false);
 

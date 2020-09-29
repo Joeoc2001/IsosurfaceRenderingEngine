@@ -6,16 +6,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(TMP_Text))]
-public class ParsedEquationDisplay : MonoBehaviour
+public class ParsedExpressionDisplay : MonoBehaviour
 {
-    public EquationProvider provider;
+    public ExpressionProvider provider;
 
     private TMP_Text text;
 
     void Awake()
     {
         text = GetComponent<TMP_Text>();
-        provider.OnEquationChange += (p, e) => text.text = $"f(x,y,z) = {e}";
+        provider.OnExpressionChange += (p, e) => text.text = $"f(x,y,z) = {e}";
     }
 
     private void Start()

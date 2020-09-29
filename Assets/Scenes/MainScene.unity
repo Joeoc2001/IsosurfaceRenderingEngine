@@ -707,7 +707,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbf3de75fa6248b41a78ee64bb5bf487, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainPlayer: {fileID: 0}
   FPSAim: 0
   TimeDeltaAverage: 0.017
   FPSAverage: 60
@@ -749,7 +748,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8da1df50626d8dc4fbb6572c66d734fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultEquation: x ^ 2 + y ^ 2 + z ^ 2 - 100
+  defaultEquation: (x) ^ 2 + (y) ^ 2 + (z) ^ 2 - 100
 --- !u!114 &430997008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -770,8 +769,8 @@ MonoBehaviour:
   ChunkSet: {fileID: 430997006}
   templateChunk: {fileID: 4146629734243397598, guid: 4fce854409d4cd84e8db74e0027971e5,
     type: 3}
-  baseQuality: 3
-  qualityDropoff: 0.5
+  baseQuality: 4
+  qualityDropoff: 0
 --- !u!114 &430997009
 MonoBehaviour:
   m_ObjectHideFlags: 0

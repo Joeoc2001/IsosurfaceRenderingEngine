@@ -1,5 +1,4 @@
 ﻿using Algebra;
-using Algebra.Operations;
 using AlgebraExtensions;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,30 +8,30 @@ using UnityEngine.UI;
 
 public class DerivativeDisplay : MonoBehaviour
 {
-    public EquationProvider provider;
+    public ExpressionProvider provider;
 
-    private Text text;
+    private Text _text;
 
     private void GenerateDerivativeDisplay()
     {
-        Equation e = provider.GetEquation();
+        Expression e = provider.GetExpression();
 
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.Append("df/dx = ");
-        stringBuilder.Append(e.GetDerivative(Variable.X).ToString());
+        stringBuilder.Append(e.GetDerivative("x").ToString());
         stringBuilder.Append("\ndf/dy = ");
-        stringBuilder.Append(e.GetDerivative(Variable.Y).ToString());
+        stringBuilder.Append(e.GetDerivative("y").ToString());
         stringBuilder.Append("\ndf/dz = ");
-        stringBuilder.Append(e.GetDerivative(Variable.Z).ToString());
+        stringBuilder.Append(e.GetDerivative("z").ToString());
 
-        text.text = stringBuilder.ToString();
+        _text.text = stringBuilder.ToString();
     }
 
     private void Start()
     {
-        text = GetComponent<Text>();
-        provider.OnEquationChange += (p, e) => GenerateDerivativeDisplay();
+        _text = GetComponent<Text>();
+        provider.OnExpressionChange += (p, e) => GenerateDerivativeDisplay();
         GenerateDerivativeDisplay();
     }
 }
