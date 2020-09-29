@@ -4,10 +4,8 @@ using UnityEngine;
 
 public class DisableOnAwake : MonoBehaviour
 {
-    public Behaviour component;
-
     void Awake()
     {
-        component.enabled = false;
+        this.enabled = false;
     }
 }
