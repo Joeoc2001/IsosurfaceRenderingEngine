@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 5007514093602490556}
   - component: {fileID: 5007514093602490559}
   - component: {fileID: 5007514093602490433}
-  - component: {fileID: 5007514093602490432}
+  - component: {fileID: -3102713677096163650}
   m_Layer: 0
-  m_Name: CubeMarchedChunk
+  m_Name: SurfaceNetChunk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -80,7 +80,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &5007514093602490432
+--- !u!114 &-3102713677096163650
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -89,7 +89,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5007514093602490435}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d49a1640e21d7c438f1a3d53a97ea9b, type: 3}
+  m_Script: {fileID: 11500000, guid: fd80f7cd3fcbb4a42807761ee41d3d67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Quality: 0
