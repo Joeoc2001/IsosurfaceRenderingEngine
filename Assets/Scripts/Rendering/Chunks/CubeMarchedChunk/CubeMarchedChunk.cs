@@ -25,9 +25,9 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
         }
 
         // Returns true if the mesh changed
-        public void GenerateMesh(FeelerNodeSet nodes, Vector3Expression norm)
+        public void GenerateMesh(FeelerNodeSet nodes, ImplicitSurface surface)
         {
-            CubeMarcher.Instance.MarchIntoMesh(_coreMesh, nodes);
+            CubeMarcher.Instance.MarchIntoMesh(_coreMesh, nodes, surface);
 
             // Extract for speed
             Vector3[] vertices = _coreMesh.vertices;
@@ -40,7 +40,7 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
             }
             else
             {
-                _coreMesh.normals = CalculateNormals(vertices, transform.position, norm);
+                _coreMesh.normals = CalculateNormals(vertices, transform.position, surface.Gradient);
             }
         }
 

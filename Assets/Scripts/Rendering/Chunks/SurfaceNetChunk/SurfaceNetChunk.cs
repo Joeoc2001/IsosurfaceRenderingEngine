@@ -19,9 +19,9 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
         }
 
         // Returns true if the mesh changed
-        public void GenerateMesh(FeelerNodeSet nodes, Vector3Expression norm)
+        public void GenerateMesh(FeelerNodeSet nodes, ImplicitSurface surface)
         {
-            SurfaceNetGenerator.Instance.MarchIntoMesh(_mesh, nodes);
+            SurfaceNetGenerator.Instance.MarchIntoMesh(_mesh, nodes, surface);
 
             // Extract for speed
             Vector3[] vertices = _mesh.vertices;
@@ -34,7 +34,7 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
             }
             else
             {
-                _mesh.normals = CalculateNormals(vertices, transform.position, norm);
+                _mesh.normals = CalculateNormals(vertices, transform.position, surface.Gradient);
             }
         }
 

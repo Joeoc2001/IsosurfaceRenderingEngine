@@ -16,14 +16,16 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
 
         }
 
-        protected override void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, Vector3Int index)
+        protected abstract Vector3 CalculateVertex(FeelerNodeSet nodes, ImplicitSurface surface, Vector3Int index);
+
+        protected override void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, ImplicitSurface surface, Vector3Int index)
         {
             if (IsCellHomogenous(nodes, index))
             {
                 return;
             }
 
-            Vector3 vertex = CalculateVertex(nodes, index);
+            Vector3 vertex = CalculateVertex(nodes, surface, index);
             int[] vs = new int[4];
             vs[0] = space.GetOrAddVertex(index, 0, vertex);
 
@@ -121,8 +123,6 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
                     throw new NotImplementedException();
             }
         }
-
-        protected abstract Vector3 CalculateVertex(FeelerNodeSet nodes, Vector3Int index);
 
         private bool IsCellHomogenous(FeelerNodeSet nodes, Vector3Int index)
         {

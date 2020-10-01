@@ -11,7 +11,7 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
         {
         }
 
-        protected override void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, Vector3Int index)
+        protected override void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, ImplicitSurface surface, Vector3Int index)
         {
             FeelerNode[] cell = ExtractCell(nodes, index);
             AddRegularCellToData(space, cell, index);

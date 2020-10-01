@@ -25,7 +25,7 @@ namespace SDFRendering.Chunks
             this._depth = depth;
         }
 
-        public void MarchIntoMesh(Mesh mesh, FeelerNodeSet nodes)
+        public void MarchIntoMesh(Mesh mesh, FeelerNodeSet nodes, ImplicitSurface surface)
         {
             // Optimization because no triangles are needed if all nodes are the same
             if (nodes.IsUniform)
@@ -44,7 +44,7 @@ namespace SDFRendering.Chunks
                 {
                     for (int z = _padL; z < nodes.Resolution - _padR; z++)
                     {
-                        GenerateForNode(space, nodes, new Vector3Int(x, y, z));
+                        GenerateForNode(space, nodes, surface, new Vector3Int(x, y, z));
                     }
                 }
             }
@@ -55,6 +55,6 @@ namespace SDFRendering.Chunks
             _pool.PutObject(space);
         }
 
-        protected abstract void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, Vector3Int index);
+        protected abstract void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, ImplicitSurface surface, Vector3Int index);
     }
 }

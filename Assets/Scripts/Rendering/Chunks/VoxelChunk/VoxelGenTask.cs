@@ -37,7 +37,7 @@ namespace SDFRendering.Chunks.VoxelChunk
         public void AfterFinished(FeelerNodeSet nodes)
         {
             // Update chunk's mesh
-            _chunk.GenerateMesh(nodes, _sdf.Gradient);
+            _chunk.GenerateMesh(nodes, _sdf);
         }
     }
 }

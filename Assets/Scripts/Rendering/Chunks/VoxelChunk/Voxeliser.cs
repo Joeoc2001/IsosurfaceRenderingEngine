@@ -22,7 +22,7 @@ namespace SDFRendering.Chunks.VoxelChunk
 
         }
 
-        protected override void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, Vector3Int index)
+        protected override void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, ImplicitSurface surface, Vector3Int index)
         {
             foreach (Direction dir in Enum.GetValues(typeof(Direction)))
             {

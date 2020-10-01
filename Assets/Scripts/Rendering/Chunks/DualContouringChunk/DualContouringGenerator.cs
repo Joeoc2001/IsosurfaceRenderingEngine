@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace SDFRendering.Chunks.SurfaceNetChunk
 {
-    public class SurfaceNetGenerator : DualGenerator
+    public class DualContouringGenerator : DualGenerator
     {
-        public static readonly SurfaceNetGenerator Instance = new SurfaceNetGenerator();
+        public static readonly DualContouringGenerator Instance = new DualContouringGenerator();
 
-        private SurfaceNetGenerator() : base(0, 1, 1)
+        private DualContouringGenerator() : base(0, 1, 1)
         {
 
         }

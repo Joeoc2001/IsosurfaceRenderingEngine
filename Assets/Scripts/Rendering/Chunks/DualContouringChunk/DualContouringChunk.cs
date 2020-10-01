@@ -5,10 +5,10 @@ using Unity.Burst;
 using Unity.Collections;
 using UnityEngine;
 
-namespace SDFRendering.Chunks.VoxelChunk
+namespace SDFRendering.Chunks.SurfaceNetChunk
 {
     [RequireComponent(typeof(MeshFilter))]
-    public class VoxelChunk : Chunk
+    public class DualContouringChunk : Chunk
     {
         private Mesh _mesh;
 
@@ -21,7 +21,7 @@ namespace SDFRendering.Chunks.VoxelChunk
         // Returns true if the mesh changed
         public void GenerateMesh(FeelerNodeSet nodes, ImplicitSurface surface)
         {
-            Voxeliser.Instance.MarchIntoMesh(_mesh, nodes, surface);
+            DualContouringGenerator.Instance.MarchIntoMesh(_mesh, nodes, surface);
 
             // Extract for speed
             Vector3[] vertices = _mesh.vertices;
@@ -40,7 +40,7 @@ namespace SDFRendering.Chunks.VoxelChunk
 
         public override GenTask CreateGetTask(ImplicitSurface sdf)
         {
-            return new VoxelGenTask(this, sdf);
+            return new DualContouringGenTask(this, sdf);
         }
     }
 }

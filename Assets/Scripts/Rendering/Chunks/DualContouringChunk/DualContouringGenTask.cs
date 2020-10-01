@@ -11,12 +11,12 @@ using SDFRendering.JobHandles;
 
 namespace SDFRendering.Chunks.SurfaceNetChunk
 {
-    public class SurfaceNetGenTask : GenTask
+    public class DualContouringGenTask : GenTask
     {
-        private readonly SurfaceNetChunk _chunk;
+        private readonly DualContouringChunk _chunk;
         private readonly ImplicitSurface _sdf;
 
-        public SurfaceNetGenTask(SurfaceNetChunk chunk, ImplicitSurface sdf)
+        public DualContouringGenTask(DualContouringChunk chunk, ImplicitSurface sdf)
         {
             this._chunk = chunk;
             this._sdf = sdf;

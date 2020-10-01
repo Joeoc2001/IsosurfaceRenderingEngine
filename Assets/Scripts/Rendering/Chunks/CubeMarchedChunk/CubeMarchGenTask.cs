@@ -37,7 +37,7 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
         public void AfterFinished(FeelerNodeSet nodes)
         {
             // Update chunk's mesh
-            _chunk.GenerateMesh(nodes, _sdf.Gradient);
+            _chunk.GenerateMesh(nodes, _sdf);
 
             // Set chunk meshes
             _chunk.MergeAndSetMeshes();
