@@ -24,9 +24,9 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
 
         public override IPriorGenTaskHandle Schedule()
         {
-            int resolution = (1 << _chunk.Quality) + 2; // Overscan by 2 so we can gen edges properly
+            int resolution = (1 << _chunk.Quality) + 2;
             float delta = Chunk.SIZE / (1 << _chunk.Quality);
-            Vector3 offset = new Vector3(-1, -1, -1) * ((delta + Chunk.SIZE) / 2);
+            Vector3 offset = new Vector3(-1, -1, -1) * (delta / 2);
             Vector3 samplingOffset = _chunk.transform.position;
 
             Sampler.SampleGridAsync(_sdf.Expression, AfterFinished, resolution, delta, offset, samplingOffset);

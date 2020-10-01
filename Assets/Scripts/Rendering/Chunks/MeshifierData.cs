@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SDFRendering.Chunks
 {
@@ -46,6 +47,18 @@ namespace SDFRendering.Chunks
                 _chunkVertexCache.Set(index, depth, iChunkVertex);
             }
             return iChunkVertex;
+        }
+
+        public int GetVertex(Vector3Int index, int depth)
+        {
+            if (_chunkVertexCache.IsSet(index, depth))
+            {
+                return _chunkVertexCache.Get(index, depth);
+            }
+            else
+            {
+                throw new IndexOutOfRangeException("Vertex not set");
+            }
         }
 
         public void AddToTriangles(int index1, int index2, int index3)

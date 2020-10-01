@@ -604,7 +604,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8da1df50626d8dc4fbb6572c66d734fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultExpression: x * x + y * y + z * z - 100
+  defaultExpression: sqrt(x * x + y * y + z * z) - 10
 --- !u!114 &430997008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -623,7 +623,7 @@ MonoBehaviour:
   - {fileID: 430997009}
   - {fileID: 430997010}
   ChunkSet: {fileID: 430997006}
-  templateChunk: {fileID: 5007514093602490432, guid: 2f0a4f44fc30699489ecc43a7ea4d784,
+  templateChunk: {fileID: -3102713677096163650, guid: 4a5b75e453ecad741b2389d18c4ad17b,
     type: 3}
   baseQuality: 4
   qualityDropoff: 0

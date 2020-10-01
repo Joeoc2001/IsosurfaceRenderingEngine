@@ -7,153 +7,188 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
     {
         private enum Direction
         {
-            XMinus,
-            XPlus,
-            YMinus,
-            YPlus,
-            ZMinus,
-            ZPlus,
+            X, Y, Z
         }
 
         public static readonly SurfaceNetGenerator Instance = new SurfaceNetGenerator();
 
-        private SurfaceNetGenerator() : base(1, 1, 1)
+        private SurfaceNetGenerator() : base(0, 1, 1)
         {
 
         }
 
         protected override void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, Vector3Int index)
         {
-            foreach (Direction dir in Enum.GetValues(typeof(Direction)))
-            {
-                ConditionallyAddWall(space, nodes, index, dir);
-            }
-        }
-
-        private void ConditionallyAddWall(MeshifierData space, FeelerNodeSet nodes, Vector3Int index, Direction dir)
-        {
-            FeelerNode thisNode = nodes[index];
-
-            if (thisNode.Val >= 0) // If outside shape, return
+            if (IsCellHomogenous(nodes, index))
             {
                 return;
             }
 
-            Vector3Int otherIndex = index + GetDirectionOffset(dir);
-            FeelerNode otherNode = nodes[otherIndex];
+            Vector3 vertex = CalculateVertex(nodes, index);
+            int[] vs = new int[4];
+            vs[0] = space.GetOrAddVertex(index, 0, vertex);
 
-            if (otherNode.Val < 0) // If other is inside shape, return
+            // Assume for default winding, surface goes from inside to outside as we go along the edge
+            foreach (Direction d in Enum.GetValues(typeof(Direction)))
             {
-                return;
-            }
+                if (!HasEdge(index, d))
+                {
+                    continue;
+                }
 
-            // ASSERT: otherNode is outside shape and thisNode is inside shape
-            // Therefore a wall should be put between them
-            Vector3Int[] faceVectors = GetFaceWithWinding(dir);
-            int[] vertexIndices = new int[faceVectors.Length];
+                Vector3Int edgeOffset = GetEdgeOffset(d);
+                if (nodes[index].SignBit == nodes[index + edgeOffset].SignBit)
+                {
+                    continue;
+                }
 
-            float spacing = nodes.Spacing;
+                Vector3Int[] vertexOffsets = GetOffsets(d);
+                for (int j = 0; j < 3; j++)
+                {
+                    Vector3Int offset = vertexOffsets[j];
+                    vs[j + 1] = space.GetVertex(index + offset, 0);
+                }
 
-            for (int i = 0; i < faceVectors.Length; i++)
-            {
-                Vector3Int faceIndex = index + ((faceVectors[i] - new Vector3Int(1, 1, 1)) / 2);
-                Vector3 facePosition = (Vector3)thisNode.Pos + ((Vector3)faceVectors[i] * (spacing / 2));
-
-                vertexIndices[i] = space.GetOrAddVertex(faceIndex, 0, facePosition);
-            }
-
-            for (int i = 1; i < vertexIndices.Length - 1; i++)
-            {
-                space.AddToTriangles(vertexIndices[0], vertexIndices[i], vertexIndices[i + 1]);
+                bool isInside = nodes[index].Val < 0;
+                if (isInside)
+                {
+                    space.AddToTriangles(vs[0], vs[1], vs[2]);
+                    space.AddToTriangles(vs[0], vs[2], vs[3]);
+                }
+                else
+                {
+                    space.AddToTriangles(vs[0], vs[2], vs[1]);
+                    space.AddToTriangles(vs[0], vs[3], vs[2]);
+                }
             }
         }
 
-        private Vector3Int GetDirectionOffset(Direction dir)
+        private static bool HasEdge(Vector3Int index, Direction d)
         {
-            Vector3Int off;
-            switch (dir)
+            switch (d)
             {
-                case Direction.XMinus:
-                    off = new Vector3Int(-1, 0, 0);
-                    break;
-                case Direction.XPlus:
-                    off = new Vector3Int(1, 0, 0);
-                    break;
-                case Direction.YMinus:
-                    off = new Vector3Int(0, -1, 0);
-                    break;
-                case Direction.YPlus:
-                    off = new Vector3Int(0, 1, 0);
-                    break;
-                case Direction.ZMinus:
-                    off = new Vector3Int(0, 0, -1);
-                    break;
-                case Direction.ZPlus:
-                    off = new Vector3Int(0, 0, 1);
-                    break;
+                case Direction.X:
+                    return index.y > 0 && index.z > 0;
+                case Direction.Y:
+                    return index.x > 0 && index.z > 0;
+                case Direction.Z:
+                    return index.x > 0 && index.y > 0;
                 default:
-                    throw new NotImplementedException("Somehow another spacial dimension has been queried that doesn't exist :/");
+                    throw new NotImplementedException();
             }
-            return off;
         }
 
-        private Vector3Int[] GetFaceWithWinding(Direction dir)
+        private static Vector3Int GetEdgeOffset(Direction d)
         {
-            Vector3Int[] offs; // The set of points for the face and the winding order
-            switch (dir)
+            switch (d)
             {
-                case Direction.XMinus:
-                    offs = new Vector3Int[] {
-                    new Vector3Int(-1, 1, 1),
-                    new Vector3Int(-1, 1, -1),
-                    new Vector3Int(-1, -1, -1),
-                    new Vector3Int(-1, -1, 1),
-                };
-                    break;
-                case Direction.XPlus:
-                    offs = new Vector3Int[] {
-                    new Vector3Int(1, 1, 1),
-                    new Vector3Int(1, -1, 1),
-                    new Vector3Int(1, -1, -1),
-                    new Vector3Int(1, 1, -1),
-                };
-                    break;
-                case Direction.YMinus:
-                    offs = new Vector3Int[] {
-                    new Vector3Int(1, -1, 1),
-                    new Vector3Int(-1, -1, 1),
-                    new Vector3Int(-1, -1, -1),
-                    new Vector3Int(1, -1, -1),
-                };
-                    break;
-                case Direction.YPlus:
-                    offs = new Vector3Int[] {
-                    new Vector3Int(1, 1, 1),
-                    new Vector3Int(1, 1, -1),
-                    new Vector3Int(-1, 1, -1),
-                    new Vector3Int(-1, 1, 1),
-                };
-                    break;
-                case Direction.ZMinus:
-                    offs = new Vector3Int[] {
-                    new Vector3Int(1, 1, -1),
-                    new Vector3Int(1, -1, -1),
-                    new Vector3Int(-1, -1, -1),
-                    new Vector3Int(-1, 1, -1),
-                };
-                    break;
-                case Direction.ZPlus:
-                    offs = new Vector3Int[] {
-                    new Vector3Int(1, 1, 1),
-                    new Vector3Int(-1, 1, 1),
-                    new Vector3Int(-1, -1, 1),
-                    new Vector3Int(1, -1, 1),
-                };
-                    break;
+                case Direction.X:
+                    return new Vector3Int(1, 0, 0);
+                case Direction.Y:
+                    return new Vector3Int(0, 1, 0);
+                case Direction.Z:
+                    return new Vector3Int(0, 0, 1);
                 default:
-                    throw new NotImplementedException("Somehow another spacial dimension has been queried that doesn't exist :/");
+                    throw new NotImplementedException();
             }
-            return offs;
+        }
+
+        private static Vector3Int[] GetOffsets(Direction d)
+        {
+            switch (d)
+            {
+                case Direction.X:
+                    return new Vector3Int[]
+                    {
+                        new Vector3Int(0, -1, 0),
+                        new Vector3Int(0, -1, -1),
+                        new Vector3Int(0, 0, -1),
+                    };
+                case Direction.Y:
+                    return new Vector3Int[]
+                    {
+                        new Vector3Int(0, 0, -1),
+                        new Vector3Int(-1, 0, -1),
+                        new Vector3Int(-1, 0, 0),
+                    };
+                case Direction.Z:
+                    return new Vector3Int[]
+                    {
+                        new Vector3Int(-1, 0, 0),
+                        new Vector3Int(-1, -1, 0),
+                        new Vector3Int(0, -1, 0),
+                    };
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private Vector3 CalculateVertex(FeelerNodeSet nodes, Vector3Int index)
+        {
+            (Vector3Int, Vector3Int)[] edges = new (Vector3Int, Vector3Int)[]
+            {
+                ( new Vector3Int(0, 0, 0), new Vector3Int(0, 0, 1) ),
+                ( new Vector3Int(0, 0, 0), new Vector3Int(0, 1, 0) ),
+                ( new Vector3Int(0, 0, 0), new Vector3Int(1, 0, 0) ),
+                ( new Vector3Int(0, 0, 1), new Vector3Int(0, 1, 1) ),
+                ( new Vector3Int(0, 0, 1), new Vector3Int(1, 0, 1) ),
+                ( new Vector3Int(0, 1, 0), new Vector3Int(0, 1, 1) ),
+                ( new Vector3Int(0, 1, 0), new Vector3Int(1, 1, 0) ),
+                ( new Vector3Int(1, 0, 0), new Vector3Int(1, 0, 1) ),
+                ( new Vector3Int(1, 0, 0), new Vector3Int(1, 1, 0) ),
+                ( new Vector3Int(0, 1, 1), new Vector3Int(1, 1, 1) ),
+                ( new Vector3Int(1, 0, 1), new Vector3Int(1, 1, 1) ),
+                ( new Vector3Int(1, 1, 0), new Vector3Int(1, 1, 1) ),
+            };
+
+            int count = 0;
+            Vector3 total = Vector3.zero;
+            foreach ((Vector3Int a, Vector3Int b) in edges)
+            {
+                FeelerNode nodeA = nodes[index + a];
+                FeelerNode nodeB = nodes[index + b];
+
+                if (nodeA.SignBit == nodeB.SignBit)
+                {
+                    continue;
+                }
+
+                float valA = nodeA.Val;
+                float valB = nodeB.Val;
+                float dist = valA / (valB - valA);
+                Vector3 pos = dist * nodeA.Pos + (1 - dist) * nodeB.Pos;
+
+                total += pos;
+                count += 1;
+            }
+
+            return total / count;
+        }
+
+        private bool IsCellHomogenous(FeelerNodeSet nodes, Vector3Int index)
+        {
+            Vector3Int[] cellOffsets = new Vector3Int[]
+            {
+                new Vector3Int(0, 0, 1),
+                new Vector3Int(0, 1, 0),
+                new Vector3Int(0, 1, 1),
+                new Vector3Int(1, 0, 0),
+                new Vector3Int(1, 0, 1),
+                new Vector3Int(1, 1, 0),
+                new Vector3Int(1, 1, 1)
+            };
+
+            int sign = nodes[index].SignBit;
+
+            foreach (var offset in cellOffsets)
+            {
+                if (nodes[index + offset].SignBit != sign)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
