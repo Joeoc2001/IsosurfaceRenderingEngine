@@ -11,15 +11,15 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
         {
         }
 
-        protected override void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, ImplicitSurface surface, Vector3Int index)
+        protected override void GenerateForNode(MeshifierData space, PointCloud nodes, ImplicitSurface surface, Vector3Int index)
         {
-            FeelerNode[] cell = ExtractCell(nodes, index);
+            Sample[] cell = ExtractCell(nodes, index);
             AddRegularCellToData(space, cell, index);
         }
 
-        private FeelerNode[] ExtractCell(FeelerNodeSet nodes, Vector3Int cellIndex)
+        private Sample[] ExtractCell(PointCloud nodes, Vector3Int cellIndex)
         {
-            FeelerNode[] cell = new FeelerNode[8];
+            Sample[] cell = new Sample[8];
 
             cell[0] = nodes[cellIndex + new Vector3Int(-1, -1, -1)];
             cell[1] = nodes[cellIndex + new Vector3Int(0, -1, -1)];
@@ -33,7 +33,7 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
             return cell;
         }
 
-        private void AddRegularCellToData(MeshifierData data, FeelerNode[] cell, Vector3Int cellIndex)
+        private void AddRegularCellToData(MeshifierData data, Sample[] cell, Vector3Int cellIndex)
         {
             int casecode = cell[0].SignBit
                 | cell[1].SignBit << 1
@@ -74,8 +74,8 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
 
                     Vector3 generateVertex()
                     {
-                        FeelerNode node1 = cell[iNode1];
-                        FeelerNode node2 = cell[iNode2];
+                        Sample node1 = cell[iNode1];
+                        Sample node2 = cell[iNode2];
 
                         float t = node1.Val / (node1.Val - node2.Val);
                         return t * node2.Pos + (1 - t) * node1.Pos;

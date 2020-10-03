@@ -82,7 +82,7 @@ namespace SDFRendering
 
             // Set fields
             Vector3 position = new Vector3(index.x, index.y, index.z) * Chunk.SIZE;
-            chunk.transform.localPosition = position;
+            chunk.SamplingOffset = position;
             chunk.OwningSet = this;
 
             // Trigger listeners

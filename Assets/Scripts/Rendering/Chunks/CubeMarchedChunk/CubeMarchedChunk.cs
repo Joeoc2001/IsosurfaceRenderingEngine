@@ -10,7 +10,7 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
     [RequireComponent(typeof(MeshFilter))]
     public class CubeMarchedChunk : MeshChunk
     {
-        protected override void GeneratePolygonsIntoMesh(Mesh mesh, FeelerNodeSet nodes, ImplicitSurface surface)
+        protected override void GeneratePolygonsIntoMesh(Mesh mesh, PointCloud nodes, ImplicitSurface surface)
         {
             CubeMarcher.Instance.MarchIntoMesh(mesh, nodes, surface);
         }

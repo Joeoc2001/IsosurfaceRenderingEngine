@@ -23,18 +23,16 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
 
         public override IPriorGenTaskHandle Schedule()
         {
-            int edgesPerEdge = 1 << _chunk.Quality;
-            float delta = Chunk.SIZE / edgesPerEdge;
-            int verticesPerEdge = edgesPerEdge + 1;
-            Vector3 offset = new Vector3(-1, -1, -1) * (Chunk.SIZE / 2);
-            Vector3 samplingOffset = _chunk.transform.position;
+            float delta = Chunk.SIZE / (1 << _chunk.Quality);
+            int resolution = (1 << _chunk.Quality) + 1;
+            Vector3 offset = _chunk.SamplingOffset;
 
-            Sampler.SampleGridAsync(_sdf.Expression, AfterFinished, verticesPerEdge, delta, offset, samplingOffset);
+            Sampler.SampleGridAsync(_sdf.Expression, AfterFinished, resolution, delta, offset);
 
             return new NoneTaskHandle();
         }
 
-        public void AfterFinished(FeelerNodeSet nodes)
+        public void AfterFinished(PointCloud nodes)
         {
             // Update chunk's mesh
             _chunk.GenerateMesh(nodes, _sdf);

@@ -13,6 +13,7 @@ namespace SDFRendering
 
         [Range(1, 8)]
         public int Quality;
+        public Vector3 SamplingOffset;
 
         public bool Dirty = true;
 

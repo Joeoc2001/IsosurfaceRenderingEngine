@@ -16,9 +16,9 @@ namespace SDFRendering.Chunks
             GetComponent<MeshFilter>().mesh = _mesh;
         }
 
-        protected abstract void GeneratePolygonsIntoMesh(Mesh mesh, FeelerNodeSet nodes, ImplicitSurface surface);
+        protected abstract void GeneratePolygonsIntoMesh(Mesh mesh, PointCloud nodes, ImplicitSurface surface);
 
-        public void GenerateMesh(FeelerNodeSet nodes, ImplicitSurface surface)
+        public void GenerateMesh(PointCloud nodes, ImplicitSurface surface)
         {
             GeneratePolygonsIntoMesh(_mesh, nodes, surface);
 

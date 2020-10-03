@@ -9,14 +9,14 @@ namespace SDFRendering.Chunks
     {
         private readonly List<Vector3> _chunkVertices = new List<Vector3>();
         private readonly List<int> _chunkTriangles = new List<int>();
-        private ChunkVertexCache _chunkVertexCache = new ChunkVertexCache(1, 1);
+        private ChunkVertexCache _chunkVertexCache = new ChunkVertexCache(new Vector3Int(1, 1, 1), 1);
 
-        public void Clear(int nodes, int depth)
+        public void Clear(Vector3Int nodes, int depth)
         {
             _chunkVertices.Clear();
             _chunkTriangles.Clear();
 
-            if (_chunkVertexCache.Width != nodes || _chunkVertexCache.Depth != depth)
+            if (_chunkVertexCache.Size != nodes || _chunkVertexCache.Depth != depth)
             {
                 _chunkVertexCache = new ChunkVertexCache(nodes, depth);
             }

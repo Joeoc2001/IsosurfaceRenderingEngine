@@ -5,18 +5,18 @@ using UnityEngine;
 
 public class ChunkVertexCache
 {
-    public readonly int Width;
+    public readonly Vector3Int Size;
     public readonly int Depth;
     private readonly int[,,,] _values;
-    public ChunkVertexCache(int width, int depth)
+    public ChunkVertexCache(Vector3Int width, int depth)
     {
-        Width = width;
+        Size = width;
         Depth = depth;
-        _values = new int[width, width, width, depth];
+        _values = new int[width.x, width.y, width.z, depth];
     }
     public void Clear()
     {
-        Array.Clear(_values, 0, Width * Width * Width * Depth);
+        Array.Clear(_values, 0, Size.x * Size.y * Size.z * Depth);
     }
     public bool IsSet(Vector3Int p, int d)
     {

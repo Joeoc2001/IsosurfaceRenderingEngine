@@ -10,7 +10,7 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
     [RequireComponent(typeof(MeshFilter))]
     public class DualContouringChunk : MeshChunk
     {
-        protected override void GeneratePolygonsIntoMesh(Mesh mesh, FeelerNodeSet nodes, ImplicitSurface surface)
+        protected override void GeneratePolygonsIntoMesh(Mesh mesh, PointCloud nodes, ImplicitSurface surface)
         {
             DualContouringGenerator.Instance.MarchIntoMesh(mesh, nodes, surface);
         }

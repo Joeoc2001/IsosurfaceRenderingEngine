@@ -7,12 +7,12 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
     {
         public static readonly SurfaceNetGenerator Instance = new SurfaceNetGenerator();
 
-        private SurfaceNetGenerator() : base(0, 1, 1)
+        private SurfaceNetGenerator()
         {
 
         }
 
-        protected override Vector3 CalculateVertex(FeelerNodeSet nodes, ImplicitSurface surface, Vector3Int index)
+        protected override Vector3 CalculateVertex(PointCloud nodes, ImplicitSurface surface, Vector3Int index)
         {
             (Vector3Int, Vector3Int)[] edges = new (Vector3Int, Vector3Int)[]
             {
@@ -34,8 +34,8 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
             Vector3 total = Vector3.zero;
             foreach ((Vector3Int a, Vector3Int b) in edges)
             {
-                FeelerNode nodeA = nodes[index + a];
-                FeelerNode nodeB = nodes[index + b];
+                Sample nodeA = nodes[index + a];
+                Sample nodeB = nodes[index + b];
 
                 if (nodeA.SignBit == nodeB.SignBit)
                 {

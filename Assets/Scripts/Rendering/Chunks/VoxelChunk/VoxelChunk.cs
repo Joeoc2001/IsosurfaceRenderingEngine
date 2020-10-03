@@ -10,7 +10,7 @@ namespace SDFRendering.Chunks.VoxelChunk
     [RequireComponent(typeof(MeshFilter))]
     public class VoxelChunk : MeshChunk
     {
-        protected override void GeneratePolygonsIntoMesh(Mesh mesh, FeelerNodeSet nodes, ImplicitSurface surface)
+        protected override void GeneratePolygonsIntoMesh(Mesh mesh, PointCloud nodes, ImplicitSurface surface)
         {
             Voxeliser.Instance.MarchIntoMesh(mesh, nodes, surface);
         }

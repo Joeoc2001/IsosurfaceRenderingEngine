@@ -24,17 +24,16 @@ namespace SDFRendering.Chunks.VoxelChunk
 
         public override IPriorGenTaskHandle Schedule()
         {
-            int resolution = (1 << _chunk.Quality) + 2; // Overscan by 2 so we can gen edges properly
-            float delta = Chunk.SIZE / (1 << _chunk.Quality);
-            Vector3 offset = new Vector3(-1, -1, -1) * ((delta + Chunk.SIZE) / 2);
-            Vector3 samplingOffset = _chunk.transform.position;
+            int sideResolution = (1 << _chunk.Quality) + 2;
+            float sideSpacing = Chunk.SIZE / (1 << _chunk.Quality);
+            Vector3 origin = _chunk.SamplingOffset - Vector3.one * (sideSpacing / 2);
 
-            Sampler.SampleGridAsync(_sdf.Expression, AfterFinished, resolution, delta, offset, samplingOffset);
+            Sampler.SampleGridAsync(_sdf.Expression, AfterFinished, sideResolution, sideSpacing, origin);
 
             return new NoneTaskHandle();
         }
 
-        public void AfterFinished(FeelerNodeSet nodes)
+        public void AfterFinished(PointCloud nodes)
         {
             // Update chunk's mesh
             _chunk.GenerateMesh(nodes, _sdf);

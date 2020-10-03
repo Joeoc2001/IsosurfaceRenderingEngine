@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Runtime.InteropServices.WindowsRuntime;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SDFRendering.Chunks.SurfaceNetChunk
@@ -7,6 +7,11 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
     public class DualContouringGenerator : DualGenerator
     {
         public static readonly DualContouringGenerator Instance = new DualContouringGenerator();
+
+        private DualContouringGenerator()
+        {
+
+        }
 
         // Has no constant term as constant term can be ignored when finding minimum
         private class Unbounded3DPolynomial
@@ -118,14 +123,24 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
                 Vector4 ans = matrix.inverse * new Vector4(-X, -Y, -Z, 0);
                 return new Vector3(ans.x, ans.y, ans.z);
             }
+
+            public override string ToString()
+            {
+                return $"{XSquared}x^2 + {YSquared}y^2 + {ZSquared}z^2 + {XY}xy + {XZ}xz + {YZ}yz + {X}x + {Y}y + {Z}z";
+            }
         }
 
-        private DualContouringGenerator() : base(0, 1, 1)
+        private static Vector3 ClampVector(Vector3 value, Vector3 lower, Vector3 upper)
         {
-
+            return new Vector3
+            {
+                x = Mathf.Clamp(value.x, lower.x, upper.x),
+                y = Mathf.Clamp(value.y, lower.y, upper.y),
+                z = Mathf.Clamp(value.z, lower.z, upper.z)
+            };
         }
 
-        protected override Vector3 CalculateVertex(FeelerNodeSet nodes, ImplicitSurface surface, Vector3Int index)
+        protected override Vector3 CalculateVertex(PointCloud nodes, ImplicitSurface surface, Vector3Int index)
         {
             (Vector3Int, Vector3Int)[] edges = new (Vector3Int, Vector3Int)[]
             {
@@ -144,10 +159,11 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
             };
 
             Unbounded3DPolynomial polynomial = new Unbounded3DPolynomial();
+            //List<Tuple<Vector3, Vector3>> pointsAndNormals = new List<Tuple<Vector3, Vector3>>();
             foreach ((Vector3Int a, Vector3Int b) in edges)
             {
-                FeelerNode nodeA = nodes[index + a];
-                FeelerNode nodeB = nodes[index + b];
+                Sample nodeA = nodes[index + a];
+                Sample nodeB = nodes[index + b];
 
                 if (nodeA.SignBit == nodeB.SignBit)
                 {
@@ -161,6 +177,8 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
 
                 Vector3 normal = surface.Gradient.EvaluateOnce(pos);
 
+                //pointsAndNormals.Add(new Tuple<Vector3, Vector3>(pos, normal.normalized));
+
                 polynomial.AddPlanarWeighting(pos, normal);
             }
 
@@ -169,9 +187,7 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
             // Clamp
             Vector3 bottomLeft = nodes[index].Pos;
             Vector3 topRight = nodes[index + Vector3Int.one].Pos;
-            point.x = Mathf.Clamp(point.x, bottomLeft.x, topRight.x);
-            point.y = Mathf.Clamp(point.y, bottomLeft.y, topRight.y);
-            point.z = Mathf.Clamp(point.z, bottomLeft.z, topRight.z);
+            //point = ClampVector(point, bottomLeft, topRight);
 
             return point;
         }

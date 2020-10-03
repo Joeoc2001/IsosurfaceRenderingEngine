@@ -10,15 +10,15 @@ namespace SDFRendering.Chunks
             X, Y, Z
         }
 
-        protected DualGenerator(int padL, int padR, int depth)
-            : base(padL, padR, depth)
+        protected DualGenerator()
+            : base(0, 1, 1)
         {
 
         }
 
-        protected abstract Vector3 CalculateVertex(FeelerNodeSet nodes, ImplicitSurface surface, Vector3Int index);
+        protected abstract Vector3 CalculateVertex(PointCloud nodes, ImplicitSurface surface, Vector3Int index);
 
-        protected override void GenerateForNode(MeshifierData space, FeelerNodeSet nodes, ImplicitSurface surface, Vector3Int index)
+        protected override void GenerateForNode(MeshifierData space, PointCloud nodes, ImplicitSurface surface, Vector3Int index)
         {
             if (IsCellHomogenous(nodes, index))
             {
@@ -124,7 +124,7 @@ namespace SDFRendering.Chunks
             }
         }
 
-        private bool IsCellHomogenous(FeelerNodeSet nodes, Vector3Int index)
+        private bool IsCellHomogenous(PointCloud nodes, Vector3Int index)
         {
             Vector3Int[] cellOffsets = new Vector3Int[]
             {
