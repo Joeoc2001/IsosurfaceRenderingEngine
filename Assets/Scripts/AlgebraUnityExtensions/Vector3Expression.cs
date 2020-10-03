@@ -32,5 +32,9 @@ namespace AlgebraExtensions
                                (float)_y.EvaluateOnce(variableInputs),
                                (float)_z.EvaluateOnce(variableInputs));
         }
+
+        public Vector3 EvaluateOnce(Vector2 values) => EvaluateOnce(new VariableInputSet<double>() { { "x", values.x }, { "y", values.y } });
+        public Vector3 EvaluateOnce(Vector3 values) => EvaluateOnce(new VariableInputSet<double>() { { "x", values.x }, { "y", values.y }, { "z", values.z } });
+        public Vector3 EvaluateOnce(Vector4 values) => EvaluateOnce(new VariableInputSet<double>() { { "x", values.x }, { "y", values.y }, { "z", values.z }, { "w", values.w } });
     }
 }

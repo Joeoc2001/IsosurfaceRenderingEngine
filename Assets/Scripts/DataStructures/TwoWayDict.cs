@@ -102,4 +102,14 @@ public class TwoWayDict<T, U>
     {
         return dict2.TryGetValue(key, out value);
     }
+
+    public IEnumerator<T> GetEnumerator1()
+    {
+        return dict1.Keys.GetEnumerator();
+    }
+
+    public IEnumerator<U> GetEnumerator2()
+    {
+        return dict2.Keys.GetEnumerator();
+    }
 }

@@ -14,6 +14,8 @@ namespace SDFRendering
         [Range(1, 8)]
         public int Quality;
 
+        public bool Dirty = true;
+
         protected bool ShouldApproximateNormals
         {
             get => Quality <= APPROXIMATE_NORMALS_QUALITY;

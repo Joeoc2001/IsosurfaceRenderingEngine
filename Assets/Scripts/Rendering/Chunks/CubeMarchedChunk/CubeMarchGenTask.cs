@@ -38,9 +38,6 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
         {
             // Update chunk's mesh
             _chunk.GenerateMesh(nodes, _sdf);
-
-            // Set chunk meshes
-            _chunk.MergeAndSetMeshes();
         }
     }
 }

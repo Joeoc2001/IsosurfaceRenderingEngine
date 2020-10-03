@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices.WindowsRuntime;
+﻿using System;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 namespace SDFRendering.Chunks.SurfaceNetChunk
@@ -57,17 +58,15 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
                 private set => _coefficients[8] = value;
             }
 
-            public static Unbounded3DPolynomial operator +(Unbounded3DPolynomial a, Unbounded3DPolynomial b)
+            public void Add(Unbounded3DPolynomial b)
             {
-                Unbounded3DPolynomial n = new Unbounded3DPolynomial();
-                for (int i = 0; i < n._coefficients.Length; i++)
+                for (int i = 0; i < _coefficients.Length; i++)
                 {
-                    n._coefficients[i] = a._coefficients[i] + b._coefficients[i];
+                    _coefficients[i] += b._coefficients[i];
                 }
-                return n;
             }
 
-            public Unbounded3DPolynomial AddPlanarWeighting(Vector3 position, Vector3 normal)
+            public void AddPlanarWeighting(Vector3 position, Vector3 normal)
             {
                 normal = normal.normalized;
 
@@ -87,8 +86,37 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
                     Z = -2 * c * normal.z
                 };
 
+                Add(newPoly);
+            }
 
-                return this + newPoly;
+            public Vector3 FindTurningPoint()
+            {
+                // this = Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz
+                // 
+                //    | d this/dx |   |2Ax +  Dy +  Ez + G |   | 0 |
+                // => | d this/dy | = | Dx + 2By +  Fz + H | = | 0 |
+                //    | d this/dz |   | Ex +  Fy + 2Cz + I |   | 0 |
+                //
+                //    | x |   | 2A   D   E |-1     | -G |
+                // => | y | = |  D  2B   F |   x   | -H |
+                //    | z |   |  E   F  2C |       | -I |
+
+                // Matrix constructor takes column vectors, so below is the matrix transposed
+                // Not that it matters anyway
+                Matrix4x4 matrix = new Matrix4x4(
+                    new Vector4(2 * XSquared, XY, XZ, 0),
+                    new Vector4(XY, 2 * YSquared, YZ, 0),
+                    new Vector4(XZ, YZ, 2 * ZSquared, 0),
+                    new Vector4(0,     0,     0,      1)
+                );
+
+                if (matrix.determinant == 0)
+                {
+                    throw new ArgumentOutOfRangeException("Determinant is 0 for given expression, so no minimum exists");
+                }
+
+                Vector4 ans = matrix.inverse * new Vector4(-X, -Y, -Z, 0);
+                return new Vector3(ans.x, ans.y, ans.z);
             }
         }
 
@@ -115,8 +143,7 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
                 ( new Vector3Int(1, 1, 0), new Vector3Int(1, 1, 1) ),
             };
 
-            int count = 0;
-            Vector3 total = Vector3.zero;
+            Unbounded3DPolynomial polynomial = new Unbounded3DPolynomial();
             foreach ((Vector3Int a, Vector3Int b) in edges)
             {
                 FeelerNode nodeA = nodes[index + a];
@@ -132,11 +159,21 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
                 float dist = valB / (valB - valA);
                 Vector3 pos = dist * nodeA.Pos + (1 - dist) * nodeB.Pos;
 
-                total += pos;
-                count += 1;
+                Vector3 normal = surface.Gradient.EvaluateOnce(pos);
+
+                polynomial.AddPlanarWeighting(pos, normal);
             }
 
-            return total / count;
+            Vector3 point = polynomial.FindTurningPoint();
+
+            // Clamp
+            Vector3 bottomLeft = nodes[index].Pos;
+            Vector3 topRight = nodes[index + Vector3Int.one].Pos;
+            point.x = Mathf.Clamp(point.x, bottomLeft.x, topRight.x);
+            point.y = Mathf.Clamp(point.y, bottomLeft.y, topRight.y);
+            point.z = Mathf.Clamp(point.z, bottomLeft.z, topRight.z);
+
+            return point;
         }
     }
 }

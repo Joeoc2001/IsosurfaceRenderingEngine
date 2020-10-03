@@ -13,7 +13,7 @@ using UnityEngine.Assertions;
 
 namespace SDFRendering
 {
-    public class ChunkSet : MonoBehaviour
+    public class ChunkSet : MonoBehaviour, IEnumerable<Chunk>
     {
         public Vector3Int BaseIndex { get; set; }
 
@@ -106,6 +106,16 @@ namespace SDFRendering
             OnChunkRemoved.Invoke(this, chunk, index);
 
             return chunk;
+        }
+
+        public IEnumerator<Chunk> GetEnumerator()
+        {
+            return _chunks.GetEnumerator2();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _chunks.GetEnumerator2();
         }
     }
 }

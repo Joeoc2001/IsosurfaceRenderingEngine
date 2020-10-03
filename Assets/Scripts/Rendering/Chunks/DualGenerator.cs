@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace SDFRendering.Chunks.SurfaceNetChunk
+namespace SDFRendering.Chunks
 {
     public abstract class DualGenerator : PointCloudMeshifier
     {

@@ -12,42 +12,20 @@ namespace SDFRendering.ChunkSetManagementModules
     {
         public ExpressionProvider distanceField;
 
-        [Range(0, 2)]
-        public double updatesPerChunkSecond = 0.1;
-
-        [Range(0, 1000)]
-        public int maxUpdatesPerTick = 100;
+        [Range(0.0f, 0.016f)]
+        public float maxTimePerFrame = 0.008f;
 
         private readonly Dictionary<Vector3Int, IPriorGenTaskHandle> _genJobs = new Dictionary<Vector3Int, IPriorGenTaskHandle>();
 
-        private ImplicitSurface _lastSDF = null;
-
         public override void Init(ChunkSet set, ChunkSystem system)
         {
-            // Also caputure system. Probably won't cause a memory leak beacause these objects should always exist
-            set.OnChunkAdded += (s, c, i) => Set_OnChunkAdded(s, system, c, i);
             set.OnChunkRemoved += Set_OnChunkRemoved;
         }
 
         private ImplicitSurface GenSDF()
         {
             // Calculate functions
-            _lastSDF = new ImplicitSurface(distanceField.GetExpression());
-            return _lastSDF;
-        }
-
-        private ImplicitSurface GetLastSDF()
-        {
-            if (_lastSDF == null)
-            {
-                return GenSDF();
-            }
-            return _lastSDF;
-        }
-
-        private void Set_OnChunkAdded(ChunkSet set, ChunkSystem system, Chunk chunk, Vector3Int index)
-        {
-            RandomTickChunk(set, system, index, GetLastSDF());
+            return new ImplicitSurface(distanceField.GetExpression());
         }
 
         private void Set_OnChunkRemoved(ChunkSet set, Chunk chunk, Vector3Int index)
@@ -84,19 +62,16 @@ namespace SDFRendering.ChunkSetManagementModules
             return completedJobs;
         }
 
-        private void RandomTickChunk(ChunkSet set, ChunkSystem system, Vector3Int index, ImplicitSurface sdf)
+        private void UpdateChunk(ChunkSet set, ChunkSystem system, Chunk chunk, ImplicitSurface sdf)
         {
-            // Check to see if the chunk should be changed
-            if (!set.TryGetChunk(index, out Chunk chunk) || system.ShouldChunkBeReinstantiated(chunk))
-            {
-                // Create a new chunk
-                chunk = system.InstantiateNewChunk(set, index);
+            Vector3Int index = set.GetChunkIndex(chunk).Value;
 
-                // Add it to the set
+            if (system.ShouldChunkBeReinstantiated(chunk))
+            {
+                chunk = system.InstantiateNewChunk(set, index);
                 set.SetChunk(index, chunk);
             }
 
-            // Update the chunk's quality
             chunk.Quality = system.GetChunkQuality(set, chunk);
 
             // Create new feeler node update job
@@ -105,31 +80,44 @@ namespace SDFRendering.ChunkSetManagementModules
             _genJobs.Add(index, handle);
         }
 
+        private static IEnumerable<T> Shuffle<T>(IEnumerable<T> enumerable)
+        {
+            List<T> ts = new List<T>(enumerable);
+            int n = ts.Count;
+            while (n > 1)
+            {
+                int k = UnityEngine.Random.Range(0, n);
+                n -= 1;
+                T temp = ts[n];
+                ts[n] = ts[k];
+                ts[k] = temp;
+            }
+            return ts;
+        }
+
         public override void Tick(ChunkSet set, ChunkSystem system)
         {
             FinishGenJobs();
 
-            // Calculate functions
             ImplicitSurface sdf = GenSDF();
 
-            // Calculate how many chunks to tick
-            int updates = (int)(set.Count * Time.deltaTime * updatesPerChunkSecond);
-            updates = Math.Min(updates, maxUpdatesPerTick);
+            float startTime = Time.realtimeSinceStartup;
 
             // Loop through some and update
-            HashSet<Vector3Int> updatedThisFrame = new HashSet<Vector3Int>();
-            for (int i = 0; i < updates; i++)
+            foreach (Chunk chunk in Shuffle(set))
             {
-                Vector3Int index = system.RandomIndexSample();
-
-                if (updatedThisFrame.Contains(index))
+                if (!chunk.Dirty)
                 {
-                    i--;
                     continue;
                 }
-                updatedThisFrame.Add(index);
 
-                RandomTickChunk(set, system, index, sdf);
+                UpdateChunk(set, system, chunk, sdf);
+
+                float nowTime = Time.realtimeSinceStartup;
+                if (nowTime - startTime > maxTimePerFrame)
+                {
+                    break;
+                }
             }
         }
     }
