@@ -93,4 +93,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Quality: 0
+  SamplingOffset: {x: 0, y: 0, z: 0}
+  Dirty: 1
   OwningSet: {fileID: 0}

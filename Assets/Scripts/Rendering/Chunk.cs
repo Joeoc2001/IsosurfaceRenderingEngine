@@ -1,12 +1,14 @@
 ﻿using Algebra;
 using AlgebraExtensions;
 using AlgebraUnityExtensions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace SDFRendering
 {
+    [RequireComponent(typeof(Renderer))]
     public abstract class Chunk : MonoBehaviour
     {
         public static readonly int APPROXIMATE_NORMALS_QUALITY = 2;
@@ -16,6 +18,14 @@ namespace SDFRendering
         public Vector3 SamplingOffset;
 
         public bool Dirty = true;
+
+        private Renderer _renderer;
+
+        public void SetMaterial(Material material)
+        {
+            _renderer = _renderer ?? GetComponent<Renderer>();
+            _renderer.material = material;
+        }
 
         protected bool ShouldApproximateNormals
         {
