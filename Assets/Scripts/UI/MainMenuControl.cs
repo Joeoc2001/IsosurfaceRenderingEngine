@@ -35,8 +35,14 @@ public class MainMenuControl : MonoBehaviour
     public void Set()
     {
         Cursor.lockState = IsOpen ? CursorLockMode.None : CursorLockMode.Locked;
-        MouseLookLock.enabled = !IsOpen;
-        WASDMoveLock.enabled = !IsOpen;
+        if (MouseLookLock != null)
+        {
+            MouseLookLock.enabled = !IsOpen;
+        }
+        if (WASDMoveLock != null)
+        {
+            WASDMoveLock.enabled = !IsOpen;
+        }
 
         foreach (var item in ShowOnOpen)
         {

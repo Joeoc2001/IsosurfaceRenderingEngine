@@ -16,7 +16,7 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
         // Has no constant term as constant term can be ignored when finding minimum
         private class Unbounded3DPolynomial
         {
-            private readonly float[] _coefficients = new float[9];
+            private readonly float[] _coefficients;
 
             public float XSquared {
                 get => _coefficients[0];
@@ -61,6 +61,25 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
             {
                 get => _coefficients[8];
                 private set => _coefficients[8] = value;
+            }
+
+            public Unbounded3DPolynomial()
+            {
+                _coefficients = new float[9];
+            }
+
+            public Unbounded3DPolynomial(float xSquared = 0, float ySquared = 0, float zSquared = 0, float xY = 0, float xZ = 0, float yZ = 0, float x = 0, float y = 0, float z = 0)
+                : this()
+            {
+                XSquared = xSquared;
+                YSquared = ySquared;
+                ZSquared = zSquared;
+                XY = xY;
+                XZ = xZ;
+                YZ = yZ;
+                X = x;
+                Y = y;
+                Z = z;
             }
 
             public void Add(Unbounded3DPolynomial b)
@@ -158,8 +177,12 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
                 ( new Vector3Int(1, 1, 0), new Vector3Int(1, 1, 1) ),
             };
 
+            Vector3 bottomLeft = nodes[index].Pos;
+            Vector3 topRight = nodes[index + Vector3Int.one].Pos;
+            Vector3 centre = (topRight + bottomLeft) / 2;
+
             Unbounded3DPolynomial polynomial = new Unbounded3DPolynomial();
-            //List<Tuple<Vector3, Vector3>> pointsAndNormals = new List<Tuple<Vector3, Vector3>>();
+            int edgeCount = 0;
             foreach ((Vector3Int a, Vector3Int b) in edges)
             {
                 Sample nodeA = nodes[index + a];
@@ -177,17 +200,41 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
 
                 Vector3 normal = surface.Gradient.EvaluateOnce(pos);
 
-                //pointsAndNormals.Add(new Tuple<Vector3, Vector3>(pos, normal.normalized));
-
                 polynomial.AddPlanarWeighting(pos, normal);
+
+                edgeCount += 1;
             }
 
-            Vector3 point = polynomial.FindTurningPoint();
+            if (edgeCount == 0)
+            {
+                return centre;
+            }
+
+            // Weight
+            float weightCoefficient = 0.05f * edgeCount;
+            Unbounded3DPolynomial weighting = new Unbounded3DPolynomial(
+                xSquared: weightCoefficient,
+                ySquared: weightCoefficient,
+                zSquared: weightCoefficient,
+                x: -2 * weightCoefficient * centre.x,
+                y: -2 * weightCoefficient * centre.y,
+                z: -2 * weightCoefficient * centre.z
+            );
+            polynomial.Add(weighting);
+
+            // Solve
+            Vector3 point;
+            try
+            {
+                point = polynomial.FindTurningPoint();
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return centre; // If there was an issue, return the centre so no crashes
+            }
 
             // Clamp
-            Vector3 bottomLeft = nodes[index].Pos;
-            Vector3 topRight = nodes[index + Vector3Int.one].Pos;
-            //point = ClampVector(point, bottomLeft, topRight);
+            point = ClampVector(point, bottomLeft, topRight);
 
             return point;
         }
