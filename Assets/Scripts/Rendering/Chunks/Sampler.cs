@@ -2,18 +2,19 @@
 using Algebra.Functions;
 using AlgebraUnityExtensions;
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SDFRendering.Chunks
 {
     public class Sampler
     {
-        public static void SampleGridAsync(Expression expression, Action<PointCloud> consumer, int sideResolution, float sideSpacing, Vector3 origin)
+        public static PointCloud SampleGridAsync(Expression expression, int sideResolution, float sideSpacing, Vector3 origin)
         {
-            SampleGridAsync(expression, consumer, new Vector3Int(sideResolution, sideResolution, sideResolution), new Vector3(sideSpacing, sideSpacing, sideSpacing), origin);
+            return SampleGridAsync(expression, new Vector3Int(sideResolution, sideResolution, sideResolution), new Vector3(sideSpacing, sideSpacing, sideSpacing), origin);
         }
 
-        public static void SampleGridAsync(Expression expression, Action<PointCloud> consumer, Vector3Int resolution, Vector3 spacing, Vector3 origin)
+        public static PointCloud SampleGridAsync(Expression expression, Vector3Int resolution, Vector3 spacing, Vector3 origin)
         {
             float[,,] nodes = new float[resolution.x, resolution.y, resolution.z];
             for (int x = 0; x < resolution.x; x++)
@@ -40,8 +41,7 @@ namespace SDFRendering.Chunks
                 }
             }
 
-            PointCloud pointCloud = new PointCloud(nodes, origin, spacing);
-            consumer(pointCloud);
+            return new PointCloud(nodes, origin, spacing);
         }
     }
 }

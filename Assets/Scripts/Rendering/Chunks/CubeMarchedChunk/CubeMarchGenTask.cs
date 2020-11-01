@@ -7,6 +7,7 @@ using Unity.Mathematics;
 using Unity.Collections;
 using Algebra;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace SDFRendering.Chunks.CubeMarchedChunk
 {
@@ -21,15 +22,15 @@ namespace SDFRendering.Chunks.CubeMarchedChunk
             this._sdf = sdf;
         }
 
-        public override IPriorGenTaskHandle Schedule()
+        public override ITaskHandle Schedule()
         {
             float delta = Chunk.SIZE / (1 << _chunk.Quality);
             int resolution = (1 << _chunk.Quality) + 1;
             Vector3 offset = _chunk.SamplingOffset;
 
-            Sampler.SampleGridAsync(_sdf.Expression, AfterFinished, resolution, delta, offset);
+            Task task = Task.Run(() => AfterFinished(Sampler.SampleGridAsync(_sdf.Expression, resolution, delta, offset)));
 
-            return new NoneTaskHandle();
+            return new TaskTaskHandle(task);
         }
 
         public void AfterFinished(PointCloud nodes)

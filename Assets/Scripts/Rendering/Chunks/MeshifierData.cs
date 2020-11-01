@@ -68,14 +68,12 @@ namespace SDFRendering.Chunks
             _chunkTriangles.Add(index3);
         }
 
-        public void PlaceInMesh(Mesh mesh)
+        public (Vector3[], int[]) GetPolygons()
         {
-            mesh.Clear();
-
             Vector3[] vertices = _chunkVertices.ToArray();
-            mesh.vertices = vertices;
             int[] triangles = _chunkTriangles.ToArray();
-            mesh.triangles = triangles;
+
+            return (vertices, triangles);
         }
     }
 }

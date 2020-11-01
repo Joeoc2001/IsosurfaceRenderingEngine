@@ -5,8 +5,9 @@ using UnityEngine;
 
 namespace SDFRendering
 {
-    public interface IPriorGenTaskHandle
+    public interface ITaskHandle
     {
+        bool HasFinished();
         void Complete();
     }
 }

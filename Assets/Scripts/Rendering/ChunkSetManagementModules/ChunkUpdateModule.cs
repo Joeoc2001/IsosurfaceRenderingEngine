@@ -15,7 +15,10 @@ namespace SDFRendering.ChunkSetManagementModules
         [Range(0.0f, 0.016f)]
         public float maxTimePerFrame = 0.008f;
 
-        private readonly Dictionary<Vector3Int, IPriorGenTaskHandle> _genJobs = new Dictionary<Vector3Int, IPriorGenTaskHandle>();
+        [Range(1, 16)]
+        public int maxJobs = 4;
+
+        private readonly Dictionary<Vector3Int, ITaskHandle> _genJobs = new Dictionary<Vector3Int, ITaskHandle>();
 
         public override void Init(ChunkSet set, ChunkSystem system)
         {
@@ -39,27 +42,49 @@ namespace SDFRendering.ChunkSetManagementModules
 
         public override void Destruct(ChunkSet set, ChunkSystem system)
         {
-            FinishGenJobs(); // Ensure that all jobs are done
+            FinishAllJobs(); // Ensure that all jobs are done
         }
 
-        private List<Vector3Int> FinishGenJobs()
+        private void FinishAllJobs()
         {
-            List<Vector3Int> completedJobs = new List<Vector3Int>(_genJobs.Count);
-
-            foreach (Vector3Int index in _genJobs.Keys)
+            foreach (var item in _genJobs)
             {
-                IPriorGenTaskHandle handle = _genJobs[index];
+                ITaskHandle handle = item.Value;
 
-                // Run job to completion
+                // Finish and collect job
                 handle.Complete();
-
-                // Add chunk to be modified
-                completedJobs.Add(index);
             }
 
             _genJobs.Clear();
+        }
 
-            return completedJobs;
+        private List<Vector3Int> CollectFinishedJobs()
+        {
+            List<Vector3Int> completed = new List<Vector3Int>();
+
+            foreach (var item in _genJobs)
+            {
+                Vector3Int index = item.Key;
+                ITaskHandle handle = item.Value;
+
+                if (!handle.HasFinished())
+                {
+                    continue;
+                }
+
+                // Finish and collect job
+                handle.Complete();
+
+                // Add chunk to be removed
+                completed.Add(index);
+            }
+
+            foreach (Vector3Int index in completed)
+            {
+                _genJobs.Remove(index);
+            }
+
+            return completed;
         }
 
         private void UpdateChunk(ChunkSet set, ChunkSystem system, Chunk chunk, ImplicitSurface sdf)
@@ -76,7 +101,7 @@ namespace SDFRendering.ChunkSetManagementModules
 
             // Create new feeler node update job
             GenTask genTask = chunk.CreateGetTask(sdf);
-            IPriorGenTaskHandle handle = genTask.Schedule();
+            ITaskHandle handle = genTask.Schedule();
             _genJobs.Add(index, handle);
         }
 
@@ -97,7 +122,7 @@ namespace SDFRendering.ChunkSetManagementModules
 
         public override void Tick(ChunkSet set, ChunkSystem system)
         {
-            FinishGenJobs();
+            CollectFinishedJobs();
 
             ImplicitSurface sdf = GenSDF();
 
@@ -106,18 +131,25 @@ namespace SDFRendering.ChunkSetManagementModules
             // Loop through some and update
             foreach (Chunk chunk in Shuffle(set))
             {
-                if (!chunk.Dirty)
+                if (_genJobs.Count >= maxJobs)
                 {
-                    continue;
+                    break;
                 }
-
-                UpdateChunk(set, system, chunk, sdf);
 
                 float nowTime = Time.realtimeSinceStartup;
                 if (nowTime - startTime > maxTimePerFrame)
                 {
                     break;
                 }
+
+                Vector3Int index = set.GetChunkIndex(chunk).Value;
+
+                if (!chunk.Dirty || _genJobs.ContainsKey(index))
+                {
+                    continue;
+                }
+
+                UpdateChunk(set, system, chunk, sdf);
             }
         }
     }

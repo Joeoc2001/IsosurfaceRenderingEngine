@@ -7,6 +7,6 @@ namespace SDFRendering
 {
     public abstract class GenTask
     {
-        public abstract IPriorGenTaskHandle Schedule();
+        public abstract ITaskHandle Schedule();
     }
 }

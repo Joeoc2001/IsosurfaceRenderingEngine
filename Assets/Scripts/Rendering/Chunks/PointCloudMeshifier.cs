@@ -25,12 +25,12 @@ namespace SDFRendering.Chunks
             this._depth = depth;
         }
 
-        public void MarchIntoMesh(Mesh mesh, PointCloud nodes, ImplicitSurface surface)
+        public (Vector3[], int[]) MarchIntoMesh(PointCloud nodes, ImplicitSurface surface)
         {
             // Optimization because no triangles are needed if all nodes are the same
             if (nodes.IsUniform)
             {
-                return;
+                return (new Vector3[0], new int[0]);
             }
 
             // Get a set of spaces in memory to march into
@@ -50,10 +50,12 @@ namespace SDFRendering.Chunks
                 }
             }
 
-            space.PlaceInMesh(mesh);
+            (Vector3[] vertices, int[] triangles) = space.GetPolygons();
 
             // Return datas
             _pool.PutObject(space);
+
+            return (vertices, triangles);
         }
 
         protected abstract void GenerateForNode(MeshifierData space, PointCloud nodes, ImplicitSurface surface, Vector3Int index);

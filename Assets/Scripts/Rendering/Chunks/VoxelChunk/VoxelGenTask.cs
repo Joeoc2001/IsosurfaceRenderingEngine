@@ -8,6 +8,7 @@ using Unity.Collections;
 using Algebra;
 using System.Runtime.InteropServices;
 using SDFRendering.JobHandles;
+using System.Threading.Tasks;
 
 namespace SDFRendering.Chunks.VoxelChunk
 {
@@ -22,15 +23,15 @@ namespace SDFRendering.Chunks.VoxelChunk
             this._sdf = sdf;
         }
 
-        public override IPriorGenTaskHandle Schedule()
+        public override ITaskHandle Schedule()
         {
             int sideResolution = (1 << _chunk.Quality) + 2;
             float sideSpacing = Chunk.SIZE / (1 << _chunk.Quality);
             Vector3 origin = _chunk.SamplingOffset - Vector3.one * (sideSpacing / 2);
 
-            Sampler.SampleGridAsync(_sdf.Expression, AfterFinished, sideResolution, sideSpacing, origin);
+            Task task = Task.Run(() => AfterFinished(Sampler.SampleGridAsync(_sdf.Expression, sideResolution, sideSpacing, origin)));
 
-            return new NoneTaskHandle();
+            return new TaskTaskHandle(task);
         }
 
         public void AfterFinished(PointCloud nodes)

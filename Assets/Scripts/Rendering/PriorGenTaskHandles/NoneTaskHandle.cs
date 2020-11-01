@@ -3,10 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NoneTaskHandle : IPriorGenTaskHandle
+public class NoneTaskHandle : ITaskHandle
 {
     public void Complete()
     {
         return;
+    }
+
+    public bool HasFinished()
+    {
+        return true;
     }
 }

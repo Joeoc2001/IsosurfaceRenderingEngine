@@ -10,9 +10,9 @@ namespace SDFRendering.Chunks.SurfaceNetChunk
     [RequireComponent(typeof(MeshFilter))]
     public class SurfaceNetChunk : MeshChunk
     {
-        protected override void GeneratePolygonsIntoMesh(Mesh mesh, PointCloud nodes, ImplicitSurface surface)
+        protected override (Vector3[], int[]) GeneratePolygons(PointCloud nodes, ImplicitSurface surface)
         {
-            SurfaceNetGenerator.Instance.MarchIntoMesh(mesh, nodes, surface);
+            return SurfaceNetGenerator.Instance.MarchIntoMesh(nodes, surface);
         }
 
         public override GenTask CreateGetTask(ImplicitSurface sdf)

@@ -5,11 +5,11 @@ using UnityEngine;
 
 namespace SDFRendering.JobHandles
 {
-    public struct PriorGenTaskJobHandle : IPriorGenTaskHandle
+    public struct JobTaskHandle : ITaskHandle
     {
         private readonly JobHandle _jobHandle;
 
-        public PriorGenTaskJobHandle(JobHandle jobHandle)
+        public JobTaskHandle(JobHandle jobHandle)
         {
             this._jobHandle = jobHandle;
         }
@@ -17,6 +17,11 @@ namespace SDFRendering.JobHandles
         public void Complete()
         {
             _jobHandle.Complete();
+        }
+
+        public bool HasFinished()
+        {
+            return _jobHandle.IsCompleted;
         }
     }
 }
